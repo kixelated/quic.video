@@ -1,7 +1,9 @@
+// https://cloud.google.com/shell/docs/cloud-shell-tutorials/deploystack/static-hosting-with-domain
+
 // Create a bucket to hold the static website.
-resource "google_storage_bucket" "http_bucket" {
-  name          = "quic-video-web"
-  location      = "us-west1"
+resource "google_storage_bucket" "web" {
+  name          = "${var.project}-web"
+  location      = var.region
   force_destroy = true
 
   uniform_bucket_level_access = true
@@ -12,37 +14,37 @@ resource "google_storage_bucket" "http_bucket" {
   }
 
   cors {
-    origin          = ["quic.video"]
+    origin          = [var.domain]
     method          = ["GET"]
     max_age_seconds = 3600
   }
 }
 
 // Create an IP address for the load balancer.
-resource "google_compute_global_address" "ip" {
-  name       = "quic-video-ip"
+resource "google_compute_global_address" "web" {
+  name       = "web"
   ip_version = "IPV4"
 }
 
-resource "google_storage_bucket_iam_binding" "policy" {
-  bucket = google_storage_bucket.http_bucket.name
+resource "google_storage_bucket_iam_binding" "web" {
+  bucket = google_storage_bucket.web.name
   role   = "roles/storage.objectViewer"
   members = [
     "allUsers",
   ]
-  depends_on = [google_storage_bucket.http_bucket]
+  depends_on = [google_storage_bucket.web]
 }
 
-resource "google_compute_backend_bucket" "be" {
-  name        = "quic-video-be"
-  bucket_name = google_storage_bucket.http_bucket.name
-  depends_on  = [google_storage_bucket.http_bucket]
+resource "google_compute_backend_bucket" "web" {
+  name        = "web-be"
+  bucket_name = google_storage_bucket.web.name
+  depends_on  = [google_storage_bucket.web]
 }
 
-resource "google_compute_url_map" "lb" {
-  name            = "quic-video-lb"
-  depends_on      = [google_compute_backend_bucket.be]
-  default_service = google_compute_backend_bucket.be.id
+resource "google_compute_url_map" "web" {
+  name            = "web-lb"
+  depends_on      = [google_compute_backend_bucket.web]
+  default_service = google_compute_backend_bucket.web.id
 
   header_action {
     response_headers_to_add {
@@ -59,25 +61,24 @@ resource "google_compute_url_map" "lb" {
   }
 }
 
-resource "google_compute_target_https_proxy" "ssl-lb-proxy" {
-  project          = "quic-video"
-  name             = "quic-video-ssl-lb-proxy"
-  url_map          = google_compute_url_map.lb.id
-  ssl_certificates = [google_compute_managed_ssl_certificate.cert.id]
-  depends_on       = [google_compute_url_map.lb, google_compute_managed_ssl_certificate.cert]
+resource "google_compute_target_https_proxy" "web" {
+  name             = "web"
+  url_map          = google_compute_url_map.web.id
+  ssl_certificates = [google_compute_managed_ssl_certificate.root.id]
+  depends_on       = [google_compute_url_map.web, google_compute_managed_ssl_certificate.root]
 }
 
-resource "google_compute_global_forwarding_rule" "https-lb-forwarding-rule" {
-  name                  = "quic-video-https-lb-forwarding-rule"
+resource "google_compute_global_forwarding_rule" "web" {
+  name                  = "web"
   load_balancing_scheme = "EXTERNAL_MANAGED"
   port_range            = "443"
-  target                = google_compute_target_https_proxy.ssl-lb-proxy.id
-  ip_address            = google_compute_global_address.ip.id
-  depends_on            = [google_compute_target_https_proxy.ssl-lb-proxy]
+  target                = google_compute_target_https_proxy.web.id
+  ip_address            = google_compute_global_address.web.id
+  depends_on            = [google_compute_target_https_proxy.web]
 }
 
-resource "google_compute_url_map" "http-redirect" {
-  name = "http-redirect"
+resource "google_compute_url_map" "web-http" {
+  name = "web-http"
 
   default_url_redirect {
     redirect_response_code = "MOVED_PERMANENTLY_DEFAULT" // 301 redirect
@@ -86,14 +87,14 @@ resource "google_compute_url_map" "http-redirect" {
   }
 }
 
-resource "google_compute_target_http_proxy" "http-redirect" {
-  name    = "http-redirect"
-  url_map = google_compute_url_map.http-redirect.self_link
+resource "google_compute_target_http_proxy" "web-http" {
+  name    = "web-http"
+  url_map = google_compute_url_map.web-http.self_link
 }
 
-resource "google_compute_global_forwarding_rule" "http-redirect" {
-  name       = "quic-video-http-redirect"
-  target     = google_compute_target_http_proxy.http-redirect.self_link
-  ip_address = google_compute_global_address.ip.id
+resource "google_compute_global_forwarding_rule" "web-http" {
+  name       = "web-http"
+  target     = google_compute_target_http_proxy.web-http.self_link
+  ip_address = google_compute_global_address.web.id
   port_range = "80"
 }

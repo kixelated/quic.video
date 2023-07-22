@@ -1,9 +1,18 @@
-// https://cloud.google.com/shell/docs/cloud-shell-tutorials/deploystack/static-hosting-with-domain
+terraform {
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "4.74.0"
+    }
+  }
+
+  required_version = ">= 0.14"
+}
 
 provider "google" {
-  project = "quic-video"
-  region  = "us-west1"
-  zone    = "us-west1-c"
+  project = var.project
+  region  = var.region
+  zone    = var.zone
 }
 
 variable "gcp_service_list" {
@@ -15,6 +24,7 @@ variable "gcp_service_list" {
     "compute.googleapis.com",
     "dns.googleapis.com",
     "appengine.googleapis.com",
+    "container.googleapis.com"
   ]
 }
 
