@@ -1,8 +1,6 @@
-import { Connection } from "../transport/connection"
-import { Player } from "../playback/player"
-import { Broadcast, Broadcasts } from "../playback/broadcast"
-import { Track, isAudioTrack, isVideoTrack } from "../common/catalog"
-import { asError } from "../common/error"
+import { Connection } from "@kixelated/moq/transport"
+import { Player, Broadcast, Broadcasts } from "@kixelated/moq/playback"
+import { CatalogTrack, isAudioCatalogTrack, isVideoCatalogTrack, asError } from "@kixelated/moq/common"
 
 import { createSignal, onMount, For, createEffect, Show } from "solid-js"
 
@@ -75,15 +73,15 @@ export function Setup(props: { connection: Connection; setPlayer(v: Player): voi
 
 function Available(props: { broadcast: Broadcast; select: () => void }) {
 	// A function because Match doesn't work with Typescript type guards
-	const trackInfo = (track: Track) => {
-		if (isVideoTrack(track)) {
+	const trackInfo = (track: CatalogTrack) => {
+		if (isVideoCatalogTrack(track)) {
 			return (
 				<>
 					video: {track.codec} {track.width}x{track.height}
 					<Show when={track.bit_rate}> {track.bit_rate} b/s</Show>
 				</>
 			)
-		} else if (isAudioTrack(track)) {
+		} else if (isAudioCatalogTrack(track)) {
 			return (
 				<>
 					audio: {track.codec} {track.sample_rate}Hz {track.channel_count}ch

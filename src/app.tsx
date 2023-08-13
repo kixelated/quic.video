@@ -18,12 +18,13 @@ export function App(props: { url: string }) {
 
 	createEffect(async () => {
 		try {
-			const client = new Client()
-			const conn = await client.connect({
+			const client = new Client({
 				url: props.url,
 				role: "both",
 				fingerprint,
 			})
+
+			const conn = await client.connect()
 
 			setConnection(conn)
 			await conn.run()
