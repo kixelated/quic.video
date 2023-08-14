@@ -14,6 +14,13 @@ Install dependencies using `npm`:
 npm install
 ```
 
+Install [mkcert](https://github.com/FiloSottile/mkcert) to generate a self-signed certificate.
+This is merely for convinence to avoid TLS errors when using parcel.
+
+```
+npm run cert
+```
+
 ## Serve
 
 Host a simple demo on `https://localhost:4444`. Note that you'll have to accept any TLS errors.
