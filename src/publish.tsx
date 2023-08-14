@@ -1,7 +1,7 @@
-import { Broadcast } from "@kixelated/moq/contribute/broadcast"
-import { Encoder } from "@kixelated/moq/contribute/video"
-import { Connection } from "@kixelated/moq/transport/connection"
-import { asError } from "../common/error"
+import { Broadcast, VideoEncoder, AudioEncoderCodecs } from "@kixelated/moq/contribute"
+import { Connection } from "@kixelated/moq/transport"
+import { asError } from "@kixelated/moq/common"
+
 import {
 	createEffect,
 	Switch,
@@ -17,8 +17,6 @@ import {
 
 import { SetStoreFunction, Store, createStore } from "solid-js/store"
 
-import { EncoderCodecs as AudioCodecs } from "../contribute/audio"
-
 interface AudioConfig {
 	sampleRate: number
 	bitrate: number
@@ -28,13 +26,13 @@ interface AudioConfig {
 const AUDIO_CONSTRAINTS = {
 	sampleRate: [44100, 48000],
 	bitrate: { min: 64_000, max: 256_000 },
-	codec: AudioCodecs,
+	codec: AudioEncoderCodecs,
 }
 
 const AUDIO_DEFAULT = {
 	sampleRate: 48000,
 	bitrate: 128_000,
-	codec: AudioCodecs[0],
+	codec: AudioEncoderCodecs[0],
 }
 
 interface VideoConfig {
@@ -268,7 +266,7 @@ function Video(props: { config: Store<VideoConfig>; setConfig: SetStoreFunction<
 		() => ({ height: props.config.height, fps: props.config.fps, bitrate: props.config.bitrate }),
 		async (config) => {
 			const isSupported = async (codec: VideoCodec) => {
-				const supported = await Encoder.isSupported({
+				const supported = await VideoEncoder.isSupported({
 					codec: codec.value,
 					width: Math.ceil((config.height * 16) / 9),
 					...config,

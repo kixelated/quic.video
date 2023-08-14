@@ -8,24 +8,13 @@ It requires a server, such as [moq-rs](https://github.com/kixelated/moq-rs).
 
 ## Setup
 
-### Node
-
 Install dependencies using `npm`:
 
 ```
 npm install
 ```
 
-### Certificates
-
-Use [mkcert](https://github.com/FiloSottile/mkcert) to generate a self-signed certificate.
-This is merely for convinence to avoid TLS errors when using parcel.
-
-```
-npm run cert
-```
-
-## Usage
+## Serve
 
 Host a simple demo on `https://localhost:4444`.
 
