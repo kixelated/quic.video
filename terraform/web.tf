@@ -98,3 +98,14 @@ resource "google_compute_global_forwarding_rule" "web-http" {
   ip_address = google_compute_global_address.web.id
   port_range = "80"
 }
+
+// Create a DNS record that points to the web load balancer.
+resource "google_dns_record_set" "web" {
+  managed_zone = google_dns_managed_zone.root.name
+  name         = "${var.domain}."
+  type         = "A"
+  ttl          = 60
+
+  rrdatas    = [google_compute_global_address.web.address]
+  depends_on = [google_compute_global_address.web]
+}
