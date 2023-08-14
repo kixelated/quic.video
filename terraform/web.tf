@@ -112,7 +112,7 @@ resource "google_dns_record_set" "web" {
 
 // Create a service account that has deploy permission.
 resource "google_service_account" "web_deploy" {
-  account_id = "web-deploy-account"
+  account_id = "web-deploy"
 }
 
 resource "google_storage_bucket_iam_member" "web_deploy" {
@@ -121,6 +121,10 @@ resource "google_storage_bucket_iam_member" "web_deploy" {
   member = "serviceAccount:${google_service_account.web_deploy.email}"
 }
 
-output "web_deploy_key" {
+output "web_deploy_account" {
   value = google_service_account.web_deploy.email
+}
+
+output "web_deploy_bucket" {
+  value = google_storage_bucket.web.name
 }

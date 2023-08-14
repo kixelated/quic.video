@@ -1,0 +1,29 @@
+name: deploy
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: checkout
+              uses: actions/checkout@v3
+
+            - name: install
+              run: npm install
+
+            - name: build
+              run: npm run build
+
+            - name: gcp
+              run: sudo apt-get install -y google-cloud-sdk
+
+            - name: auth
+              run: echo "${{ secrets.GCP_ACCOUNT }}" | gcloud auth activate-service-account --key-file=-
+
+            - name: upload
+              run: gsutil cp -r dist/* gs://${{ secrets.GCP_BUCKET }}/
