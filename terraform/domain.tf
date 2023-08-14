@@ -9,6 +9,7 @@ resource "google_dns_managed_zone" "root" {
 }
 
 // The domain is manually purchased, so we run this command to point it to our DNS zone.
+/*
 resource "null_resource" "dnsconfigure" {
   provisioner "local-exec" {
     command = <<-EOT
@@ -21,6 +22,7 @@ resource "null_resource" "dnsconfigure" {
     google_dns_managed_zone.root
   ]
 }
+*/
 
 // Create a certificate for the domain.
 resource "google_compute_managed_ssl_certificate" "root" {

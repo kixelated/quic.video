@@ -109,3 +109,18 @@ resource "google_dns_record_set" "web" {
   rrdatas    = [google_compute_global_address.web.address]
   depends_on = [google_compute_global_address.web]
 }
+
+// Create a service account that has deploy permission.
+resource "google_service_account" "web_deploy" {
+  account_id = "web-deploy-account"
+}
+
+resource "google_storage_bucket_iam_member" "web_deploy" {
+  bucket = google_storage_bucket.web.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.web_deploy.email}"
+}
+
+output "web_deploy_key" {
+  value = google_service_account.web_deploy.email
+}
