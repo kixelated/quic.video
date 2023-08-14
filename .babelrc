@@ -1,5 +1,3 @@
 {
-	"presets": [
-		"solid"
-	]
+	"presets": ["solid"]
 }

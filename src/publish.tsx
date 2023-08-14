@@ -284,7 +284,7 @@ function Video(props: { config: Store<VideoConfig>; setConfig: SetStoreFunction<
 			// Remove any undefined values, using this syntax so Typescript knows they aren't undefined
 			return codecs.filter((codec): codec is VideoCodec => !!codec)
 		},
-		{ initialValue: [] }
+		{ initialValue: [] },
 	)
 
 	// Default to the first valid codec if the settings are invalid.

@@ -1,7 +1,5 @@
 {
-	"include": [
-		"./src"
-	],
+	"include": ["./src"],
 	"compilerOptions": {
 		"target": "es2022",
 		"module": "es2022",
@@ -16,9 +14,6 @@
 		"isolatedModules": true,
 		"jsx": "preserve",
 		"jsxImportSource": "solid-js",
-		"lib": [
-			"es2022",
-			"dom",
-		],
-	},
+		"lib": ["es2022", "dom"]
+	}
 }
