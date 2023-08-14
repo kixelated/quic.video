@@ -1,6 +1,4 @@
-# Local .terraform directories
-**/.terraform/*
-
-# .tfstate files
-*.tfstate
-*.tfstate.*
+dist/
+node_modules/
+.parcel-cache/
+.DS_Store
