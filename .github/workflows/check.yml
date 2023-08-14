@@ -1,0 +1,24 @@
+name: moq.js
+
+on:
+    pull_request:
+        branches: ["main"]
+
+jobs:
+    check:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: install
+              run: npm install
+
+            - name: build
+              run: npm run build
+
+            - name: test
+              run: npm run test
+
+            - name: lint
+              run: npm run lint
