@@ -13,17 +13,20 @@ jobs:
             - name: checkout
               uses: actions/checkout@v3
 
+            - name: auth
+              uses: "google-github-actions/auth@v1"
+              with:
+                  credentials_json: "${{ secrets.GCP_ACCOUNT }}"
+
             - name: install
-              run: npm install
+              run: npm ci
 
             - name: build
               run: npm run build
 
-            - name: gcp
-              run: sudo apt-get install -y google-cloud-sdk
-
-            - name: auth
-              run: echo "${{ secrets.GCP_ACCOUNT }}" | gcloud auth activate-service-account --key-file=-
-
             - name: upload
-              run: gsutil cp -r dist/* gs://${{ secrets.GCP_BUCKET }}/
+              uses: "google-github-actions/upload-cloud-storage@v1"
+              with:
+                  path: "dist"
+                  destination: ${{ secrets.GCP_BUCKET }}
+                  parent: false
