@@ -98,3 +98,33 @@ resource "google_compute_global_forwarding_rule" "web-http" {
   ip_address = google_compute_global_address.web.id
   port_range = "80"
 }
+
+// Create a DNS record that points to the web load balancer.
+resource "google_dns_record_set" "web" {
+  managed_zone = google_dns_managed_zone.root.name
+  name         = "${var.domain}."
+  type         = "A"
+  ttl          = 60
+
+  rrdatas    = [google_compute_global_address.web.address]
+  depends_on = [google_compute_global_address.web]
+}
+
+// Create a service account that has deploy permission.
+resource "google_service_account" "web_deploy" {
+  account_id = "web-deploy"
+}
+
+resource "google_storage_bucket_iam_member" "web_deploy" {
+  bucket = google_storage_bucket.web.name
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.web_deploy.email}"
+}
+
+output "web_deploy_account" {
+  value = google_service_account.web_deploy.email
+}
+
+output "web_deploy_bucket" {
+  value = google_storage_bucket.web.name
+}
