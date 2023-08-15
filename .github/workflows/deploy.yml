@@ -30,3 +30,4 @@ jobs:
                   path: "dist"
                   destination: ${{ secrets.GCP_BUCKET }}
                   parent: false
+                  process_gcloudignore: false
