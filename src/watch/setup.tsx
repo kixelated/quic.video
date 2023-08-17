@@ -78,7 +78,7 @@ function Available(props: { broadcast: Broadcast; select: () => void }) {
 	return (
 		<>
 			<a onClick={watch}>{props.broadcast.name.replace(/\//, " / ")}</a>
-			<div class="ml-4 text-xs italic text-gray-700">
+			<div class="ml-4 text-xs italic text-gray-300">
 				<For each={props.broadcast.catalog.tracks}>
 					{(track) => {
 						return <div>{trackInfo(track)}</div>

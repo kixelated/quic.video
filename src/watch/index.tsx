@@ -49,9 +49,9 @@ export function Main() {
 	const [player, setPlayer] = createSignal<Player | undefined>()
 
 	return (
-		<div class="flex flex-col overflow-hidden rounded-lg bg-gray-100 shadow-xl ring-1 ring-gray-900/5">
+		<div class="flex flex-col">
 			<Show when={error()}>
-				<div class="bg-red-400 px-4 py-2 font-bold">
+				<div class="bg-red-600 px-4 py-2 font-bold">
 					{error()?.name}: {error()?.message}
 				</div>
 			</Show>
