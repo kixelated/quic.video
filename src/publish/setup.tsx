@@ -10,7 +10,6 @@ import {
 	createSignal,
 	For,
 	createResource,
-	onMount,
 	createSelector,
 	Show,
 } from "solid-js"
@@ -109,26 +108,6 @@ const VIDEO_CODECS: VideoCodec[] = [
 	// AVC Baseline Level 5.2
 	{ name: "h.264", profile: "baseline", value: "avc1.420034" },
 ]
-
-export function Main(props: { broadcast: Broadcast; setBroadcast(): void; setError(e: Error): void }) {
-	let preview: HTMLVideoElement
-
-	onMount(() => {
-		props.broadcast.preview(preview)
-	})
-
-	createEffect(async () => {
-		try {
-			await props.broadcast.run()
-		} catch (e) {
-			props.setError(asError(e))
-		} finally {
-			props.setBroadcast()
-		}
-	})
-
-	return <video ref={preview!} autoplay muted></video>
-}
 
 export function Setup(props: {
 	connection: Connection | undefined
