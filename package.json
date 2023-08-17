@@ -3,7 +3,12 @@
 	"version": "0.0.1",
 	"description": "Website for quic.video",
 	"license": "(MIT OR Apache-2.0)",
-	"source": "src/index.html",
+	"source": [
+		"src/index.html",
+		"src/explained.html",
+		"src/publish.html",
+		"src/watch.html"
+	],
 	"scripts": {
 		"serve": "parcel serve --https --cert cert/localhost.crt --key cert/localhost.key --port 4444 --open",
 		"build": "parcel build",
@@ -34,6 +39,7 @@
 		"eslint-plugin-prettier": "^5.0.0",
 		"parcel": "^2.9.2",
 		"postcss": "^8.4.24",
+		"posthtml-include": "^1.7.4",
 		"prettier": "^3.0.1",
 		"prettier-plugin-tailwindcss": "^0.5.2",
 		"tailwindcss": "^3.3.2",

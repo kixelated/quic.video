@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+a {
+	@apply text-green-400 hover:cursor-pointer hover:text-green-500;
+}
+
+html {
+	@apply bg-slate-900 text-slate-100;
+}
