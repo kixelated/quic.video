@@ -1,24 +1,19 @@
 import { Broadcast } from "@kixelated/moq/contribute"
-import { asError } from "@kixelated/moq/common"
+import { Listing } from "../common/catalog"
 
-import { createEffect, onMount } from "solid-js"
+import { onMount } from "solid-js"
 
-export function Preview(props: { broadcast: Broadcast; setBroadcast(): void; setError(e: Error): void }) {
+export function Preview(props: { broadcast: Broadcast }) {
 	let preview: HTMLVideoElement
 
 	onMount(() => {
 		props.broadcast.preview(preview)
 	})
 
-	createEffect(async () => {
-		try {
-			await props.broadcast.run()
-		} catch (e) {
-			props.setError(asError(e))
-		} finally {
-			props.setBroadcast()
-		}
-	})
-
-	return <video ref={preview!} autoplay muted></video>
+	return (
+		<>
+			<Listing name={props.broadcast.name} catalog={props.broadcast.catalog} />
+			<video ref={preview!} autoplay muted class="mt-6"></video>
+		</>
+	)
 }

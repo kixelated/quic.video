@@ -2,7 +2,17 @@ import { Broadcast, VideoEncoder, AudioEncoderCodecs } from "@kixelated/moq/cont
 import { Connection } from "@kixelated/moq/transport"
 import { asError } from "@kixelated/moq/common"
 
-import { createEffect, Switch, Match, createMemo, createSignal, For, createResource, createSelector } from "solid-js"
+import {
+	createEffect,
+	Switch,
+	Match,
+	createMemo,
+	createSignal,
+	For,
+	createResource,
+	createSelector,
+	Show,
+} from "solid-js"
 
 import { SetStoreFunction, Store, createStore } from "solid-js/store"
 
@@ -165,14 +175,21 @@ export function Setup(props: {
 
 	const isState = createSelector(state)
 
-	return (
-		<form class="grid grid-cols-3 items-center justify-center gap-x-4 gap-y-2 text-sm">
-			<General name={name()} setName={setName} />
-			<Video config={video} setConfig={setVideo} />
-			<Audio config={audio} setConfig={setAudio} />
+	const [advanced, setAdvanced] = createSignal(false)
+	const toggleAdvanced = (e: MouseEvent) => {
+		e.preventDefault()
+		setAdvanced(!advanced())
+	}
 
+	return (
+		<form class="grid items-center gap-x-6 gap-y-3 text-sm">
+			<General name={name()} setName={setName} advanced={advanced()} />
+			<Video config={video} setConfig={setVideo} advanced={advanced()} />
+			<Audio config={audio} setConfig={setAudio} advanced={advanced()} />
+
+			<div class="col-span-3 mt-3"></div>
 			<button
-				class="col-start-2 mt-3 rounded-md bg-green-500 px-3 py-2 text-sm font-semibold shadow-sm hover:bg-green-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+				class="col-start-2 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
 				type="submit"
 				onClick={start}
 			>
@@ -182,33 +199,41 @@ export function Setup(props: {
 					<Match when={isState("connecting")}>Connecting</Match>
 				</Switch>
 			</button>
+			<a onClick={toggleAdvanced} class="text-center">
+				<Show when={advanced()} fallback="Advanced">
+					Simple
+				</Show>
+			</a>
 		</form>
 	)
 }
 
-function General(props: { name: string; setName(name: string): void }) {
+function General(props: { name: string; setName(name: string): void; advanced: boolean }) {
 	return (
 		<>
-			<div class="col-span-3 mt-3 border-b-2 border-green-500 pl-3 text-lg">General</div>
-			<label for="name" class="col-start-1 block font-medium">
-				Name
-			</label>
-			<div class="form-input col-span-2 w-full rounded-md border-0 bg-slate-700 text-sm">
-				<span>anon.quic.video/</span>
-				<input
-					type="text"
-					name="name"
-					placeholder="random"
-					class="block border-0 bg-transparent p-1 pl-3 text-sm placeholder-slate-400 focus:ring-0"
-					value={props.name}
-					onInput={(e) => props.setName(e.target.value)}
-				/>
-			</div>
+			<Show when={props.advanced}>
+				<div class="col-span-3 mt-6 border-b-2 border-green-600 pl-3 text-xl">General</div>
+				<label for="name" class="col-start-1 px-3">
+					Name
+				</label>
+				<div class="form-input col-span-2 flex items-center gap-2 rounded-md border-0 bg-slate-700 text-sm">
+					<span>anon.quic.video</span>
+					<span>/</span>
+					<input
+						type="text"
+						name="name"
+						placeholder="random"
+						class="flex-grow border-0 bg-transparent p-0 text-sm placeholder-slate-400 focus:ring-0"
+						value={props.name}
+						onInput={(e) => props.setName(e.target.value)}
+					/>
+				</div>
+			</Show>
 		</>
 	)
 }
 
-function Video(props: { config: Store<VideoConfig>; setConfig: SetStoreFunction<VideoConfig> }) {
+function Video(props: { config: Store<VideoConfig>; setConfig: SetStoreFunction<VideoConfig>; advanced: boolean }) {
 	const [codec, setCodec] = createStore<VideoCodec>(VIDEO_CODEC_UNDEF)
 
 	// Fetch the list of supported codecs.
@@ -282,42 +307,48 @@ function Video(props: { config: Store<VideoConfig>; setConfig: SetStoreFunction<
 
 	return (
 		<>
-			<div class="col-span-3 mt-3 border-b-2 border-green-500 pl-3 text-lg">Video</div>
-			<label class="col-start-1 font-medium leading-6">Codec</label>
-			<select
-				name="codec"
-				class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-500"
-				onInput={(e) => setCodec({ name: e.target.value })}
-			>
-				<For each={[...supportedCodecNames()]}>
-					{(supported) => {
-						return (
-							<option value={supported} selected={supported === codec.name}>
-								{supported}
-							</option>
-						)
-					}}
-				</For>
-			</select>
-			<select
-				name="profile"
-				class="col-start-3 rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-500"
-				onInput={(e) => setCodec({ profile: e.target.value })}
-			>
-				<For each={[...supportedCodecProfiles()]}>
-					{(supported) => {
-						return (
-							<option value={supported} selected={supported === codec.profile}>
-								{supported}
-							</option>
-						)
-					}}
-				</For>
-			</select>
-			<label class="col-start-1 font-medium leading-6">Resolution</label>
+			<div class="col-span-3 mt-6 border-b-2 border-green-600 pl-3 text-xl">Video</div>
+			<Show when={props.advanced}>
+				<label for="codec" class="col-start-1 px-3 leading-6">
+					Codec
+				</label>
+				<select
+					name="codec"
+					class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
+					onInput={(e) => setCodec({ name: e.target.value })}
+				>
+					<For each={[...supportedCodecNames()]}>
+						{(supported) => {
+							return (
+								<option value={supported} selected={supported === codec.name}>
+									{supported}
+								</option>
+							)
+						}}
+					</For>
+				</select>
+				<select
+					name="profile"
+					class="col-start-3 rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
+					onInput={(e) => setCodec({ profile: e.target.value })}
+				>
+					<For each={[...supportedCodecProfiles()]}>
+						{(supported) => {
+							return (
+								<option value={supported} selected={supported === codec.profile}>
+									{supported}
+								</option>
+							)
+						}}
+					</For>
+				</select>
+			</Show>
+			<label for="resolution" class="col-start-1 px-3 leading-6">
+				Resolution
+			</label>
 			<select
 				name="resolution"
-				class="rounded-md border-0 bg-slate-700 text-sm focus:ring-1 focus:ring-inset focus:ring-green-500"
+				class="rounded-md border-0 bg-slate-700 text-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
 				onInput={(e) => props.setConfig({ height: parseInt(e.target.value) })}
 			>
 				<For each={VIDEO_CONSTRAINTS.height}>
@@ -330,86 +361,98 @@ function Video(props: { config: Store<VideoConfig>; setConfig: SetStoreFunction<
 					}}
 				</For>
 			</select>
-			<select
-				name="fps"
-				class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-500"
-				onInput={(e) => props.setConfig({ fps: parseInt(e.target.value) })}
-			>
-				<For each={VIDEO_CONSTRAINTS.fps}>
-					{(fps) => {
-						return (
-							<option value={fps} selected={fps === props.config.fps}>
-								{fps}fps
-							</option>
-						)
-					}}
-				</For>
-			</select>
-			<label class="col-start-1 font-medium leading-6">Bitrate</label>
-			<input
-				type="range"
-				name="bitrate"
-				min={VIDEO_CONSTRAINTS.bitrate.min}
-				max={VIDEO_CONSTRAINTS.bitrate.max}
-				step="1000"
-				value={props.config.bitrate}
-				onInput={(e) => props.setConfig({ bitrate: parseInt(e.target.value) })}
-			/>
-			<span class="text-xs leading-6">{Math.floor(props.config.bitrate / 1000)} Kb/s</span>
-		</>
-	)
-}
-
-function Audio(props: { config: Store<AudioConfig>; setConfig: SetStoreFunction<AudioConfig> }) {
-	return (
-		<>
-			<div class="col-span-3 mt-3 border-b-2 border-green-500 pl-3 text-lg">Audio</div>
-			<label for="codec" class="col-start-1 font-medium leading-6">
-				Codec
-			</label>
-			<select
-				name="codec"
-				class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-500"
-				onInput={(e) => props.setConfig({ codec: e.target.value })}
-			>
-				<For each={AUDIO_CONSTRAINTS.codec}>
-					{(supported) => {
-						return (
-							<option value={supported} selected={supported === props.config.codec}>
-								{supported}
-							</option>
-						)
-					}}
-				</For>
-			</select>
-			<select
-				name="sampleRate"
-				class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-500"
-				onInput={(e) => props.setConfig({ sampleRate: parseInt(e.target.value) })}
-			>
-				<For each={AUDIO_CONSTRAINTS.sampleRate}>
-					{(supported) => {
-						return (
-							<option value={supported} selected={supported === props.config.sampleRate}>
-								{supported}hz
-							</option>
-						)
-					}}
-				</For>
-			</select>
-			<label for="bitrate" class="col-start-1 font-medium">
+			<Show when={props.advanced}>
+				<label for="fps" class="col-start-1 px-3 leading-6">
+					Frame Rate
+				</label>
+				<select
+					name="fps"
+					class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
+					onInput={(e) => props.setConfig({ fps: parseInt(e.target.value) })}
+				>
+					<For each={VIDEO_CONSTRAINTS.fps}>
+						{(fps) => {
+							return (
+								<option value={fps} selected={fps === props.config.fps}>
+									{fps}fps
+								</option>
+							)
+						}}
+					</For>
+				</select>
+			</Show>
+			<label for="bitrate" class="col-start-1 px-3 leading-6">
 				Bitrate
 			</label>
 			<input
 				type="range"
 				name="bitrate"
-				min={AUDIO_CONSTRAINTS.bitrate.min}
-				max={AUDIO_CONSTRAINTS.bitrate.max}
-				step="1000"
+				min={VIDEO_CONSTRAINTS.bitrate.min}
+				max={VIDEO_CONSTRAINTS.bitrate.max}
+				step="100000"
 				value={props.config.bitrate}
 				onInput={(e) => props.setConfig({ bitrate: parseInt(e.target.value) })}
 			/>
-			<span class="text-left text-xs">{Math.floor(props.config.bitrate / 1000)} Kb/s</span>
+			<span class="text-xs leading-6">{(props.config.bitrate / 1_000_000).toFixed(1)} Mb/s</span>
+		</>
+	)
+}
+
+function Audio(props: { config: Store<AudioConfig>; setConfig: SetStoreFunction<AudioConfig>; advanced: boolean }) {
+	return (
+		<>
+			<Show when={props.advanced}>
+				<div class="col-span-3 mt-6 border-b-2 border-green-600 pl-3 text-xl">Audio</div>
+				<label for="codec" class="col-start-1 px-3">
+					Codec
+				</label>
+				<select
+					name="codec"
+					class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
+					onInput={(e) => props.setConfig({ codec: e.target.value })}
+				>
+					<For each={AUDIO_CONSTRAINTS.codec}>
+						{(supported) => {
+							return (
+								<option value={supported} selected={supported === props.config.codec}>
+									{supported}
+								</option>
+							)
+						}}
+					</For>
+				</select>
+				<label for="sampleRate" class="col-start-1 px-3 leading-6">
+					Sample Rate
+				</label>
+				<select
+					name="sampleRate"
+					class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
+					onInput={(e) => props.setConfig({ sampleRate: parseInt(e.target.value) })}
+				>
+					<For each={AUDIO_CONSTRAINTS.sampleRate}>
+						{(supported) => {
+							return (
+								<option value={supported} selected={supported === props.config.sampleRate}>
+									{supported}hz
+								</option>
+							)
+						}}
+					</For>
+				</select>
+				<label for="bitrate" class="col-start-1 px-3 font-medium">
+					Bitrate
+				</label>
+				<input
+					type="range"
+					name="bitrate"
+					min={AUDIO_CONSTRAINTS.bitrate.min}
+					max={AUDIO_CONSTRAINTS.bitrate.max}
+					step="1000"
+					value={props.config.bitrate}
+					onInput={(e) => props.setConfig({ bitrate: parseInt(e.target.value) })}
+				/>
+				<span class="text-left text-xs">{Math.floor(props.config.bitrate / 1000)} Kb/s</span>
+			</Show>
 		</>
 	)
 }

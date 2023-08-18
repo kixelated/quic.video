@@ -3,12 +3,13 @@ import { Player } from "@kixelated/moq/playback"
 import { asError } from "@kixelated/moq/common"
 
 import { createSignal, createEffect, Show, Switch, Match } from "solid-js"
-import { Setup } from "./setup"
+import { Listing } from "./listing"
 import { Controls } from "./controls"
 
 export function Main() {
 	const [error, setError] = createSignal<Error | undefined>()
 	const [connection, setConnection] = createSignal<Connection | undefined>()
+	const [player, setPlayer] = createSignal<Player | undefined>()
 
 	const params = new URLSearchParams(window.location.search)
 
@@ -46,7 +47,18 @@ export function Main() {
 		if (err) console.error(err)
 	})
 
-	const [player, setPlayer] = createSignal<Player | undefined>()
+	createEffect(async () => {
+		const p = player()
+		if (!p) return
+
+		try {
+			await p.run()
+		} catch (e) {
+			setError(asError(e))
+		} finally {
+			setPlayer()
+		}
+	})
 
 	return (
 		<div class="flex flex-col">
@@ -59,10 +71,10 @@ export function Main() {
 			<div class="p-6">
 				<Switch fallback="Connecting...">
 					<Match when={player()}>
-						<Controls player={player()!} setError={setError} setPlayer={setPlayer} />
+						<Controls player={player()!} />
 					</Match>
 					<Match when={connection()}>
-						<Setup connection={connection()!} setPlayer={setPlayer} setError={setError} />
+						<Listing connection={connection()!} setPlayer={setPlayer} setError={setError} />
 					</Match>
 				</Switch>
 			</div>

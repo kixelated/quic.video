@@ -1,24 +1,13 @@
 import { Player } from "@kixelated/moq/playback"
-import { asError } from "@kixelated/moq/common"
 
-import { onMount, createEffect } from "solid-js"
+import { onMount } from "solid-js"
 
-export function Controls(props: { player: Player; setError(e: Error): void; setPlayer(): void }) {
+export function Controls(props: { player: Player }) {
 	let canvas: HTMLCanvasElement
 
 	onMount(() => {
 		props.player.attach(canvas)
 		//props.player.play()
-	})
-
-	createEffect(async () => {
-		try {
-			await props.player.run()
-		} catch (e) {
-			props.setError(asError(e))
-		} finally {
-			props.setPlayer()
-		}
 	})
 
 	// NOTE: The canvas automatically has width/height set to the decoded video size.

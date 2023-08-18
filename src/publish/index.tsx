@@ -10,6 +10,7 @@ import { Setup } from "./setup"
 export function Main() {
 	const [error, setError] = createSignal<Error | undefined>()
 	const [connection, setConnection] = createSignal<Connection | undefined>()
+	const [broadcast, setBroadcast] = createSignal<Broadcast | undefined>()
 
 	const params = new URLSearchParams(window.location.search)
 
@@ -42,12 +43,23 @@ export function Main() {
 		}
 	})
 
+	createEffect(async () => {
+		const b = broadcast()
+		if (!b) return
+
+		try {
+			await b.run()
+		} catch (e) {
+			setError(asError(e))
+		} finally {
+			setBroadcast()
+		}
+	})
+
 	createEffect(() => {
 		const err = error()
 		if (err) console.error(err)
 	})
-
-	const [broadcast, setBroadcast] = createSignal<Broadcast | undefined>()
 
 	return (
 		<div class="flex flex-col">
@@ -57,16 +69,14 @@ export function Main() {
 				</div>
 			</Show>
 
-			<div class="p-6">
-				<Switch>
-					<Match when={broadcast()}>
-						<Preview broadcast={broadcast()!} setBroadcast={setBroadcast} setError={setError} />
-					</Match>
-					<Match when={!broadcast()}>
-						<Setup connection={connection()} setBroadcast={setBroadcast} setError={setError} />
-					</Match>
-				</Switch>
-			</div>
+			<Switch>
+				<Match when={broadcast()}>
+					<Preview broadcast={broadcast()!} />
+				</Match>
+				<Match when={!broadcast()}>
+					<Setup connection={connection()} setBroadcast={setBroadcast} setError={setError} />
+				</Match>
+			</Switch>
 		</div>
 	)
 }

@@ -4,7 +4,7 @@ import { CatalogTrack, isAudioCatalogTrack, isVideoCatalogTrack, asError } from 
 
 import { For, createSignal, createEffect, Show } from "solid-js"
 
-export function Setup(props: { connection: Connection; setPlayer(v: Player): void; setError(e: Error): void }) {
+export function Listing(props: { connection: Connection; setPlayer(v: Player): void; setError(e: Error): void }) {
 	// Create an object that we'll use to list all of the broadcasts
 	const announced = new Broadcasts(props.connection)
 
