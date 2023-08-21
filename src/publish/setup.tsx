@@ -10,6 +10,7 @@ interface AudioConfig {
 	sampleRate: number
 	bitrate: number
 	codec: string
+	deviceId: string
 }
 
 const AUDIO_CONSTRAINTS = {
@@ -22,6 +23,7 @@ const AUDIO_DEFAULT = {
 	sampleRate: 48000,
 	bitrate: 128_000,
 	codec: AudioEncoderCodecs[0],
+	deviceId: "",
 }
 
 interface VideoConfig {
@@ -29,6 +31,7 @@ interface VideoConfig {
 	fps: number
 	bitrate: number
 	codec: string
+	deviceId: string
 }
 
 interface VideoCodec {
@@ -51,6 +54,7 @@ const VIDEO_DEFAULT: VideoConfig = {
 	fps: 30,
 	bitrate: 1_500_000,
 	codec: "",
+	deviceId: "",
 }
 
 // A list of codecs and profiles sorted in preferred order.
@@ -107,6 +111,7 @@ export function Setup(props: {
 	const [name, setName] = createSignal("")
 	const [audio, setAudio] = createStore<AudioConfig>(AUDIO_DEFAULT)
 	const [video, setVideo] = createStore<VideoConfig>(VIDEO_DEFAULT)
+	const [inputDevices, setInputDevices] = createStore<MediaDeviceInfo[]>([])
 
 	const [loading, setLoading] = createSignal(false)
 
@@ -117,12 +122,14 @@ export function Setup(props: {
 			audio: {
 				sampleRate: { ideal: audio.sampleRate },
 				channelCount: { max: 2, ideal: 2 },
+				deviceId: audio.deviceId,
 			},
 			video: {
 				aspectRatio: { ideal: 16 / 9 },
 				width: { ideal: width, max: width },
 				height: { ideal: video.height, max: video.height },
 				frameRate: { ideal: video.fps, max: video.fps },
+				deviceId: video.deviceId,
 			},
 		})
 
@@ -152,6 +159,26 @@ export function Setup(props: {
 		}
 	})
 
+	// Fetch the list of devices.
+	const [devices] = createResource(async () => {
+		return await window.navigator.mediaDevices.enumerateDevices()
+	})
+
+	createEffect(() => {
+		const allDevices = devices()
+		if (allDevices && allDevices.length > 0) {
+			setInputDevices(
+				allDevices.filter(
+					(device: MediaDeviceInfo) => device.kind == "videoinput" || device.kind == "audioinput",
+				),
+			)
+		}
+	})
+
+	const getDevices = (deviceType: MediaDeviceKind) => {
+		return inputDevices.filter((device: MediaDeviceInfo) => device.kind == deviceType)
+	}
+
 	const start = (e: Event) => {
 		e.preventDefault()
 		setLoading(true)
@@ -168,8 +195,8 @@ export function Setup(props: {
 	return (
 		<form class="grid grid-cols-3 items-center justify-center gap-x-4 gap-y-2 text-sm">
 			<General name={name()} setName={setName} />
-			<Video config={video} setConfig={setVideo} />
-			<Audio config={audio} setConfig={setAudio} />
+			<Video config={video} setConfig={setVideo} devices={getDevices("videoinput")} />
+			<Audio config={audio} setConfig={setAudio} devices={getDevices("audioinput")}/>
 
 			<button
 				class="col-start-2 mt-3 rounded-md bg-green-500 px-3 py-2 text-sm font-semibold shadow-sm hover:bg-green-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
@@ -208,8 +235,13 @@ function General(props: { name: string; setName(name: string): void }) {
 	)
 }
 
-function Video(props: { config: Store<VideoConfig>; setConfig: SetStoreFunction<VideoConfig> }) {
+function Video(props: {
+	config: Store<VideoConfig>
+	setConfig: SetStoreFunction<VideoConfig>
+	devices: MediaDeviceInfo[]
+}) {
 	const [codec, setCodec] = createStore<VideoCodec>(VIDEO_CODEC_UNDEF)
+	const [deviceId, setDeviceId] = createSignal(props.devices[0]?.deviceId)
 
 	// Fetch the list of supported codecs.
 	const [supportedCodecs] = createResource(
@@ -275,14 +307,39 @@ function Video(props: { config: Store<VideoConfig>; setConfig: SetStoreFunction<
 		return [...unique]
 	}
 
+	const getDeviceId = (deviceId: string) => {
+		const device = props.devices.find((device: MediaDeviceInfo) => device.deviceId == deviceId)
+		return device ? device.deviceId : ""
+	}
+
 	// Update the store with our computed value.
 	createEffect(() => {
 		props.setConfig({ codec: codec.value })
 	})
 
+	createEffect(() => {
+		props.setConfig({ deviceId: deviceId() })
+	})
+
 	return (
 		<>
 			<div class="col-span-3 mt-3 border-b-2 border-green-500 pl-3 text-lg">Video</div>
+			<label class="col-start-1 font-medium leading-6">Video Input</label>
+			<select
+				name="videoInputDeviceId"
+				class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-500"
+				onInput={(e) => setDeviceId(getDeviceId(e.target.value))}
+			>
+				<For each={[...props.devices]}>
+					{(device) => {
+						return (
+							<option value={device.deviceId} selected={deviceId() === device.deviceId}>
+								{device.label}
+							</option>
+						)
+					}}
+				</For>
+			</select>
 			<label class="col-start-1 font-medium leading-6">Codec</label>
 			<select
 				name="codec"
@@ -360,10 +417,41 @@ function Video(props: { config: Store<VideoConfig>; setConfig: SetStoreFunction<
 	)
 }
 
-function Audio(props: { config: Store<AudioConfig>; setConfig: SetStoreFunction<AudioConfig> }) {
+function Audio(props: {
+	config: Store<AudioConfig>
+	setConfig: SetStoreFunction<AudioConfig>
+	devices: MediaDeviceInfo[]
+}) {
+	const [deviceId, setDeviceId] = createSignal(props.devices[0]?.deviceId)
+
+	const getDeviceId = (deviceId: string) => {
+		const device = props.devices.find((device: MediaDeviceInfo) => device.deviceId == deviceId)
+		return device ? device.deviceId : ""
+	}
+
+	createEffect(() => {
+		props.setConfig({ deviceId: deviceId() })
+	})
+
 	return (
 		<>
 			<div class="col-span-3 mt-3 border-b-2 border-green-500 pl-3 text-lg">Audio</div>
+			<label class="col-start-1 font-medium leading-6">Audio Input</label>
+			<select
+				name="audioInputDeviceId"
+				class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-500"
+				onInput={(e) => setDeviceId(getDeviceId(e.target.value))}
+			>
+				<For each={[...props.devices]}>
+					{(device) => {
+						return (
+							<option value={device.deviceId} selected={deviceId() === device.deviceId}>
+								{device.label}
+							</option>
+						)
+					}}
+				</For>
+			</select>
 			<label for="codec" class="col-start-1 font-medium leading-6">
 				Codec
 			</label>
