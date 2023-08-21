@@ -1,20 +1,16 @@
 import { Broadcast, VideoEncoder, AudioEncoderCodecs } from "@kixelated/moq/contribute"
-import { Connection } from "@kixelated/moq/transport"
+import { Client } from "@kixelated/moq/transport"
 import { asError } from "@kixelated/moq/common"
 
-import {
-	createEffect,
-	Switch,
-	Match,
-	createMemo,
-	createSignal,
-	For,
-	createResource,
-	createSelector,
-	Show,
-} from "solid-js"
+import { createEffect, createSignal, For, createResource, Show } from "solid-js"
 
 import { SetStoreFunction, Store, createStore } from "solid-js/store"
+
+interface GeneralConfig {
+	server: string
+	fingerprint: string | undefined
+	name: string
+}
 
 interface AudioConfig {
 	sampleRate: number
@@ -109,21 +105,43 @@ const VIDEO_CODECS: VideoCodec[] = [
 	{ name: "h.264", profile: "baseline", value: "avc1.420034" },
 ]
 
-export function Setup(props: {
-	connection: Connection | undefined
-	setBroadcast(v: Broadcast | undefined): void
-	setError(e: Error): void
-}) {
-	const [name, setName] = createSignal("")
+export function Setup(props: { setBroadcast(v: Broadcast | undefined): void; setError(e: Error): void }) {
+	const params = new URLSearchParams(window.location.search)
+
+	let url = params.get("url") ?? undefined
+	let fingerprint = params.get("fingerprint") ?? undefined
+
+	// Change the default URL based on the environment.
+	if (process.env.NODE_ENV === "production") {
+		url ??= "https://moq-demo.englishm.net:4443"
+	} else {
+		url ??= "https://localhost:4443"
+		fingerprint ??= url + "/fingerprint"
+	}
+
+	const [general, setGeneral] = createStore<GeneralConfig>({ server: url, fingerprint, name: "" })
 	const [audio, setAudio] = createStore<AudioConfig>(AUDIO_DEFAULT)
 	const [video, setVideo] = createStore<VideoConfig>(VIDEO_DEFAULT)
 
 	const [loading, setLoading] = createSignal(false)
 
-	const [broadcast] = createResource(loading, async () => {
+	// Starting establishing the connection when the load button is clicked.
+	const [connection] = createResource(loading, async () => {
+		// Start connecting while we wait for the media to be ready.
+		const client = new Client({
+			url: general.server,
+			role: "both",
+			fingerprint: general.server + "/fingerprint",
+		})
+
+		return await client.connect()
+	})
+
+	// Start loading the selected media device.
+	const [media] = createResource(loading, async () => {
 		const width = Math.ceil((video.height * 16) / 9)
 
-		const media = await window.navigator.mediaDevices.getUserMedia({
+		return await window.navigator.mediaDevices.getUserMedia({
 			audio: {
 				sampleRate: { ideal: audio.sampleRate },
 				channelCount: { max: 2, ideal: 2 },
@@ -135,30 +153,33 @@ export function Setup(props: {
 				frameRate: { ideal: video.fps, max: video.fps },
 			},
 		})
-
-		const conn = props.connection
-		if (!conn) throw new Error("disconnected")
-
-		let full = name() != "" ? name() : crypto.randomUUID()
-		full = `anon.quic.video/${full}`
-
-		return new Broadcast({
-			conn,
-			media,
-			name: full,
-			audio: { codec: "opus", bitrate: 128_000 },
-			video: { codec: video.codec, bitrate: video.bitrate },
-		})
 	})
 
-	createEffect(() => {
+	// Load the connection and media, then run the broadcast.
+	createEffect(async () => {
 		try {
-			const b = broadcast()
+			const c = connection()
+			const m = media()
+			if (!c || !m) return // Don't unset loading since the other is still loading
+
+			let full = general.name != "" ? general.name : crypto.randomUUID()
+			full = `anon.quic.video/${full}`
+
+			const b = new Broadcast({
+				conn: c,
+				media: m,
+				name: full,
+				audio: { codec: "opus", bitrate: 128_000 },
+				video: { codec: video.codec, bitrate: video.bitrate },
+			})
+
 			props.setBroadcast(b)
+
+			await Promise.any([b.run(), c.run()])
+			setLoading(false) // Set to false so we can start a new broadcast.
 		} catch (e) {
 			props.setError(asError(e))
-		} finally {
-			setLoading(false)
+			setLoading(false) // Set to false so we can try again.
 		}
 	})
 
@@ -166,14 +187,6 @@ export function Setup(props: {
 		e.preventDefault()
 		setLoading(true)
 	}
-
-	const state = createMemo(() => {
-		if (!props.connection) return "connecting"
-		if (broadcast.loading) return "loading"
-		return "ready"
-	})
-
-	const isState = createSelector(state)
 
 	const [advanced, setAdvanced] = createSignal(false)
 	const toggleAdvanced = (e: MouseEvent) => {
@@ -183,7 +196,7 @@ export function Setup(props: {
 
 	return (
 		<form class="grid items-center gap-x-6 gap-y-3 text-sm">
-			<General name={name()} setName={setName} advanced={advanced()} />
+			<General config={general} setConfig={setGeneral} advanced={advanced()} />
 			<Video config={video} setConfig={setVideo} advanced={advanced()} />
 			<Audio config={audio} setConfig={setAudio} advanced={advanced()} />
 
@@ -193,11 +206,9 @@ export function Setup(props: {
 				type="submit"
 				onClick={start}
 			>
-				<Switch>
-					<Match when={isState("ready")}>Go Live</Match>
-					<Match when={isState("loading")}>Loading</Match>
-					<Match when={isState("connecting")}>Connecting</Match>
-				</Switch>
+				<Show when={loading()} fallback="Go Live">
+					Connecting
+				</Show>
 			</button>
 			<a onClick={toggleAdvanced} class="text-center">
 				<Show when={advanced()} fallback="Advanced">
@@ -208,11 +219,23 @@ export function Setup(props: {
 	)
 }
 
-function General(props: { name: string; setName(name: string): void; advanced: boolean }) {
+function General(props: {
+	config: Store<GeneralConfig>
+	setConfig: SetStoreFunction<GeneralConfig>
+	advanced: boolean
+}) {
 	return (
 		<>
 			<Show when={props.advanced}>
 				<div class="col-span-3 mt-6 border-b-2 border-green-600 pl-3 text-xl">General</div>
+				<label for="url" class="col-start-1 px-3">
+					Server
+				</label>
+				<input
+					name="server"
+					class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
+					onInput={(e) => props.setConfig({ server: e.target.value })}
+				/>
 				<label for="name" class="col-start-1 px-3">
 					Name
 				</label>
@@ -224,8 +247,8 @@ function General(props: { name: string; setName(name: string): void; advanced: b
 						name="name"
 						placeholder="random"
 						class="flex-grow border-0 bg-transparent p-0 text-sm placeholder-slate-400 focus:ring-0"
-						value={props.name}
-						onInput={(e) => props.setName(e.target.value)}
+						value={props.config.name}
+						onInput={(e) => props.setConfig({ name: e.target.value })}
 					/>
 				</div>
 			</Show>

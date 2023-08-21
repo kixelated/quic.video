@@ -1,6 +1,4 @@
 import { Broadcast } from "@kixelated/moq/contribute"
-import { Connection, Client } from "@kixelated/moq/transport"
-import { asError } from "@kixelated/moq/common"
 
 import { createEffect, createSignal, Match, Show, Switch } from "solid-js"
 
@@ -9,52 +7,7 @@ import { Setup } from "./setup"
 
 export function Main() {
 	const [error, setError] = createSignal<Error | undefined>()
-	const [connection, setConnection] = createSignal<Connection | undefined>()
 	const [broadcast, setBroadcast] = createSignal<Broadcast | undefined>()
-
-	const params = new URLSearchParams(window.location.search)
-
-	let url = params.get("url") ?? undefined
-	let fingerprint = params.get("fingerprint") ?? undefined
-
-	// Change the default URL based on the environment.
-	if (process.env.NODE_ENV === "production") {
-		url ??= "https://moq-demo.englishm.net:4443"
-	} else {
-		url ??= "https://localhost:4443"
-		fingerprint ??= url + "/fingerprint"
-	}
-
-	const client = new Client({
-		url,
-		role: "both",
-		fingerprint,
-	})
-
-	createEffect(async () => {
-		try {
-			const conn = await client.connect()
-			setConnection(conn)
-			await conn.run()
-		} catch (e) {
-			setError(asError(e))
-		} finally {
-			setConnection()
-		}
-	})
-
-	createEffect(async () => {
-		const b = broadcast()
-		if (!b) return
-
-		try {
-			await b.run()
-		} catch (e) {
-			setError(asError(e))
-		} finally {
-			setBroadcast()
-		}
-	})
 
 	createEffect(() => {
 		const err = error()
@@ -74,7 +27,7 @@ export function Main() {
 					<Preview broadcast={broadcast()!} />
 				</Match>
 				<Match when={!broadcast()}>
-					<Setup connection={connection()} setBroadcast={setBroadcast} setError={setError} />
+					<Setup setBroadcast={setBroadcast} setError={setError} />
 				</Match>
 			</Switch>
 		</div>
