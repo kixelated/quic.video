@@ -231,7 +231,7 @@ export function Setup(props: { setBroadcast(v: Broadcast | undefined): void; set
 
 			<div class="col-span-3 py-3"></div>
 			<button
-				class="col-start-2 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+				class="col-start-2 rounded-md bg-green-600 p-2 py-2 text-sm font-semibold shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
 				type="submit"
 				onClick={start}
 			>
@@ -257,7 +257,7 @@ function General(props: {
 		<>
 			<Show when={props.advanced}>
 				<h2 class="col-span-3 my-3 border-b-2 border-green-600 pl-3 text-xl">General</h2>
-				<label for="url" class="col-start-1 px-3">
+				<label for="url" class="col-start-1 p-2">
 					Server
 				</label>
 				<input
@@ -267,12 +267,12 @@ function General(props: {
 					onInput={(e) => props.setConfig({ server: e.target.value })}
 				/>
 				<div>
-					<label for="fingerprint" class="col-start-1 px-3">
+					<label for="fingerprint" class="col-start-1 p-2">
 						Self-Signed?
 					</label>
 					<input name="fingerprint" type="checkbox" checked={props.config.fingerprint} />
 				</div>
-				<label for="name" class="col-start-1 px-3">
+				<label for="name" class="col-start-1 p-2">
 					Name
 				</label>
 				<div class="form-input flex flex-wrap items-center gap-2 rounded-md border-0 bg-slate-700 text-sm">
@@ -382,7 +382,7 @@ function Video(props: {
 	return (
 		<>
 			<h2 class="col-span-3 my-3 border-b-2 border-green-600 pl-3 text-xl">Video</h2>
-			<label class="col-start-1 px-3">Input</label>
+			<label class="col-start-1 p-2">Input</label>
 			<select
 				name="video-input"
 				class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
@@ -399,7 +399,7 @@ function Video(props: {
 				</For>
 			</select>
 			<Show when={props.advanced}>
-				<label for="codec" class="col-start-1 px-3">
+				<label for="codec" class="col-start-1 p-2">
 					Codec
 				</label>
 				<select
@@ -433,7 +433,7 @@ function Video(props: {
 					</For>
 				</select>
 			</Show>
-			<label for="resolution" class="col-start-1 px-3">
+			<label for="resolution" class="col-start-1 p-2">
 				Resolution
 			</label>
 			<select
@@ -452,7 +452,7 @@ function Video(props: {
 				</For>
 			</select>
 			<Show when={props.advanced}>
-				<label for="fps" class="col-start-1 px-3">
+				<label for="fps" class="col-start-1 p-2">
 					Frame Rate
 				</label>
 				<select
@@ -471,7 +471,7 @@ function Video(props: {
 					</For>
 				</select>
 			</Show>
-			<label for="bitrate" class="col-start-1 px-3">
+			<label for="bitrate" class="col-start-1 p-2">
 				Bitrate
 			</label>
 			<input
@@ -508,7 +508,7 @@ function Audio(props: {
 	return (
 		<>
 			<h2 class="col-span-3 my-3 border-b-2 border-green-600 pl-3 text-xl">Audio</h2>
-			<label class="col-start-1 px-3">Input</label>
+			<label class="col-start-1 p-2">Input</label>
 			<select
 				name="audio-input"
 				class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-500"
@@ -525,7 +525,7 @@ function Audio(props: {
 				</For>
 			</select>
 			<Show when={props.advanced}>
-				<label for="codec" class="col-start-1 px-3">
+				<label for="codec" class="col-start-1 p-2">
 					Codec
 				</label>
 				<select
@@ -543,7 +543,7 @@ function Audio(props: {
 						}}
 					</For>
 				</select>
-				<label for="sampleRate" class="col-start-1 px-3">
+				<label for="sampleRate" class="col-start-1 p-2">
 					Sample Rate
 				</label>
 				<select
@@ -561,7 +561,7 @@ function Audio(props: {
 						}}
 					</For>
 				</select>
-				<label for="bitrate" class="col-start-1 px-3">
+				<label for="bitrate" class="col-start-1 p-2">
 					Bitrate
 				</label>
 				<input
