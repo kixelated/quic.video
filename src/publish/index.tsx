@@ -15,7 +15,7 @@ export function Main() {
 	})
 
 	return (
-		<div class="flex flex-col">
+		<>
 			<Show when={error()}>
 				<div class="bg-red-600 px-4 py-2 font-bold">
 					{error()?.name}: {error()?.message}
@@ -30,6 +30,6 @@ export function Main() {
 					<Setup setBroadcast={setBroadcast} setError={setError} />
 				</Match>
 			</Switch>
-		</div>
+		</>
 	)
 }

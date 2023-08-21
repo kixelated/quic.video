@@ -229,21 +229,22 @@ export function Setup(props: { setBroadcast(v: Broadcast | undefined): void; set
 			<Video config={video} setConfig={setVideo} devices={getDevices("videoinput")} advanced={advanced()} />
 			<Audio config={audio} setConfig={setAudio} devices={getDevices("audioinput")} advanced={advanced()} />
 
-			<div class="col-span-3 py-3"></div>
-			<button
-				class="col-start-2 rounded-md bg-green-600 p-2 py-2 text-sm font-semibold shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-				type="submit"
-				onClick={start}
-			>
-				<Show when={loading()} fallback="Go Live">
-					Connecting
-				</Show>
-			</button>
-			<a onClick={toggleAdvanced} class="text-center">
-				<Show when={advanced()} fallback="Advanced">
-					Simple
-				</Show>
-			</a>
+			<div class="col-start-2 flex pt-6">
+				<button
+					class="basis-1/2 rounded-md bg-green-600 p-2 font-semibold shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+					type="submit"
+					onClick={start}
+				>
+					<Show when={loading()} fallback="Go Live">
+						Connecting
+					</Show>
+				</button>
+				<a onClick={toggleAdvanced} class="basis-1/2 p-2 text-center">
+					<Show when={advanced()} fallback="Advanced">
+						Simple
+					</Show>
+				</a>
+			</div>
 		</form>
 	)
 }
@@ -256,23 +257,23 @@ function General(props: {
 	return (
 		<>
 			<Show when={props.advanced}>
-				<h2 class="col-span-3 my-3 border-b-2 border-green-600 pl-3 text-xl">General</h2>
+				<h2 class="col-span-2 my-3 border-b-2 border-green-600 pl-3 text-xl">General</h2>
+
 				<label for="url" class="col-start-1 p-2">
 					Server
 				</label>
-				<input
-					name="server"
-					class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
-					value={props.config.server}
-					onInput={(e) => props.setConfig({ server: e.target.value })}
-				/>
-				<div>
-					<label for="fingerprint" class="col-start-1 p-2">
-						Self-Signed?
-					</label>
+				<div class="flex items-center gap-3">
+					<input
+						name="server"
+						class="flex-grow rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
+						value={props.config.server}
+						onInput={(e) => props.setConfig({ server: e.target.value })}
+					/>
+					<label for="fingerprint">Self-Signed?</label>
 					<input name="fingerprint" type="checkbox" checked={props.config.fingerprint} />
 				</div>
-				<label for="name" class="col-start-1 p-2">
+
+				<label for="name" class="p-2">
 					Name
 				</label>
 				<div class="form-input flex flex-wrap items-center gap-2 rounded-md border-0 bg-slate-700 text-sm">
@@ -381,8 +382,9 @@ function Video(props: {
 
 	return (
 		<>
-			<h2 class="col-span-3 my-3 border-b-2 border-green-600 pl-3 text-xl">Video</h2>
-			<label class="col-start-1 p-2">Input</label>
+			<h2 class="col-span-2 my-3 border-b-2 border-green-600 pl-3 text-xl">Video</h2>
+
+			<label class="p-2">Input</label>
 			<select
 				name="video-input"
 				class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
@@ -398,42 +400,46 @@ function Video(props: {
 					}}
 				</For>
 			</select>
+
 			<Show when={props.advanced}>
-				<label for="codec" class="col-start-1 p-2">
+				<label for="codec" class="p-2">
 					Codec
 				</label>
-				<select
-					name="codec"
-					class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
-					onInput={(e) => setCodec({ name: e.target.value })}
-				>
-					<For each={[...supportedCodecNames()]}>
-						{(supported) => {
-							return (
-								<option value={supported} selected={supported === codec.name}>
-									{supported}
-								</option>
-							)
-						}}
-					</For>
-				</select>
-				<select
-					name="profile"
-					class="col-start-3 rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
-					onInput={(e) => setCodec({ profile: e.target.value })}
-				>
-					<For each={[...supportedCodecProfiles()]}>
-						{(supported) => {
-							return (
-								<option value={supported} selected={supported === codec.profile}>
-									{supported}
-								</option>
-							)
-						}}
-					</For>
-				</select>
+				<div class="flex gap-3">
+					<select
+						name="codec"
+						class="flex-grow rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
+						onInput={(e) => setCodec({ name: e.target.value })}
+					>
+						<For each={[...supportedCodecNames()]}>
+							{(supported) => {
+								return (
+									<option value={supported} selected={supported === codec.name}>
+										{supported}
+									</option>
+								)
+							}}
+						</For>
+					</select>
+					<select
+						name="profile"
+						class="col-start-3 flex-grow rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-600"
+						onInput={(e) => setCodec({ profile: e.target.value })}
+					>
+						<For each={[...supportedCodecProfiles()]}>
+							{(supported) => {
+								return (
+									<option value={supported} selected={supported === codec.profile}>
+										{supported}
+									</option>
+								)
+							}}
+						</For>
+					</select>
+				</div>
 			</Show>
-			<label for="resolution" class="col-start-1 p-2">
+
+			<label for="resolution" class="p-2">
 				Resolution
 			</label>
 			<select
@@ -451,8 +457,9 @@ function Video(props: {
 					}}
 				</For>
 			</select>
+
 			<Show when={props.advanced}>
-				<label for="fps" class="col-start-1 p-2">
+				<label for="fps" class="p-2">
 					Frame Rate
 				</label>
 				<select
@@ -471,19 +478,23 @@ function Video(props: {
 					</For>
 				</select>
 			</Show>
-			<label for="bitrate" class="col-start-1 p-2">
+
+			<label for="bitrate" class="p-2">
 				Bitrate
 			</label>
-			<input
-				type="range"
-				name="bitrate"
-				min={VIDEO_CONSTRAINTS.bitrate.min}
-				max={VIDEO_CONSTRAINTS.bitrate.max}
-				step="100000"
-				value={props.config.bitrate}
-				onInput={(e) => props.setConfig({ bitrate: parseInt(e.target.value) })}
-			/>
-			<span class="text-xs">{(props.config.bitrate / 1_000_000).toFixed(1)} Mb/s</span>
+			<div class="flex items-center gap-2">
+				<input
+					type="range"
+					name="bitrate"
+					min={VIDEO_CONSTRAINTS.bitrate.min}
+					max={VIDEO_CONSTRAINTS.bitrate.max}
+					step="100000"
+					value={props.config.bitrate}
+					onInput={(e) => props.setConfig({ bitrate: parseInt(e.target.value) })}
+					class="flex-grow"
+				/>
+				<span class="basis-1/3 text-center">{(props.config.bitrate / 1_000_000).toFixed(1)} Mb/s</span>
+			</div>
 		</>
 	)
 }
@@ -507,8 +518,9 @@ function Audio(props: {
 
 	return (
 		<>
-			<h2 class="col-span-3 my-3 border-b-2 border-green-600 pl-3 text-xl">Audio</h2>
-			<label class="col-start-1 p-2">Input</label>
+			<h2 class="col-span-2 my-3 border-b-2 border-green-600 pl-3 text-xl">Audio</h2>
+
+			<label class="p-2">Input</label>
 			<select
 				name="audio-input"
 				class="rounded-md border-0 bg-slate-700 text-sm shadow-sm focus:ring-1 focus:ring-inset focus:ring-green-500"
@@ -524,8 +536,9 @@ function Audio(props: {
 					}}
 				</For>
 			</select>
+
 			<Show when={props.advanced}>
-				<label for="codec" class="col-start-1 p-2">
+				<label for="codec" class="p-2">
 					Codec
 				</label>
 				<select
@@ -543,7 +556,8 @@ function Audio(props: {
 						}}
 					</For>
 				</select>
-				<label for="sampleRate" class="col-start-1 p-2">
+
+				<label for="sampleRate" class="p-2">
 					Sample Rate
 				</label>
 				<select
@@ -561,19 +575,23 @@ function Audio(props: {
 						}}
 					</For>
 				</select>
-				<label for="bitrate" class="col-start-1 p-2">
+
+				<label for="bitrate" class="p-2">
 					Bitrate
 				</label>
-				<input
-					type="range"
-					name="bitrate"
-					min={AUDIO_CONSTRAINTS.bitrate.min}
-					max={AUDIO_CONSTRAINTS.bitrate.max}
-					step="1000"
-					value={props.config.bitrate}
-					onInput={(e) => props.setConfig({ bitrate: parseInt(e.target.value) })}
-				/>
-				<span class="text-left text-xs">{Math.floor(props.config.bitrate / 1000)} Kb/s</span>
+				<div class="flex items-center">
+					<input
+						type="range"
+						name="bitrate"
+						min={AUDIO_CONSTRAINTS.bitrate.min}
+						max={AUDIO_CONSTRAINTS.bitrate.max}
+						step="1000"
+						value={props.config.bitrate}
+						onInput={(e) => props.setConfig({ bitrate: parseInt(e.target.value) })}
+						class="flex-grow"
+					/>
+					<span class="basis-1/3 text-center">{Math.floor(props.config.bitrate / 1000)} Kb/s</span>
+				</div>
 			</Show>
 		</>
 	)
