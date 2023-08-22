@@ -8,7 +8,7 @@ import { SetStoreFunction, Store, createStore } from "solid-js/store"
 
 interface GeneralConfig {
 	server: string
-	fingerprint: boolean
+	local: boolean
 	name: string
 }
 
@@ -112,18 +112,17 @@ const VIDEO_CODECS: VideoCodec[] = [
 export function Setup(props: { setBroadcast(v: Broadcast | undefined): void; setError(e: Error): void }) {
 	const params = new URLSearchParams(window.location.search)
 
-	let url = params.get("url") ?? undefined
-	let fingerprint = !!params.get("fingerprint") // request /fingerprint when true
+	// Defaults based on the query parameters and environment.
+	const server =
+		params.get("server") ?? process.env.NODE_ENV === "production" ? "moq-demo.englishm.net:4443" : "localhost:4443"
+	const local = params.get("local") === "true" || process.env.NODE_ENV !== "production"
 
-	// Change the default URL based on the environment.
-	if (process.env.NODE_ENV === "production") {
-		url ??= "moq-demo.englishm.net:4443"
-	} else {
-		url ??= "localhost:4443"
-		fingerprint = true
-	}
+	const [general, setGeneral] = createStore<GeneralConfig>({
+		server,
+		local,
+		name: "",
+	})
 
-	const [general, setGeneral] = createStore<GeneralConfig>({ server: url, fingerprint, name: "" })
 	const [audio, setAudio] = createStore<AudioConfig>(AUDIO_DEFAULT)
 	const [video, setVideo] = createStore<VideoConfig>(VIDEO_DEFAULT)
 	const [inputDevices, setInputDevices] = createStore<MediaDeviceInfo[]>([])
@@ -138,7 +137,7 @@ export function Setup(props: { setBroadcast(v: Broadcast | undefined): void; set
 		const client = new Client({
 			url: url,
 			role: "both",
-			fingerprint: general.fingerprint ? url + "/fingerprint" : undefined,
+			fingerprint: general.local ? url + "/fingerprint" : undefined,
 		})
 
 		return await client.connect()
@@ -175,7 +174,7 @@ export function Setup(props: { setBroadcast(v: Broadcast | undefined): void; set
 			full = `anon.quic.video/${full}`
 
 			const b = new Broadcast({
-				conn: c,
+				connection: c,
 				media: m,
 				name: full,
 				audio: { codec: "opus", bitrate: 128_000 },
@@ -184,11 +183,15 @@ export function Setup(props: { setBroadcast(v: Broadcast | undefined): void; set
 
 			props.setBroadcast(b)
 
-			await Promise.any([b.run(), c.run()])
-			setLoading(false) // Set to false so we can start a new broadcast.
+			try {
+				await Promise.any([b.run(), c.run()])
+			} finally {
+				props.setBroadcast(undefined)
+				setLoading(false)
+			}
 		} catch (e) {
 			props.setError(asError(e))
-			setLoading(false) // Set to false so we can try again.
+			setLoading(false)
 		}
 	})
 
@@ -223,29 +226,40 @@ export function Setup(props: { setBroadcast(v: Broadcast | undefined): void; set
 		setAdvanced(!advanced())
 	}
 
-	return (
-		<form class="grid items-center gap-x-6 gap-y-3 text-sm">
-			<General config={general} setConfig={setGeneral} advanced={advanced()} />
-			<Video config={video} setConfig={setVideo} devices={getDevices("videoinput")} advanced={advanced()} />
-			<Audio config={audio} setConfig={setAudio} devices={getDevices("audioinput")} advanced={advanced()} />
+	if (!("WebTransport" in window)) {
+		props.setError(new Error("WebTransport is required; try another browser"))
+	} else if (!("VideoEncoder" in window) || !("AudioEncoder" in window)) {
+		props.setError(new Error("WebCodecs is required; try another browser"))
+	}
 
-			<div class="col-start-2 flex pt-6">
-				<button
-					class="basis-1/2 rounded-md bg-green-600 p-2 font-semibold shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-					type="submit"
-					onClick={start}
-				>
-					<Show when={loading()} fallback="Go Live">
-						Connecting
-					</Show>
-				</button>
-				<a onClick={toggleAdvanced} class="basis-1/2 p-2 text-center">
-					<Show when={advanced()} fallback="Advanced">
-						Simple
-					</Show>
-				</a>
-			</div>
-		</form>
+	return (
+		<>
+			<p class="p-6">
+				Create a <b class="text-green-500">PUBLIC</b> broadcast. Don't abuse it pls.
+			</p>
+			<form class="grid items-center gap-x-6 gap-y-3 text-sm">
+				<General config={general} setConfig={setGeneral} advanced={advanced()} />
+				<Video config={video} setConfig={setVideo} devices={getDevices("videoinput")} advanced={advanced()} />
+				<Audio config={audio} setConfig={setAudio} devices={getDevices("audioinput")} advanced={advanced()} />
+
+				<div class="col-start-2 flex pt-6">
+					<button
+						class="basis-1/2 rounded-md bg-green-600 p-2 font-semibold shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+						type="submit"
+						onClick={start}
+					>
+						<Show when={loading()} fallback="Go Live">
+							Connecting
+						</Show>
+					</button>
+					<a onClick={toggleAdvanced} class="basis-1/2 p-2 text-center">
+						<Show when={advanced()} fallback="Advanced">
+							Simple
+						</Show>
+					</a>
+				</div>
+			</form>
+		</>
 	)
 }
 
@@ -257,7 +271,7 @@ function General(props: {
 	return (
 		<>
 			<Show when={props.advanced}>
-				<h2 class="col-span-2 my-3 border-b-2 border-green-600 pl-3 text-xl">General</h2>
+				<header class="col-span-2 my-3 border-b-2 border-green-600 pl-3 text-xl">General</header>
 
 				<label for="url" class="col-start-1 p-2">
 					Server
@@ -269,8 +283,13 @@ function General(props: {
 						value={props.config.server}
 						onInput={(e) => props.setConfig({ server: e.target.value })}
 					/>
-					<label for="fingerprint">Self-Signed?</label>
-					<input name="fingerprint" type="checkbox" checked={props.config.fingerprint} />
+					<label for="local">Self-Signed?</label>
+					<input
+						name="local"
+						type="checkbox"
+						checked={props.config.local}
+						onInput={(e) => props.setConfig({ local: e.target.checked })}
+					/>
 				</div>
 
 				<label for="name" class="p-2">
@@ -382,7 +401,7 @@ function Video(props: {
 
 	return (
 		<>
-			<h2 class="col-span-2 my-3 border-b-2 border-green-600 pl-3 text-xl">Video</h2>
+			<header class="col-span-2 my-3 border-b-2 border-green-600 pl-3 text-xl">Video</header>
 
 			<label class="p-2">Input</label>
 			<select
@@ -518,7 +537,7 @@ function Audio(props: {
 
 	return (
 		<>
-			<h2 class="col-span-2 my-3 border-b-2 border-green-600 pl-3 text-xl">Audio</h2>
+			<header class="col-span-2 my-3 border-b-2 border-green-600 pl-3 text-xl">Audio</header>
 
 			<label class="p-2">Input</label>
 			<select

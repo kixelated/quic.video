@@ -1,6 +1,6 @@
 import { Broadcast } from "@kixelated/moq/contribute"
 
-import { createEffect, createSignal, Match, Show, Switch } from "solid-js"
+import { createEffect, createSignal, Show } from "solid-js"
 
 import { Preview } from "./preview"
 import { Setup } from "./setup"
@@ -22,14 +22,9 @@ export function Main() {
 				</div>
 			</Show>
 
-			<Switch>
-				<Match when={broadcast()}>
-					<Preview broadcast={broadcast()!} />
-				</Match>
-				<Match when={!broadcast()}>
-					<Setup setBroadcast={setBroadcast} setError={setError} />
-				</Match>
-			</Switch>
+			<Show when={broadcast()} fallback={<Setup setBroadcast={setBroadcast} setError={setError} />}>
+				<Preview broadcast={broadcast()!} />
+			</Show>
 		</>
 	)
 }
