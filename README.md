@@ -10,26 +10,37 @@ It uses [moq-js](https://github.com/kixelated/moq-js) for the web components and
 
 Install dependencies using `npm`:
 
-```
+```bash
 npm install
 ```
 
 Install [mkcert](https://github.com/FiloSottile/mkcert) to generate a self-signed certificate.
 This is merely for convinence to avoid TLS errors when using parcel.
 
-```
+```bash
 npm run cert
 ```
 
-## Serve
+## Development
 
-Host a simple demo on `https://localhost:4444`. Note that you'll have to accept any TLS errors.
+Host a simple demo on `https://localhost:4444`.
 
-```
+```bash
 npm run serve
 ```
 
-This a requires a [MoQ server](https://github.com/kixelated/moq-rs) running on `https://localhost:4443`.
+By default, the site will use a [moq-rs](https://github.com/kixelated/moq-rs) relay running on `https://localhost:4443`.
+
+### Linking
+
+If you want to test changes to [@kixelated/moq](https://github.com/kixelated/moq-js), use `npm link` set up a global symlink.
+
+```bash
+npm link @kixelated/moq
+```
+
+Unfortunately, [parcel doesn't monitor symlinks for changes](https://github.com/parcel-bundler/parcel/issues/4332).
+You'll need to restart the parcel server each time until I can figure out a work-around.
 
 ## License
 

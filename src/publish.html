@@ -17,7 +17,11 @@
 			const main = document.getElementById("main")
 			if (!main) throw new Error("no container")
 
-			render(() => <Main />, main)
+			const dispose = render(() => <Main />, main)
+			if (module.hot) {
+				module.hot.accept()
+				module.hot.dispose(dispose)
+			}
 		</script>
 	</body>
 </html>
