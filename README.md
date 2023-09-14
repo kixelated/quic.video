@@ -1,2 +1,3 @@
-# MOVED
-Moved back to [moq-js](https://github.com/kixelated/moq-js) again.
+# quic.video
+
+This repo contains the infrastructure for quic.video.
