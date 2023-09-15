@@ -1,7 +1,3 @@
-variable "domain" {
-  description = "domain"
-}
-
 // Set up a DNS zone for our domain.
 resource "google_dns_managed_zone" "root" {
   name     = "root"
