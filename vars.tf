@@ -24,3 +24,8 @@ output "zone" {
   value       = var.zone
   description = "GCloud Zone"
 }
+
+output "relay_image" {
+  value       = "gcr.io/${var.project}/relay"
+  description = "Relay docker image address"
+}
