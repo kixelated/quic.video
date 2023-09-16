@@ -11,7 +11,7 @@ variable "dns_zone" {
 }
 
 variable "domain" {
-  description = "The root domain"
+  description = "The relay domain"
 }
 
 variable "instances" {
@@ -21,4 +21,16 @@ variable "instances" {
 
 variable "image" {
   type = string
+}
+
+variable "email" {
+  description = "Your email address"
+}
+
+variable "crt" {
+  description = "The PEM certificate for *.domain"
+}
+
+variable "key" {
+  description = "The PEM key for *.domain"
 }

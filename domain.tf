@@ -47,29 +47,3 @@ resource "acme_certificate" "relay" {
     }
   }
 }
-
-resource "google_secret_manager_secret" "relay_cert" {
-  secret_id = "relay-cert"
-
-  replication {
-    automatic = true
-  }
-}
-
-resource "google_secret_manager_secret_version" "relay_cert" {
-  secret      = google_secret_manager_secret.relay_cert.id
-  secret_data = acme_certificate.relay.certificate_pem
-}
-
-resource "google_secret_manager_secret" "relay_key" {
-  secret_id = "relay-key"
-
-  replication {
-    automatic = true
-  }
-}
-
-resource "google_secret_manager_secret_version" "relay_key" {
-  secret      = google_secret_manager_secret.relay_key.id
-  secret_data = acme_certificate.relay.private_key_pem
-}

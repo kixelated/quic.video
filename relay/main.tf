@@ -1,3 +1,4 @@
+
 resource "google_compute_instance" "relay" {
   count = var.instances
 
@@ -19,33 +20,27 @@ resource "google_compute_instance" "relay" {
     }
   }
 
-  metadata_startup_script = <<-EOT
-    #! /bin/bash
-    curl https://sdk.cloud.google.com | bash
-    exec -l $SHELL
-    gcloud init
-
-    CRT="/etc/cert/relay.${var.domain}.crt"
-    KEY="/etc/cert/relay.${var.domain}.key"
-
-    gcloud secrets versions access latest --secret="relay-cert" --out-file "$CRT"
-    gcloud secrets versions access latest --secret="relay-key" --out-file "$KEY"
-
-    docker run -d --name moq-relay \
-      --network="host" -p 443:443 \
-      -e RUST_LOG=info \
-      ${var.image}
-      moq-relay --bind [::]:443 --cert "$CRT" --key "$KEY"
-  EOT
+  metadata = {
+    # TODO recreate on change
+    user-data = templatefile("${path.module}/init.yml.tpl", {
+      image = var.image
+      email = var.email
+      crt   = var.crt
+      key   = var.key
+    })
+  }
 
   service_account {
     scopes = ["cloud-platform"]
-
-    email = google_service_account.relay.email
   }
 
   # For the firewall
   tags = ["relay"]
+
+  # There seems to be a terraform bug causing this to be recreated on every apply
+  lifecycle {
+    ignore_changes = [boot_disk]
+  }
 }
 
 resource "google_compute_address" "relay" {
@@ -58,7 +53,7 @@ resource "google_compute_address" "relay" {
 resource "google_dns_record_set" "relay" {
   count = var.instances
 
-  name         = "${var.region}-${count.index}.relay.${var.domain}."
+  name         = "${var.region}-${count.index}.${var.domain}."
   type         = "A"
   ttl          = 300
   managed_zone = var.dns_zone
@@ -82,17 +77,4 @@ resource "google_compute_firewall" "relay" {
 
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["relay"]
-}
-
-# Allow the instance to access secrets
-resource "google_service_account" "relay" {
-  account_id = "relay-instance"
-}
-
-data "google_project" "current" {}
-
-resource "google_project_iam_member" "relay_secrets" {
-  role    = "roles/secretmanager.secretAccessor"
-  member  = "serviceAccount:${google_service_account.relay.email}"
-  project = data.google_project.current.project_id
 }
