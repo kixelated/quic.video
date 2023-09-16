@@ -10,11 +10,10 @@ variable "zone" {
   description = "zone"
 }
 
-variable "domain" {
-  description = "domain name"
+variable "email" {
+  description = "Your email address, used for LetsEncrypt"
 }
 
-variable "relay_image" {
-  description = "name of the relay docker image"
-  default     = "moq-rs:latest"
+variable "domain" {
+  description = "domain name"
 }

@@ -4,6 +4,11 @@ terraform {
       source  = "hashicorp/google"
       version = "4.74.0"
     }
+
+    acme = {
+      source  = "vancluever/acme"
+      version = "~> 2.0"
+    }
   }
 
   backend "gcs" {
@@ -30,7 +35,10 @@ variable "gcp_service_list" {
     "dns.googleapis.com",
     "appengine.googleapis.com",
     "container.googleapis.com",
-    "iamcredentials.googleapis.com"
+    "iamcredentials.googleapis.com",
+    "secretmanager.googleapis.com",
+    "cloudbuild.googleapis.com",
+    "sourcerepo.googleapis.com",
   ]
 }
 

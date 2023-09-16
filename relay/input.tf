@@ -10,7 +10,6 @@ variable "dns_zone" {
   description = "The name of the GCloud DNS zone"
 }
 
-
 variable "domain" {
   description = "The root domain"
 }

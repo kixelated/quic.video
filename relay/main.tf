@@ -2,12 +2,12 @@ resource "google_compute_instance" "relay" {
   count = var.instances
 
   name         = "relay-${var.region}-${count.index}"
-  machine_type = "n1-standard-1"
+  machine_type = "t2a-standard-1"
   zone         = var.zone
 
   boot_disk {
     initialize_params {
-      image = "cos-cloud/cos-stable"
+      image = "cos-cloud/cos-arm64-stable"
     }
   }
 
@@ -21,21 +21,31 @@ resource "google_compute_instance" "relay" {
 
   metadata_startup_script = <<-EOT
     #! /bin/bash
-    docker run -it --rm --name certbot \
-      -v "/etc/letsencrypt:/etc/letsencrypt" \
-      -v "/var/lib/letsencrypt:/var/lib/letsencrypt" \
-      -p 80:80 \
-      certbot/certbot certonly --standalone \
-      -d ${google_dns_record_set.relay[count.index].name}
+    curl https://sdk.cloud.google.com | bash
+    exec -l $SHELL
+    gcloud init
 
-    docker run -d --network="host" -p 443:443 ${var.image} \
-      -v "/etc/letsencrypt/live/${google_dns_record_set.relay[count.index].name}:/etc/cert" \
-      moq-relay --bind [::]:443 --cert /etc/cert/fullchain.pem --key /etc/cert/privkey.pem
+    CRT="/etc/cert/relay.${var.domain}.crt"
+    KEY="/etc/cert/relay.${var.domain}.key"
+
+    gcloud secrets versions access latest --secret="relay-cert" --out-file "$CRT"
+    gcloud secrets versions access latest --secret="relay-key" --out-file "$KEY"
+
+    docker run -d --name moq-relay \
+      --network="host" -p 443:443 \
+      -e RUST_LOG=info \
+      ${var.image}
+      moq-relay --bind [::]:443 --cert "$CRT" --key "$KEY"
   EOT
 
   service_account {
     scopes = ["cloud-platform"]
+
+    email = google_service_account.relay.email
   }
+
+  # For the firewall
+  tags = ["relay"]
 }
 
 resource "google_compute_address" "relay" {
@@ -48,9 +58,41 @@ resource "google_compute_address" "relay" {
 resource "google_dns_record_set" "relay" {
   count = var.instances
 
-  name         = "${count.index}.${var.region}.relay.${var.domain}."
+  name         = "${var.region}-${count.index}.relay.${var.domain}."
   type         = "A"
   ttl          = 300
   managed_zone = var.dns_zone
   rrdatas      = [google_compute_address.relay[count.index].address]
+}
+
+# Allow TCP 80 and UDP 443
+resource "google_compute_firewall" "relay" {
+  name    = "relay"
+  network = "default"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80"]
+  }
+
+  allow {
+    protocol = "udp"
+    ports    = ["443"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["relay"]
+}
+
+# Allow the instance to access secrets
+resource "google_service_account" "relay" {
+  account_id = "relay-instance"
+}
+
+data "google_project" "current" {}
+
+resource "google_project_iam_member" "relay_secrets" {
+  role    = "roles/secretmanager.secretAccessor"
+  member  = "serviceAccount:${google_service_account.relay.email}"
+  project = data.google_project.current.project_id
 }
