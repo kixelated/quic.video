@@ -2,12 +2,14 @@
 
 write_files:
   - path: /etc/cert/crt.pem
-    content: ${crt}
+    content: |
+      ${indent(6, crt)}
     permissions: "0600"
     owner: root
 
   - path: /etc/cert/key.pem
-    content: ${key}
+    content: |
+      ${indent(6, key)}
     permissions: "0600"
     owner: root
 
