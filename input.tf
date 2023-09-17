@@ -21,17 +21,17 @@ variable "domain" {
 # Too complicated to specify via flags, so do it here.
 locals {
   regions = {
-    usc = { # Iowa
+    us-central = { # Iowa
       region = "us-central1"
       zone   = "us-central1-a",
       count  = 2
     },
-    euw = { # Netherlands
+    europe-west = { # Netherlands
       region = "europe-west4",
       zone   = "europe-west4-b",
       count  = 2
     },
-    sin = { # Singapore
+    asia-southeast = { # Singapore
       region = "asia-southeast1",
       zone   = "asia-southeast1-c", // T2A not available in -a
       count  = 2
