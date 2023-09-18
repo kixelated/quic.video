@@ -23,7 +23,6 @@ resource "google_compute_instance" "relay" {
     # cloud-init template
     user-data = templatefile("${path.module}/relay.yml.tpl", {
       image = var.image
-      email = var.email
       crt   = acme_certificate.relay.certificate_pem
       key   = acme_certificate.relay.private_key_pem
     })

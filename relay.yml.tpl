@@ -25,10 +25,10 @@ write_files:
       Description=Run moq-relay via docker
 
       [Service]
-      ExecStart=/usr/bin/docker run --rm -u moq --name moq-relay --network="host" -v "/etc/cert:/etc/cert:ro" -e RUST_LOG=info ${image} moq-relay --bind [::]:443 --cert "/etc/cert/crt.pem" --key "/etc/cert/key.pem"
-      ExecStop=/usr/bin/docker stop moq-relay
-      ExecStopPost=/usr/bin/docker rm moq-relay
+      ExecStart=docker run --rm -u moq --name moq-relay --network="host" -v "/etc/cert:/etc/cert:ro" -e RUST_LOG=info ${image} moq-relay --bind [::]:443 --cert "/etc/cert/crt.pem" --key "/etc/cert/key.pem"
+      ExecStop=docker stop moq-relay
+      ExecStopPost=docker rm moq-relay
 
 runcmd:
   - systemctl daemon-reload
-  - systemctl start moq-relay.service
+  - systemctl start moq-relay
