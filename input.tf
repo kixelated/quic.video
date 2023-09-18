@@ -18,6 +18,10 @@ variable "domain" {
   description = "domain name"
 }
 
+variable "image" {
+  description = "docker image with moq-rs"
+}
+
 # Too complicated to specify via flags, so do it here.
 locals {
   regions = {

@@ -1,41 +1,3 @@
-resource "google_container_registry" "default" {
-  location = "us"
-}
-
-resource "google_artifact_registry_repository" "relay" {
-  location      = var.region
-  repository_id = "relay"
-  format        = "DOCKER"
-}
-
-resource "google_cloudbuild_trigger" "deploy" {
-  name = "deploy"
-
-  github {
-    owner = "kixelated"
-    name  = "moq-rs"
-    push {
-      branch = "^main$"
-    }
-  }
-
-  build {
-    step {
-      name = "gcr.io/cloud-builders/docker"
-      args = ["build", "-t", "$_IMAGE", "."]
-    }
-
-    artifacts {
-      images = ["$_IMAGE"]
-    }
-  }
-
-  substitutions = {
-    _IMAGE = "${var.region}-docker.pkg.dev/${var.project}/${google_artifact_registry_repository.relay.name}/server"
-  }
-
-}
-
 resource "google_compute_instance" "relay" {
   for_each = local.regions_flat
 
@@ -60,7 +22,7 @@ resource "google_compute_instance" "relay" {
   metadata = {
     # cloud-init template
     user-data = templatefile("${path.module}/relay.yml.tpl", {
-      image = "${var.region}-docker.pkg.dev/${var.project}/${google_artifact_registry_repository.relay.name}/server"
+      image = var.image
       email = var.email
       crt   = acme_certificate.relay.certificate_pem
       key   = acme_certificate.relay.private_key_pem
@@ -76,22 +38,10 @@ resource "google_compute_instance" "relay" {
 
   lifecycle {
     # There seems to be a terraform bug causing this to be recreated on every apply
-    ignore_changes = [boot_disk]
+    #ignore_changes = [boot_disk]
   }
 
-  depends_on = [null_resource.recreate_trigger]
-}
-
-# Recreate the instance if the cloud-init script changes
-resource "null_resource" "recreate_trigger" {
-  triggers = {
-    user_data_hash = sha256(templatefile("${path.module}/relay.yml.tpl", {
-      image = "${var.region}-docker.pkg.dev/${var.project}/${google_artifact_registry_repository.relay.name}/server"
-      email = var.email
-      crt   = acme_certificate.relay.certificate_pem
-      key   = acme_certificate.relay.private_key_pem
-    }))
-  }
+  allow_stopping_for_update = true
 }
 
 resource "google_compute_address" "relay" {
