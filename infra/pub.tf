@@ -1,5 +1,5 @@
 resource "google_compute_instance" "pub" {
-  name         = "pub"
+  name         = "pub-${var.region}"
   machine_type = "t2a-standard-1"
   zone         = var.zone
 
@@ -27,7 +27,7 @@ resource "google_compute_instance" "pub" {
 
   lifecycle {
     # There seems to be a terraform bug causing this to be recreated on every apply
-    #ignore_changes = [boot_disk]
+    ignore_changes = [boot_disk]
   }
 
   allow_stopping_for_update = true

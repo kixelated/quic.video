@@ -20,7 +20,7 @@ resource "google_compute_managed_ssl_certificate" "root" {
 
 // We also need an unmanaged certificate for the relay, since there's no QUIC LBs available yet.
 provider "acme" {
-  server_url = "https://acme-staging-v02.api.letsencrypt.org/directory"
+  server_url = "https://acme-v02.api.letsencrypt.org/directory"
 }
 
 resource "tls_private_key" "relay" {

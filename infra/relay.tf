@@ -37,7 +37,7 @@ resource "google_compute_instance" "relay" {
 
   lifecycle {
     # There seems to be a terraform bug causing this to be recreated on every apply
-    #ignore_changes = [boot_disk]
+    ignore_changes = [boot_disk]
   }
 
   allow_stopping_for_update = true
@@ -64,12 +64,6 @@ resource "google_dns_record_set" "relay" {
 resource "google_compute_firewall" "relay" {
   name    = "relay"
   network = "default"
-
-  # TODO only allow for internal health checks
-  allow {
-    protocol = "tcp"
-    ports    = ["80"]
-  }
 
   allow {
     protocol = "udp"
