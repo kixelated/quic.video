@@ -56,7 +56,7 @@ resource "google_dns_record_set" "relay" {
   name         = "${each.key}.relay.${var.domain}."
   type         = "A"
   ttl          = 300
-  managed_zone = google_dns_managed_zone.root.name
+  managed_zone = google_dns_managed_zone.public.name
   rrdatas      = [google_compute_address.relay[each.key].address]
 }
 
@@ -81,3 +81,16 @@ resource "google_compute_http_health_check" "relay" {
   check_interval_sec = 5
   timeout_sec        = 5
 }
+
+/*
+resource "google_dns_record_set" "relay-internal" {
+  for_each = local.regions_flat
+
+  name         = "${each.key}.internal.relay.${var.domain}."
+  type         = "A"
+  ttl          = 300
+  managed_zone = google_dns_managed_zone.private.name
+  rrdatas      = [google_compute_instance.relay[each.key].network_interface[0].network_ip]
+}
+
+*/

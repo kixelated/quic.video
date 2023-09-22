@@ -3,7 +3,7 @@ resource "google_dns_record_set" "relay_global" {
   name         = "relay.${var.domain}."
   type         = "A"
   ttl          = 60
-  managed_zone = google_dns_managed_zone.root.name
+  managed_zone = google_dns_managed_zone.public.name
 
   routing_policy {
     dynamic "geo" {
@@ -27,7 +27,7 @@ resource "google_dns_record_set" "relay_region" {
   name         = "${each.key}.relay.${var.domain}."
   type         = "A"
   ttl          = 60
-  managed_zone = google_dns_managed_zone.root.name
+  managed_zone = google_dns_managed_zone.public.name
   rrdatas = [
     for idx in range(each.value.count) :
     google_compute_address.relay["${each.key}-${idx}"].address
@@ -43,7 +43,7 @@ resource "google_dns_record_set" "relay_lb" {
   name         = "relay.quic.video."
   type         = "A"
   ttl          = 300
-  managed_zone = google_dns_managed_zone.root.name
+  managed_zone = google_dns_managed_zone.public.name
   rrdatas      = [google_compute_global_forwarding_rule.relay_lb.ip_address]
 }
 

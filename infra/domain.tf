@@ -1,7 +1,25 @@
 // Set up a DNS zone for our domain.
-resource "google_dns_managed_zone" "root" {
-  name     = "root"
+resource "google_dns_managed_zone" "public" {
+  name     = "public"
   dns_name = "${var.domain}."
+}
+
+// Get the default VPC
+data "google_compute_network" "default" {
+  name = "default"
+}
+
+// Set up a private DNS zone for relays to chat with each other.
+resource "google_dns_managed_zone" "private" {
+  name       = "private"
+  dns_name   = "internal.${var.domain}."
+  visibility = "private"
+
+  private_visibility_config {
+    networks {
+      network_url = data.google_compute_network.default.self_link
+    }
+  }
 }
 
 // Create a managed certificate for the domain.
@@ -35,8 +53,8 @@ resource "acme_registration" "relay" {
 
 resource "acme_certificate" "relay" {
   account_key_pem           = acme_registration.relay.account_key_pem
-  common_name               = "relay.${var.domain}"
-  subject_alternative_names = ["*.relay.${var.domain}"]
+  common_name               = "*.relay.${var.domain}"
+  subject_alternative_names = ["*.relay.internal.${var.domain}"]
   key_type                  = tls_private_key.relay.ecdsa_curve
 
   dns_challenge {

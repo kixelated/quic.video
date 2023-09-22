@@ -101,7 +101,7 @@ resource "google_compute_global_forwarding_rule" "web-http" {
 
 // Create a DNS record that points to the web load balancer.
 resource "google_dns_record_set" "web" {
-  managed_zone = google_dns_managed_zone.root.name
+  managed_zone = google_dns_managed_zone.public.name
   name         = "${var.domain}."
   type         = "A"
   ttl          = 60
