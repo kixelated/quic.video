@@ -1,12 +1,7 @@
 import { Broadcast, VideoEncoder, AudioEncoderCodecs } from "@kixelated/moq/contribute"
-
-import { createEffect, createSignal, For, createResource, Show, Switch, Match, createMemo, onCleanup } from "solid-js"
-import { SetStoreFunction, Store, createStore } from "solid-js/store"
-import { useSearchParams } from "@solidjs/router"
+import { Client } from "@kixelated/moq/transport"
 
 import { Listing } from "./listing"
-import { createFetch } from "./common"
-import { Client } from "@kixelated/moq/transport"
 import { Notice } from "./issues"
 
 interface GeneralConfig {
@@ -148,7 +143,9 @@ export function Publish() {
 
 		// Special case localhost to fetch the TLS fingerprint from the server.
 		// TODO remove this when WebTransport correctly supports self-signed certificates
-		const fingerprint = server.startsWith("localhost") ? `https://${server}/fingerprint` : undefined
+		const fingerprint = server.startsWith("localhost")
+			? `https://${server}/fingerprint`
+			: undefined
 
 		const client = new Client({
 			url,
@@ -217,13 +214,27 @@ export function Publish() {
 			</Show>
 			<Show when={broadcast()}>
 				<header>Preview</header>
-				<Listing server={general.server} name={broadcast()!.config.name} catalog={broadcast()!.catalog} />
+				<Listing
+					server={general.server}
+					name={broadcast()!.config.name}
+					catalog={broadcast()!.catalog}
+				/>
 				<video ref={preview!} autoplay muted class="rounded-md" />
 			</Show>
 			<form class="grid grid-cols-3 items-center gap-3 text-sm">
 				<General config={general} setConfig={setGeneral} advanced={advanced()} />
-				<Video config={video} setConfig={setVideo} devices={getDevices("videoinput")} advanced={advanced()} />
-				<Audio config={audio} setConfig={setAudio} devices={getDevices("audioinput")} advanced={advanced()} />
+				<Video
+					config={video}
+					setConfig={setVideo}
+					devices={getDevices("videoinput")}
+					advanced={advanced()}
+				/>
+				<Audio
+					config={audio}
+					setConfig={setAudio}
+					devices={getDevices("audioinput")}
+					advanced={advanced()}
+				/>
 
 				<div class="col-span-3" />
 
@@ -301,7 +312,11 @@ function Video(props: {
 
 	// Fetch the list of supported codecs.
 	const [supportedCodecs] = createResource(
-		() => ({ height: props.config.height, fps: props.config.fps, bitrate: props.config.bitrate }),
+		() => ({
+			height: props.config.height,
+			fps: props.config.fps,
+			bitrate: props.config.bitrate,
+		}),
 		async (config) => {
 			const isSupported = async (codec: VideoCodec) => {
 				const supported = await VideoEncoder.isSupported({
@@ -358,7 +373,8 @@ function Video(props: {
 	const supportedCodecProfiles = () => {
 		const unique = new Set<string>()
 		for (const supported of supportedCodecs()) {
-			if (supported.name == codec.name && !unique.has(supported.profile)) unique.add(supported.profile)
+			if (supported.name == codec.name && !unique.has(supported.profile))
+				unique.add(supported.profile)
 		}
 		return [...unique]
 	}
@@ -381,7 +397,10 @@ function Video(props: {
 				<For each={[...props.devices]}>
 					{(device) => {
 						return (
-							<option value={device.deviceId} selected={props.config.deviceId === device.deviceId}>
+							<option
+								value={device.deviceId}
+								selected={props.config.deviceId === device.deviceId}
+							>
 								{device.label}
 							</option>
 						)
@@ -498,7 +517,10 @@ function Audio(props: {
 				<For each={props.devices}>
 					{(device) => {
 						return (
-							<option value={device.deviceId} selected={props.config.deviceId === device.deviceId}>
+							<option
+								value={device.deviceId}
+								selected={props.config.deviceId === device.deviceId}
+							>
 								{device.label}
 							</option>
 						)
@@ -518,7 +540,10 @@ function Audio(props: {
 					<For each={AUDIO_CONSTRAINTS.codec}>
 						{(supported) => {
 							return (
-								<option value={supported} selected={supported === props.config.codec}>
+								<option
+									value={supported}
+									selected={supported === props.config.codec}
+								>
 									{supported}
 								</option>
 							)
@@ -534,7 +559,10 @@ function Audio(props: {
 					<For each={AUDIO_CONSTRAINTS.sampleRate}>
 						{(supported) => {
 							return (
-								<option value={supported} selected={supported === props.config.sampleRate}>
+								<option
+									value={supported}
+									selected={supported === props.config.sampleRate}
+								>
 									{supported}hz
 								</option>
 							)
@@ -559,6 +587,3 @@ function Audio(props: {
 		</>
 	)
 }
-
-// We take the client used to create the broadcast so we can create a sharable link
-export function Preview() {}

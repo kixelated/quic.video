@@ -3,19 +3,7 @@ import Link from "next/link"
 import { AnchorHTMLAttributes } from "react"
 
 const MDXLink: React.FC<AnchorHTMLAttributes<HTMLAnchorElement>> = (props) => {
-	// Check if the link is an external link
-	const isExternal =
-		props.href && (props.href.startsWith("http://") || props.href.startsWith("https://"))
-
-	if (isExternal) {
-		return <a {...props} target="_blank" rel="noopener noreferrer" />
-	}
-
-	return (
-		<Link href={props.href || ""}>
-			<a {...props} />
-		</Link>
-	)
+	return <Link href={props.href || ""} {...props}></Link>
 }
 
 // This file is required to use MDX in `app` directory.
