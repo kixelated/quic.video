@@ -4,8 +4,8 @@ module.exports = {
 		"plugin:@typescript-eslint/recommended",
 		"plugin:@typescript-eslint/recommended-requiring-type-checking",
 		"plugin:@typescript-eslint/strict",
+		"plugin:react/recommended",
 		"next/core-web-vitals",
-		"react-app",
 		"prettier",
 	],
 	parser: "@typescript-eslint/parser",
@@ -13,4 +13,15 @@ module.exports = {
 	parserOptions: {
 		project: true,
 	},
+	rules: {
+		// Warn when an unused variable doesn't start with an underscore
+		"@typescript-eslint/no-unused-vars": [
+			"warn",
+			{
+				argsIgnorePattern: "^_",
+				varsIgnorePattern: "^_",
+				caughtErrorsIgnorePattern: "^_",
+			},
+		],
+	}
 }
