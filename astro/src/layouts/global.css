@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	html {
+		@apply bg-slate-900 text-slate-100;
+	}
+
+	a {
+		@apply font-bold text-green-500 hover:cursor-pointer hover:text-green-600;
+	}
+
+	strong {
+		@apply font-bold text-green-500;
+	}
+}

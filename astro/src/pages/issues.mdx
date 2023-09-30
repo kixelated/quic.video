@@ -1,11 +1,16 @@
+---
+layout: ../layouts/markdown.astro
+---
+
+# Issues
+
 Yeah so there's a lot of work to do.
 
 This is an early PoC and hobby project, so expect nothing to work. Check out the Github issues
-([moq-rs](https://github.com/kixelated/moq-rs/issues) and
-[moq-js](https://github.com/kixelated/moq-js/issues)) if you want to contribute or complain; both
-are equally valid.
+for [moq-rs](https://github.com/kixelated/moq-rs/issues) and
+[moq-js](https://github.com/kixelated/moq-js/issues) if you want to contribute or complain.
 
-# Browser Support
+## Browser Support
 
 We're using some pretty new web standards so browser support is limited. Here is a
 non-compreshensive list of the required features from the [caniuse](https://caniuse.com/) database
@@ -15,7 +20,7 @@ The only hard requirement is
 [WebTransport](https://developer.mozilla.org/en-US/docs/Web/API/WebTransport). See the following
 sections for possible alternatives for web playback and web contribution.
 
-# Web Playback
+## Web Playback
 
 [WebCodecs](https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API) decoding is a breeze but
 rendering is a nightmare, as the application is responsible for everything. This includes when to
@@ -32,7 +37,7 @@ previous demo that used this API, but the latency is significantly higher than W
 buffer during starvation. I plan on supporting it again in the future and it works great with Media
 over QUIC as both use fMP4.
 
-# Web Contribution
+## Web Contribution
 
 [WebCodecs](https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API) is great for encoding in
 my relatively limited experience. We may need some more functionality to support conferencing, such
@@ -51,7 +56,7 @@ and
 but these are simple and have not been implemented yet. We have limited control over the browser's
 congestion control which is especially important for live media.
 
-# Congestion Control
+## Congestion Control
 
 -   [moq-rs](https://github.com/kixelated/moq-rs) uses an experimental
     [BBR implementation](https://docs.rs/quinn/latest/quinn/congestion/struct.Bbr.html/)
@@ -65,7 +70,7 @@ more interested in latency, since the encoded bitrate is the limiting factor. Wh
 critical, it's better to drop old media instead of queuing new media, and that's only possible when
 you can detect queuing via congestion control.
 
-## Loss-based
+#### Loss-based
 
 Loss-based congestion control like [New Reno](https://en.wikipedia.org/wiki/TCP_congestion_control)
 (Windows default) and [CUBIC](https://en.wikipedia.org/wiki/CUBIC_TCP) (Linux default) suffer from
@@ -74,7 +79,7 @@ being significantly worse than others. This is also the fundamental issue with R
 on the operating system's TCP congestion control. QUIC libraries can ship their own congestion
 control allowing much faster experimentation and iteration.
 
-## Delay-based
+#### Delay-based
 
 Delay-based congestion control like
 [BBR](https://www.ietf.org/proceedings/97/slides/slides-97-iccrg-bbr-congestion-control-02.pdf) and
@@ -83,7 +88,7 @@ for application-limited environments like live media where we don't fully satura
 Flooding the network with PADDING packets to occasionally saturate the network makes a big
 difference, but is experimental and not yet implemented.
 
-## Jitter-based
+#### Jitter-based
 
 Jitter-based congestion control like
 [GCC](https://datatracker.ietf.org/doc/html/draft-ietf-rmcat-gcc-02) and
@@ -91,12 +96,12 @@ Jitter-based congestion control like
 usage in WebRTC. However, the per-packet feedback required for these algorithms are not available in
 QUIC. We will need a QUIC extension in order to match WebRTC performance and latency.
 
-# Dynamic Bitrate
+## Dynamic Bitrate
 
 An alternative to dropping media is to dynamically adjust the bitrate. The picture quality will
 worsen, but more frames will be delivered, which often results in a better user experience.
 
-## 1:1
+#### 1:1
 
 In 1:1 video conferencing, the media encoding is adjusted in response to viewer feedback. A protocol
 like WebRTC will lower the media bitrate in response to minor congestion and request a new I-frame
@@ -110,7 +115,7 @@ is called [ABR](https://en.wikipedia.org/wiki/Adaptive_bitrate_streaming) in dis
 and [simulcast](https://en.wikipedia.org/wiki/Simulcast) in contribution circles. This is not
 implemented yet either.
 
-# CDNs
+## CDNs
 
 Media over QUIC is designed with relays and CDNs in mind.
 [MoqTransport](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/) is media agnostic and
@@ -120,7 +125,7 @@ still supporting real-time latency budgets.
 ...but we haven't built it yet. You're currently connecting to a single server somewhere in the US,
 so don't expect the best quality. I'm working on it now so expect this section to be updated soon.
 
-# Specification
+## Specification
 
 Media over QUIC is an [IETF working group](https://datatracker.ietf.org/group/moq/about/). The
 [IETF](https://www.ietf.org/) is an open organization that develops Internet standards, including
