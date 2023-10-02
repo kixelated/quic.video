@@ -1,11 +1,14 @@
-// .vscode/settings.json
 {
+	"eslint.validate": [
+		"javascript",
+		"javascriptreact",
+		"astro", // Enable .astro
+		"typescript", // Enable .ts
+		"typescriptreact" // Enable .tsx
+	],
 	"editor.codeActionsOnSave": {
-		"source.fixAll.eslint": true
+		"source.fixAll": true
 	},
 	"editor.formatOnSave": true, // Tell VSCode to format files on save
-	"editor.defaultFormatter": "esbenp.prettier-vscode",
-	"[css]": {
-		"editor.defaultFormatter": "vscode.css-language-features"
-	} // Tell VSCode to use Prettier as default file formatter
+	"editor.defaultFormatter": "esbenp.prettier-vscode"
 }

@@ -1,0 +1,19 @@
+---
+export const prerender = false
+
+const { name, server } = Astro.params
+if (!name || !server) return Astro.redirect("/404")
+
+import Issues from "@/components/issues.astro"
+import Watch from "@/components/watch.tsx"
+import Layout from "@/layouts/global.astro"
+---
+
+<Layout>
+	<Issues />
+
+	<p>
+		Watching a <strong>PUBLIC</strong> broadcast on {server}: {name}.
+	</p>
+	<Watch name={name} server={server} client:load />
+</Layout>
