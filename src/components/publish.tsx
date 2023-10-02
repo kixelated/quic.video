@@ -207,9 +207,6 @@ export default function Publish(props: { server?: string }) {
 		<>
 			<form onSubmit={(e) => e.preventDefault()}>
 				<p>
-					Publish a <strong>PUBLIC</strong> broadcast.
-				</p>
-				<p>
 					<button
 						onClick={(e) => {
 							setAdvanced((toggle) => !toggle)

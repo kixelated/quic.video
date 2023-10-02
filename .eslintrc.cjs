@@ -35,4 +35,10 @@ module.exports = {
 	parserOptions: {
 		project: true,
 	},
+	env: {
+		browser: true,
+		amd: true,
+		node: true,
+	},
+	ignorePatterns: [".eslintrc.cjs", "tailwind.config.cjs", "astro.config.mjs"],
 }
