@@ -63,6 +63,7 @@ module "web_lb" {
 }
 
 
+
 resource "google_compute_region_network_endpoint_group" "web" {
   name                  = "web"
   network_endpoint_type = "SERVERLESS"

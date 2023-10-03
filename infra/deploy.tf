@@ -27,3 +27,14 @@ resource "google_project_iam_member" "deploy_run" {
   role    = "roles/run.admin"
   member  = "serviceAccount:${google_service_account.deploy.email}"
 }
+
+// Allow assuming the cloud run service account
+data "google_service_account" "compute_default" {
+  account_id = "${data.google_project.current.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_service_account_iam_binding" "deploy_run" {
+  service_account_id = data.google_service_account.compute_default.id
+  role               = "roles/iam.serviceAccountUser"
+  members            = ["serviceAccount:${google_service_account.deploy.email}"]
+}

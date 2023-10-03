@@ -46,3 +46,7 @@ resource "google_project_service" "all" {
   disable_dependent_services = false
   disable_on_destroy         = false
 }
+
+data "google_project" "current" {
+  project_id = var.project
+}
