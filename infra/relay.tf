@@ -22,7 +22,7 @@ resource "google_compute_instance" "relay" {
   metadata = {
     # cloud-init template
     user-data = templatefile("${path.module}/relay.yml.tpl", {
-      image = var.image
+      image = "ghcr.io/kixelated/moq-rs:main"
       crt   = acme_certificate.relay.certificate_pem
       key   = acme_certificate.relay.private_key_pem
     })

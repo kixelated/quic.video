@@ -36,6 +36,7 @@ variable "gcp_service_list" {
     "appengine.googleapis.com",
     "iamcredentials.googleapis.com",
     "sourcerepo.googleapis.com",
+    "run.googleapis.com",
   ]
 }
 
