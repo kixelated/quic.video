@@ -38,6 +38,11 @@ write_files:
       RemainAfterExit=true
       ExecStart=iptables -A INPUT -p udp --dport 443 -j ACCEPT
 
+  - path: /etc/docker/daemon.json
+    content: |
+      { "mtu": 1460 }
+
 runcmd:
   - systemctl daemon-reload
+  - systemctl restart docker
   - systemctl start moq-relay

@@ -49,7 +49,12 @@ write_files:
       ExecStop=docker stop moq-pub
       Restart=always
 
+  - path: /etc/docker/daemon.json
+    content: |
+      { "mtu": 1460 }
+
 runcmd:
   - wget http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4 -O /var/moq/source.mp4
   - systemctl daemon-reload
+  - systemctl restart docker
   - systemctl start moq-pub
