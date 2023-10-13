@@ -2,7 +2,7 @@ resource "google_compute_instance" "relay" {
   for_each = local.regions_flat
 
   name         = "relay-${each.key}"
-  machine_type = "t2a-standard-1"
+  machine_type = "t2a-standard-4"
   zone         = each.value.zone
 
   boot_disk {
