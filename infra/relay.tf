@@ -23,7 +23,7 @@ resource "google_compute_instance" "relay" {
     # cloud-init template
     user-data = templatefile("${path.module}/relay.yml.tpl", {
       image = "docker.io/kixelated/moq-rs:latest"
-      crt   = acme_certificate.relay.certificate_pem
+      crt   = "${acme_certificate.relay.certificate_pem}${acme_certificate.relay.issuer_pem}"
       key   = acme_certificate.relay.private_key_pem
       api   = google_cloud_run_v2_service.api.uri
       node  = "https://${each.key}.relay.${var.domain}"
