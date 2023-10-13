@@ -17,7 +17,7 @@ resource "google_compute_instance" "pub" {
     # cloud-init template
     user-data = templatefile("${path.module}/pub.yml.tpl", {
       addr  = "relay.${var.domain}"
-      image = "ghcr.io/kixelated/moq-rs:main"
+      image = "docker.io/kixelated/moq-rs:latest"
     })
   }
 

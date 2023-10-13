@@ -23,7 +23,7 @@ write_files:
       Wants=docker.service allow-quic.service
 
       [Service]
-      ExecStart=docker run --rm --name moq-relay --network="host" -v "/etc/cert:/etc/cert:ro" -e RUST_LOG=info -e RUST_BACKTRACE=1 ${image} moq-relay --bind 0.0.0.0:443 --cert "/etc/cert/crt.pem" --key "/etc/cert/key.pem"
+      ExecStart=docker run --rm --name moq-relay --network="host" -v "/etc/cert:/etc/cert:ro" -e RUST_LOG=info -e RUST_BACKTRACE=1 ${image} moq-relay --listen 0.0.0.0:443 --cert "/etc/cert/crt.pem" --key "/etc/cert/key.pem" --api ${api} --node ${node}
       ExecStop=docker stop moq-relay
 
   - path: /etc/systemd/system/allow-quic.service

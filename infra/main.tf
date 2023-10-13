@@ -37,6 +37,8 @@ variable "gcp_service_list" {
     "iamcredentials.googleapis.com",
     "sourcerepo.googleapis.com",
     "run.googleapis.com",
+    "vpcaccess.googleapis.com",
+    "redis.googleapis.com",
   ]
 }
 

@@ -9,19 +9,6 @@ data "google_compute_network" "default" {
   name = "default"
 }
 
-// Set up a private DNS zone for relays to chat with each other.
-resource "google_dns_managed_zone" "private" {
-  name       = "private"
-  dns_name   = "internal.${var.domain}."
-  visibility = "private"
-
-  private_visibility_config {
-    networks {
-      network_url = data.google_compute_network.default.self_link
-    }
-  }
-}
-
 // Create a managed certificate for the domain.
 resource "google_compute_managed_ssl_certificate" "root" {
   name        = "root"
@@ -53,8 +40,8 @@ resource "acme_registration" "relay" {
 
 resource "acme_certificate" "relay" {
   account_key_pem           = acme_registration.relay.account_key_pem
-  common_name               = "*.relay.${var.domain}"
-  subject_alternative_names = ["*.relay.internal.${var.domain}"]
+  common_name               = "relay.${var.domain}"
+  subject_alternative_names = ["*.relay.${var.domain}"]
   key_type                  = tls_private_key.relay.ecdsa_curve
 
   dns_challenge {

@@ -22,9 +22,11 @@ resource "google_compute_instance" "relay" {
   metadata = {
     # cloud-init template
     user-data = templatefile("${path.module}/relay.yml.tpl", {
-      image = "ghcr.io/kixelated/moq-rs:main"
+      image = "docker.io/kixelated/moq-rs:latest"
       crt   = acme_certificate.relay.certificate_pem
       key   = acme_certificate.relay.private_key_pem
+      api   = google_cloud_run_v2_service.api.uri
+      node  = "https://${each.key}.relay.${var.domain}"
     })
   }
 
@@ -81,16 +83,3 @@ resource "google_compute_http_health_check" "relay" {
   check_interval_sec = 5
   timeout_sec        = 5
 }
-
-/*
-resource "google_dns_record_set" "relay-internal" {
-  for_each = local.regions_flat
-
-  name         = "${each.key}.internal.relay.${var.domain}."
-  type         = "A"
-  ttl          = 300
-  managed_zone = google_dns_managed_zone.private.name
-  rrdatas      = [google_compute_instance.relay[each.key].network_interface[0].network_ip]
-}
-
-*/
