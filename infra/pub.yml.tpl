@@ -45,7 +45,10 @@ write_files:
       Sockets=moq-pipe.socket
       StandardInput=fd:moq-pipe.socket
 
-      ExecStart=docker run --rm --name moq-pub --network="host" -e RUST_LOG=info -e RUST_BACKTRACE=1 ${image} moq-pub "moq://${addr}/BigBuckBunny"
+      ExecStartPre=docker pull ${image}
+      ExecStart=docker run --rm --name moq-pub --network="host" \
+        -e RUST_LOG=info -e RUST_BACKTRACE=1 \
+        ${image} moq-pub "moq://${addr}/BigBuckBunny"
       ExecStop=docker stop moq-pub
       Restart=always
 

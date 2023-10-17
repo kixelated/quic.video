@@ -1,7 +1,9 @@
 resource "google_compute_instance" "relay" {
-  for_each = local.regions_flat
+  for_each = local.nodes
 
-  name         = "relay-${each.key}"
+  name = "relay-${each.key}"
+
+  // https://cloud.google.com/compute/docs/general-purpose-machines#t2a_machine_types
   machine_type = "t2a-standard-4"
   zone         = each.value.zone
 
@@ -22,11 +24,23 @@ resource "google_compute_instance" "relay" {
   metadata = {
     # cloud-init template
     user-data = templatefile("${path.module}/relay.yml.tpl", {
-      image = "docker.io/kixelated/moq-rs:latest"
-      crt   = "${acme_certificate.relay.certificate_pem}${acme_certificate.relay.issuer_pem}"
-      key   = acme_certificate.relay.private_key_pem
-      api   = google_cloud_run_v2_service.api.uri
-      node  = "https://${each.key}.relay.${var.domain}"
+      image = "docker.io/kixelated/moq-rs"
+
+      # Address to an API server to register origins
+      api_url = google_cloud_run_v2_service.api.uri
+
+      # The external address and certs
+      public_host = var.domain
+      public_cert = "${acme_certificate.relay.certificate_pem}${acme_certificate.relay.issuer_pem}"
+      public_key  = acme_certificate.relay.private_key_pem
+
+      # Domain and certs used for internal traffic
+      # We reuse the GCE provided DNS: VM_NAME.ZONE.c.PROJECT_ID.internal
+      # See: https://cloud.google.com/compute/docs/internal-dns
+      internal_host = "relay-${each.key}.${each.value.zone}.c.${var.project}.internal"
+      internal_cert = "${tls_locally_signed_cert.relay_internal[each.key].cert_pem}${tls_self_signed_cert.internal.cert_pem}"
+      internal_key  = tls_private_key.relay_internal[each.key].private_key_pem
+      internal_ca   = tls_self_signed_cert.internal.cert_pem
     })
   }
 
@@ -46,14 +60,14 @@ resource "google_compute_instance" "relay" {
 }
 
 resource "google_compute_address" "relay" {
-  for_each = local.regions_flat
+  for_each = local.nodes
 
   name   = "relay-${each.key}"
   region = each.value.region
 }
 
 resource "google_dns_record_set" "relay" {
-  for_each = local.regions_flat
+  for_each = local.nodes
 
   name         = "${each.key}.relay.${var.domain}."
   type         = "A"
@@ -83,3 +97,52 @@ resource "google_compute_http_health_check" "relay" {
   check_interval_sec = 5
   timeout_sec        = 5
 }
+
+# Create an internal TLS certificate for the relay
+resource "tls_private_key" "relay_internal" {
+  for_each = local.nodes
+
+  algorithm   = "ECDSA"
+  ecdsa_curve = "P256"
+}
+
+resource "tls_cert_request" "relay_internal" {
+  for_each        = local.nodes
+  private_key_pem = tls_private_key.relay_internal[each.key].private_key_pem
+
+  subject {
+    common_name = "relay-${each.key}"
+  }
+
+  # Valid for the default Google DNS entry
+  dns_names = ["relay-${each.key}.${each.value.zone}.c.${var.project}.internal"]
+}
+
+resource "tls_locally_signed_cert" "relay_internal" {
+  for_each = local.nodes
+
+  cert_request_pem   = tls_cert_request.relay_internal[each.key].cert_request_pem
+  ca_private_key_pem = tls_private_key.internal.private_key_pem
+  ca_cert_pem        = tls_self_signed_cert.internal.cert_pem
+
+  validity_period_hours = 8760 # 1 year
+
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth"
+  ]
+}
+
+/*
+resource "google_dns_record_set" "relay_internal" {
+  for_each = local.nodes
+
+  name         = "${each.key}.internal.quic.video."
+  type         = "A"
+  ttl          = 300
+  managed_zone = google_dns_managed_zone.internal.name
+
+  rrdatas = [google_compute_instance.relay[each.key].network_interface.0.access_config.0.nat_ip]
+}
+*/

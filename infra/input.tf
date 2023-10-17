@@ -38,7 +38,7 @@ locals {
     }
   }
 
-  regions_flat = merge([
+  nodes = merge([
     for name, val in local.regions : {
       for i in range(val.count) :
       "${name}-${i}" => {

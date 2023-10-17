@@ -4,11 +4,6 @@ resource "google_dns_managed_zone" "public" {
   dns_name = "${var.domain}."
 }
 
-// Get the default VPC
-data "google_compute_network" "default" {
-  name = "default"
-}
-
 // Create a managed certificate for the domain.
 resource "google_compute_managed_ssl_certificate" "root" {
   name        = "root"
