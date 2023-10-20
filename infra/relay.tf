@@ -4,6 +4,9 @@ resource "google_compute_instance" "relay" {
   name = "relay-${each.key}"
 
   // https://cloud.google.com/compute/docs/general-purpose-machines#t2a_machine_types
+  // The relay uses virtually no CPU, so we can use a cheap ARM host.
+  // We should increase the instance size until network is the bottleneck.
+  // Then we scale out to more instances instead.
   machine_type = "t2a-standard-1"
   zone         = each.value.zone
 

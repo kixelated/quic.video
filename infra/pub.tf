@@ -1,5 +1,8 @@
 resource "google_compute_instance" "pub" {
-  name         = "pub-${var.region}"
+  name = "pub-${var.region}"
+
+  // https://cloud.google.com/compute/docs/general-purpose-machines#t2a_machine_types
+  // I picked a new/cheap ARM host with a beefy single core.
   machine_type = "t2a-standard-1"
   zone         = var.zone
 
