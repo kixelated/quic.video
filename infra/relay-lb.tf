@@ -1,4 +1,4 @@
-# Geo DNS
+# Global Geo DNS, routing to the closest region.
 resource "google_dns_record_set" "relay_global" {
   name         = "relay.${var.domain}."
   type         = "A"
@@ -20,7 +20,7 @@ resource "google_dns_record_set" "relay_global" {
   }
 }
 
-# Regional DNS if that's not working
+# Regional DNS
 resource "google_dns_record_set" "relay_region" {
   for_each = local.regions
 
@@ -36,6 +36,7 @@ resource "google_dns_record_set" "relay_region" {
 
 # Unfortunately GCP doesn't support global UDP load balancing despite their marketing.
 # oof there goes a few hours; here's my progress for posterity:
+# TODO We could still use this for regional load balancing.
 
 /*
 # Get a domain name for the anycast address.

@@ -11,13 +11,20 @@ resource "google_compute_instance" "pub" {
 
   network_interface {
     network = "default"
+
+    # Give the instance a public IP address so it can download from the internet.
+    # If we add more instances, it's probably cheaper to set up a NAT instead.
+    access_config {
+      nat_ip       = google_compute_address.pub.address
+      network_tier = "STANDARD"
+    }
   }
 
   metadata = {
     # cloud-init template
     user-data = templatefile("${path.module}/pub.yml.tpl", {
       addr  = "relay.${var.domain}"
-      image = "docker.io/kixelated/moq-rs"
+      image = "docker.io/kixelated/moq-pub"
     })
   }
 
@@ -31,4 +38,12 @@ resource "google_compute_instance" "pub" {
   }
 
   allow_stopping_for_update = true
+}
+
+# Create an IP address just so we can access the internet without a NAT.
+resource "google_compute_address" "pub" {
+  name         = "pub"
+  region       = var.region
+  address_type = "EXTERNAL"
+  network_tier = "STANDARD"
 }

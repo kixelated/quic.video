@@ -1,25 +1,5 @@
-// Create an interal DNS zone and use self-signed certificates
-// This way we can ensure that instances talk to each other within network and over TLS
-// It's not recommended to use terraform for this, but who cares.
-
-/*
-data "google_compute_network" "default" {
-  name = "default"
-}
-
-// Create a DNS zone for private IPs
-resource "google_dns_managed_zone" "internal" {
-  name       = "internal"
-  dns_name   = "internal.${var.domain}."
-  visibility = "private"
-
-  private_visibility_config {
-    networks {
-      network_url = data.google_compute_network.default.self_link
-    }
-  }
-}
-*/
+// Create a root CA to use for all internal traffic.
+// This doesn't need to be secure, but it's required for QUIC.
 
 resource "tls_private_key" "internal" {
   algorithm   = "ECDSA"

@@ -4,7 +4,7 @@ resource "google_compute_instance" "relay" {
   name = "relay-${each.key}"
 
   // https://cloud.google.com/compute/docs/general-purpose-machines#t2a_machine_types
-  machine_type = "t2a-standard-4"
+  machine_type = "t2a-standard-1"
   zone         = each.value.zone
 
   boot_disk {
@@ -66,6 +66,7 @@ resource "google_compute_address" "relay" {
   region = each.value.region
 }
 
+# Create a DNS entry for each node.
 resource "google_dns_record_set" "relay" {
   for_each = local.nodes
 
@@ -133,16 +134,3 @@ resource "tls_locally_signed_cert" "relay_internal" {
     "server_auth"
   ]
 }
-
-/*
-resource "google_dns_record_set" "relay_internal" {
-  for_each = local.nodes
-
-  name         = "${each.key}.internal.quic.video."
-  type         = "A"
-  ttl          = 300
-  managed_zone = google_dns_managed_zone.internal.name
-
-  rrdatas = [google_compute_instance.relay[each.key].network_interface.0.access_config.0.nat_ip]
-}
-*/
