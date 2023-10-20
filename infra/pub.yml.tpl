@@ -16,7 +16,12 @@ write_files:
         -e RUST_LOG=info -e RUST_BACKTRACE=1 \
         ${image}
       ExecStop=docker stop moq-pub
+
+      # Take longer and longer to restart the process.
       Restart=always
+      RestartSec=10s
+      RestartSteps=6
+      RestartMaxDelaySec=1m
 
   - path: /etc/docker/daemon.json
     content: |
