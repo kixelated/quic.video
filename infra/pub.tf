@@ -26,8 +26,9 @@ resource "google_compute_instance" "pub" {
   metadata = {
     # cloud-init template
     user-data = templatefile("${path.module}/pub.yml.tpl", {
-      addr  = "relay.${var.domain}"
-      image = "docker.io/kixelated/moq-pub"
+      addr   = "relay.${var.domain}"
+      image  = "docker.io/kixelated/moq-pub"
+      region = var.region
     })
   }
 

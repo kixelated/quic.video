@@ -14,6 +14,7 @@ write_files:
       ExecStartPre=docker pull ${image}
       ExecStart=docker run --rm --name moq-pub --network="host" \
         -e RUST_LOG=info -e RUST_BACKTRACE=1 \
+        -e REGION=${region} \
         ${image}
       ExecStop=docker stop moq-pub
 
