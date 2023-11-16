@@ -14,9 +14,9 @@ find_command() {
 }
 
 # Find the first available command among podman and docker
-# Originally, depot was on the list but it doesn't seem to play nicely with pushing via podman?
+# Originally, depot was on the list but it doesn't seem to play nicely with auth?
 CMD=$(find_command podman docker)
 
 # Build with arm/amd and push.
-$CMD build --platform linux/arm64,linux/amd64 -t kixelated/moq-pub .
-$CMD push kixelated/moq-pub
+${CMD} buildx build --platform linux/arm64,linux/amd64 -t docker.io/kixelated/moq-pub .
+${CMD} push docker.io/kixelated/moq-pub

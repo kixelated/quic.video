@@ -32,7 +32,7 @@ ffmpeg \
 	-v quiet \
 	-re \
     -i "${NAME}.mp4" \
-	-vf "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf:text='${REGION}: %{gmtime\: %H\\\\\:%M\\\\\:%S.%3N}':x=(W-tw)-24:y=24:fontsize=48:fontcolor=white:box=1:boxcolor=black@0.5" \
+	-vf "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf:text='${REGION}\: %{gmtime\: %H\\\\\:%M\\\\\:%S.%3N}':x=(W-tw)-24:y=24:fontsize=48:fontcolor=white:box=1:boxcolor=black@0.5" \
 	-an \
 	-b:v 3M \
 	-preset ultrafast \
