@@ -13,9 +13,31 @@ write_files:
       [Service]
       ExecStartPre=docker pull ${image}
       ExecStart=docker run --rm --name moq-pub --network="host" \
-        -e RUST_LOG=info -e RUST_BACKTRACE=1 \
+        -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
         ${image}
       ExecStop=docker stop moq-pub
+
+      # Take longer and longer to restart the process.
+      Restart=always
+      RestartSec=10s
+      RestartSteps=6
+      RestartMaxDelaySec=1m
+
+  - path: /etc/systemd/system/moq-clock.service
+    permissions: 0644
+    owner: root
+    content: |
+      [Unit]
+      Description=Run moq-clock via docker
+      Requires=docker.service
+      After=docker.service
+
+      [Service]
+      ExecStartPre=docker pull ${image}
+      ExecStart=docker run --rm --name moq-clock --network="host" \
+        -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
+        ${image} moq-clock --publish "https://relay.quic.video/clock"
+      ExecStop=docker stop moq-clock
 
       # Take longer and longer to restart the process.
       Restart=always
@@ -30,4 +52,4 @@ write_files:
 runcmd:
   - systemctl daemon-reload
   - systemctl restart docker
-  - systemctl start moq-pub
+  - systemctl start moq-pub moq-clock
