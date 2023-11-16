@@ -51,7 +51,7 @@ write_files:
       ExecStartPre=docker pull ${image}
       ExecStart=docker run --rm --name moq-relay --network="host" \
         -v "/etc/cert:/etc/cert:ro" \
-        -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
+        -e RUST_LOG=info -e RUST_BACKTRACE=1 \
         ${image} moq-relay --listen 0.0.0.0:443 \
         --tls-cert "/etc/cert/${internal_host}.crt" --tls-key "/etc/cert/${internal_host}.key" \
         --tls-cert "/etc/cert/${public_host}.crt" --tls-key "/etc/cert/${public_host}.key" \

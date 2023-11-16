@@ -13,7 +13,7 @@ write_files:
       [Service]
       ExecStartPre=docker pull ${image}
       ExecStart=docker run --rm --name moq-pub --network="host" \
-        -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
+        -e RUST_LOG=info -e RUST_BACKTRACE=1 \
         ${image}
       ExecStop=docker stop moq-pub
 
@@ -35,7 +35,7 @@ write_files:
       [Service]
       ExecStartPre=docker pull ${image}
       ExecStart=docker run --rm --name moq-clock --network="host" \
-        -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
+        -e RUST_LOG=info -e RUST_BACKTRACE=1 \
         ${image} moq-clock --publish "https://relay.quic.video/clock"
       ExecStop=docker stop moq-clock
 
