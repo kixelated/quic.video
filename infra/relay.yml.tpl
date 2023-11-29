@@ -48,6 +48,8 @@ write_files:
       Wants=docker.service allow-quic.service
 
       [Service]
+      Restart=on-failure
+      RestartSec=5s
       ExecStartPre=docker pull ${image}
       ExecStart=docker run --rm --name moq-relay --network="host" \
         -v "/etc/cert:/etc/cert:ro" \
