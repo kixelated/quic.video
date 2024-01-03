@@ -39,6 +39,8 @@ resource "acme_certificate" "relay" {
   subject_alternative_names = ["*.relay.${var.domain}"]
   key_type                  = tls_private_key.relay.ecdsa_curve
 
+  recursive_nameservers = ["8.8.8.8:53"]
+
   dns_challenge {
     provider = "gcloud"
 
