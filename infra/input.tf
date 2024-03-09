@@ -18,33 +18,38 @@ variable "domain" {
   description = "domain name"
 }
 
+variable "commit" {
+  type        = bool
+  description = "use a one-year usage commit"
+  default     = false
+}
+
 # Too complicated to specify via flags, so do it here.
 locals {
-  regions = {
+  relays = {
     us-central = { # Iowa
-      region = "us-central1"
-      zone   = "us-central1-a",
-      count  = 1
+      region  = "us-central1"
+      zone    = "us-central1-a",
+      machine = "t2d-standard-1",
+      cpu     = 1,
+      memory  = 4,
+      commit  = var.commit,
     },
     europe-west = { # Netherlands
-      region = "europe-west4",
-      zone   = "europe-west4-b",
-      count  = 1
+      region  = "europe-west4",
+      zone    = "europe-west4-b",
+      machine = "t2d-standard-1",
+      cpu     = 1,
+      memory  = 4,
+      commit  = var.commit,
     },
     asia-southeast = { # Singapore
-      region = "asia-southeast1",
-      zone   = "asia-southeast1-c", // T2A not available in -a
-      count  = 1
+      region  = "asia-southeast1",
+      zone    = "asia-southeast1-c",
+      machine = "t2d-standard-1",
+      cpu     = 1,
+      memory  = 4,
+      commit  = var.commit,
     }
   }
-
-  nodes = merge([
-    for name, val in local.regions : {
-      for i in range(val.count) :
-      "${name}-${i}" => {
-        region = val.region,
-        zone   = val.zone,
-      }
-    }
-  ]...)
 }

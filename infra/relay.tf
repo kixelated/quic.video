@@ -1,5 +1,5 @@
 resource "google_compute_instance" "relay" {
-  for_each = local.nodes
+  for_each = local.relays
 
   name = "relay-${each.key}"
 
@@ -7,7 +7,7 @@ resource "google_compute_instance" "relay" {
   // The relay uses virtually no CPU, so we can use a cheap ARM host.
   // We should increase the instance size until network is the bottleneck.
   // Then we scale out to more instances instead.
-  machine_type = "t2a-standard-1"
+  machine_type = each.value.machine
   zone         = each.value.zone
 
   boot_disk {
@@ -56,14 +56,14 @@ resource "google_compute_instance" "relay" {
 
   lifecycle {
     # There seems to be a terraform bug causing this to be recreated on every apply
-    ignore_changes = [boot_disk]
+    # ignore_changes = [boot_disk]
   }
 
   allow_stopping_for_update = true
 }
 
 resource "google_compute_address" "relay" {
-  for_each = local.nodes
+  for_each = local.relays
 
   name   = "relay-${each.key}"
   region = each.value.region
@@ -71,7 +71,7 @@ resource "google_compute_address" "relay" {
 
 # Create a DNS entry for each node.
 resource "google_dns_record_set" "relay" {
-  for_each = local.nodes
+  for_each = local.relays
 
   name         = "${each.key}.relay.${var.domain}."
   type         = "A"
@@ -104,14 +104,14 @@ resource "google_compute_http_health_check" "relay" {
 
 # Create an internal TLS certificate for the relay
 resource "tls_private_key" "relay_internal" {
-  for_each = local.nodes
+  for_each = local.relays
 
   algorithm   = "ECDSA"
   ecdsa_curve = "P256"
 }
 
 resource "tls_cert_request" "relay_internal" {
-  for_each        = local.nodes
+  for_each        = local.relays
   private_key_pem = tls_private_key.relay_internal[each.key].private_key_pem
 
   subject {
@@ -123,7 +123,7 @@ resource "tls_cert_request" "relay_internal" {
 }
 
 resource "tls_locally_signed_cert" "relay_internal" {
-  for_each = local.nodes
+  for_each = local.relays
 
   cert_request_pem   = tls_cert_request.relay_internal[each.key].cert_request_pem
   ca_private_key_pem = tls_private_key.internal.private_key_pem
@@ -136,4 +136,20 @@ resource "tls_locally_signed_cert" "relay_internal" {
     "digital_signature",
     "server_auth"
   ]
+}
+
+resource "google_compute_region_commitment" "relay" {
+  for_each = { for k, v in local.relays : k => v if v.commit }
+  name     = "relay-${each.key}"
+  region   = each.value.region
+
+  plan = "TWELVE_MONTH"
+  resources {
+    type   = "VCPU"
+    amount = each.value.cpu
+  }
+  resources {
+    type   = "MEMORY"
+    amount = each.value.memory
+  }
 }

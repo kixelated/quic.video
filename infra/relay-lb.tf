@@ -7,31 +7,16 @@ resource "google_dns_record_set" "relay_global" {
 
   routing_policy {
     dynamic "geo" {
-      for_each = local.regions
+      for_each = local.relays
 
       content {
         location = geo.value.region
         rrdatas = [
-          for idx in range(geo.value.count) :
-          google_compute_address.relay["${geo.key}-${idx}"].address
+          google_compute_address.relay[geo.key].address
         ]
       }
     }
   }
-}
-
-# Regional DNS
-resource "google_dns_record_set" "relay_region" {
-  for_each = local.regions
-
-  name         = "${each.key}.relay.${var.domain}."
-  type         = "A"
-  ttl          = 60
-  managed_zone = google_dns_managed_zone.public.name
-  rrdatas = [
-    for idx in range(each.value.count) :
-    google_compute_address.relay["${each.key}-${idx}"].address
-  ]
 }
 
 # Unfortunately GCP doesn't support global UDP load balancing despite their marketing.
