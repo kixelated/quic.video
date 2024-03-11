@@ -50,8 +50,8 @@ write_files:
       [Service]
       Restart=on-failure
       RestartSec=5s
-      ExecStartPre=docker pull ${image}
       ExecStart=docker run --rm --name moq-relay --network="host" \
+        --pull=always \
         -v "/etc/cert:/etc/cert:ro" \
         -e RUST_LOG=info -e RUST_BACKTRACE=1 \
         ${image} moq-relay --listen 0.0.0.0:443 \
@@ -78,6 +78,15 @@ write_files:
   - path: /etc/docker/daemon.json
     content: |
       { "mtu": 1460 }
+
+  # Clear out the logs after a week
+  - path: /etc/systemd/journald.conf
+    content: |
+      [Journal]
+      SystemMaxUse=500M
+      SystemKeepFree=1G
+      MaxFileSec=1week
+      MaxRetentionSec=4weeks
 
 runcmd:
   - systemctl daemon-reload

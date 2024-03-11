@@ -11,8 +11,8 @@ write_files:
       After=docker.service
 
       [Service]
-      ExecStartPre=docker pull ${image}
       ExecStart=docker run --rm --name moq-pub --network="host" \
+        --pull=always \
         -e RUST_LOG=info -e RUST_BACKTRACE=1 \
         -e REGION=${region} \
         ${image}
@@ -49,6 +49,14 @@ write_files:
   - path: /etc/docker/daemon.json
     content: |
       { "mtu": 1460 }
+
+  - path: /etc/systemd/journald.conf
+    content: |
+      [Journal]
+      SystemMaxUse=500M
+      SystemKeepFree=1G
+      MaxFileSec=1week
+      MaxRetentionSec=4weeks
 
 runcmd:
   - systemctl daemon-reload

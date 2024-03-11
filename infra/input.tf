@@ -24,6 +24,16 @@ variable "commit" {
   default     = false
 }
 
+variable "image_pub" {
+  description = "moq-pub image"
+  default     = "docker.io/kixelated/moq-pub"
+}
+
+variable "image_relay" {
+  description = "moq-relay image"
+  default     = "docker.io/kixelated/moq-rs"
+}
+
 # Too complicated to specify via flags, so do it here.
 locals {
   relays = {
@@ -31,25 +41,37 @@ locals {
       region  = "us-central1"
       zone    = "us-central1-a",
       machine = "t2d-standard-1",
-      cpu     = 1,
-      memory  = 4,
-      commit  = var.commit,
+      commit = var.commit ? {
+        cpu    = 1,
+        memory = 4,
+      } : null,
     },
     europe-west = { # Netherlands
       region  = "europe-west4",
       zone    = "europe-west4-b",
       machine = "t2d-standard-1",
-      cpu     = 1,
-      memory  = 4,
-      commit  = var.commit,
+      commit = var.commit ? {
+        cpu    = 1,
+        memory = 4,
+      } : null,
     },
     asia-southeast = { # Singapore
       region  = "asia-southeast1",
       zone    = "asia-southeast1-c",
       machine = "t2d-standard-1",
-      cpu     = 1,
-      memory  = 4,
-      commit  = var.commit,
+      commit = var.commit ? {
+        cpu    = 1,
+        memory = 4,
+      } : null,
     }
+  }
+  pub = {
+    region  = "us-central1"
+    zone    = "us-central1-f",
+    machine = "t2d-standard-1",
+    commit = var.commit ? {
+      cpu    = 1,
+      memory = 4,
+    } : null,
   }
 }

@@ -1,14 +1,12 @@
 resource "google_compute_instance" "pub" {
-  name = "pub-${var.region}"
+  name = "pub-${local.pub.region}"
 
-  // https://cloud.google.com/compute/docs/general-purpose-machines#t2a_machine_types
-  // I picked a new/cheap ARM host with a beefy single core.
-  machine_type = "t2a-standard-1"
-  zone         = var.zone
+  machine_type = local.pub.machine
+  zone         = local.pub.zone
 
   boot_disk {
     initialize_params {
-      image = "cos-cloud/cos-arm64-stable"
+      image = "cos-cloud/cos-stable"
     }
   }
 
@@ -27,8 +25,8 @@ resource "google_compute_instance" "pub" {
     # cloud-init template
     user-data = templatefile("${path.module}/pub.yml.tpl", {
       addr   = "relay.${var.domain}"
-      image  = "docker.io/kixelated/moq-pub"
-      region = var.region
+      image  = var.image_pub
+      region = local.pub.region
     })
   }
 
@@ -46,8 +44,24 @@ resource "google_compute_instance" "pub" {
 
 # Create an IP address just so we can access the internet without a NAT.
 resource "google_compute_address" "pub" {
-  name         = "pub"
-  region       = var.region
+  name         = "pub-${local.pub.region}"
+  region       = local.pub.region
   address_type = "EXTERNAL"
   network_tier = "STANDARD"
+}
+
+resource "google_compute_region_commitment" "pub" {
+  count  = local.pub.commit != null ? 1 : 0
+  name   = "pub"
+  region = local.pub.region
+
+  plan = "TWELVE_MONTH"
+  resources {
+    type   = "VCPU"
+    amount = local.pub.commit.cpu
+  }
+  resources {
+    type   = "MEMORY"
+    amount = local.pub.commit.memory
+  }
 }

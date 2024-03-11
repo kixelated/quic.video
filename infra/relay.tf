@@ -12,7 +12,7 @@ resource "google_compute_instance" "relay" {
 
   boot_disk {
     initialize_params {
-      image = "cos-cloud/cos-arm64-stable"
+      image = "cos-cloud/cos-stable"
     }
   }
 
@@ -27,7 +27,7 @@ resource "google_compute_instance" "relay" {
   metadata = {
     # cloud-init template
     user-data = templatefile("${path.module}/relay.yml.tpl", {
-      image = "docker.io/kixelated/moq-rs"
+      image = var.image_relay
 
       # Address to an API server to register origins
       api_url = google_cloud_run_v2_service.api.uri
@@ -56,7 +56,7 @@ resource "google_compute_instance" "relay" {
 
   lifecycle {
     # There seems to be a terraform bug causing this to be recreated on every apply
-    # ignore_changes = [boot_disk]
+    ignore_changes = [boot_disk]
   }
 
   allow_stopping_for_update = true
@@ -139,17 +139,17 @@ resource "tls_locally_signed_cert" "relay_internal" {
 }
 
 resource "google_compute_region_commitment" "relay" {
-  for_each = { for k, v in local.relays : k => v if v.commit }
+  for_each = { for k, v in local.relays : k => v if v.commit != null }
   name     = "relay-${each.key}"
   region   = each.value.region
 
   plan = "TWELVE_MONTH"
   resources {
     type   = "VCPU"
-    amount = each.value.cpu
+    amount = each.value.commit.cpu
   }
   resources {
     type   = "MEMORY"
-    amount = each.value.memory
+    amount = each.value.commit.memory
   }
 }
