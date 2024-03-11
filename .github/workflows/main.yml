@@ -37,6 +37,6 @@ jobs:
       - uses: depot/build-push-action@v1
         with:
           project: 8x4wtxrh2t
-          context: .
+          context: pub
           push: true
           tags: ${{env.REGISTRY}}/${{env.IMAGE}}
