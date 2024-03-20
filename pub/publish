@@ -39,4 +39,4 @@ ffmpeg \
 	-tune zerolatency \
     -f mp4 \
 	-movflags empty_moov+frag_every_frame+separate_moof+omit_tfhd_offset \
-	- | moq-pub "${ADDR}/${NAME}"
+	- | moq-pub "${ADDR}" --name "${NAME}"
