@@ -1,5 +1,5 @@
 # draft-03
-FROM kixelated/moq-rs@sha256:82720ba9e5c384f69f5749d65814ae108e6bb3d6fbf3305c8c9dbb36738a8f6f
+FROM kixelated/moq-rs@sha256:360d904e16935a884731acac4b1aa840504ad51250965e47b3892f4bbe27021b
 
 # Install required utilities and ffmpeg
 RUN apt-get update && \
