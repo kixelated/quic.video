@@ -11,9 +11,12 @@ write_files:
       After=docker.service
 
       [Service]
-      ExecStart=docker run --rm --name moq-pub --network="host" \
+      ExecStart=docker run --rm \
+        --name moq-pub \
+        --network="host" \
         --pull=always \
-        -e RUST_LOG=info -e RUST_BACKTRACE=1 \
+        --cap-add=SYS_PTRACE \
+        -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
         -e REGION=${region} \
         ${image}
       ExecStop=docker stop moq-pub
@@ -34,8 +37,11 @@ write_files:
       After=docker.service
 
       [Service]
-      ExecStartPre=docker pull ${image}
-      ExecStart=docker run --rm --name moq-clock --network="host" \
+      ExecStart=docker run --rm \
+        --name moq-clock \
+        --network="host" \
+        --pull=always \
+        --cap-add=SYS_PTRACE \
         -e RUST_LOG=info -e RUST_BACKTRACE=1 \
         ${image} moq-clock --publish "https://relay.quic.video/clock"
       ExecStop=docker stop moq-clock
@@ -55,8 +61,8 @@ write_files:
       [Journal]
       SystemMaxUse=500M
       SystemKeepFree=1G
-      MaxFileSec=1week
-      MaxRetentionSec=4weeks
+      MaxFileSec=1day
+      MaxRetentionSec=1week
 
 runcmd:
   - systemctl daemon-reload

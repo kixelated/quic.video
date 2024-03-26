@@ -50,10 +50,13 @@ write_files:
       [Service]
       Restart=on-failure
       RestartSec=5s
-      ExecStart=docker run --rm --name moq-relay --network="host" \
+      ExecStart=docker run --rm \
+        --name moq-relay \
+        --network="host" \
         --pull=always \
+        --cap-add=SYS_PTRACE \
         -v "/etc/cert:/etc/cert:ro" \
-        -e RUST_LOG=info -e RUST_BACKTRACE=1 \
+        -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
         ${image} moq-relay --listen 0.0.0.0:443 \
         --tls-cert "/etc/cert/${internal_host}.crt" --tls-key "/etc/cert/${internal_host}.key" \
         --tls-cert "/etc/cert/${public_host}.crt" --tls-key "/etc/cert/${public_host}.key" \
@@ -85,8 +88,8 @@ write_files:
       [Journal]
       SystemMaxUse=500M
       SystemKeepFree=1G
-      MaxFileSec=1week
-      MaxRetentionSec=4weeks
+      MaxFileSec=1day
+      MaxRetentionSec=1week
 
 runcmd:
   - systemctl daemon-reload
