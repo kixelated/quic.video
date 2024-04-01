@@ -46,7 +46,6 @@ locals {
         memory = 4,
       } : null,
     },
-/*
     europe-west = { # Netherlands
       region  = "europe-west4",
       zone    = "europe-west4-b",
@@ -65,7 +64,6 @@ locals {
         memory = 4,
       } : null,
     }
-*/
   }
   pub = {
     region  = "us-central1"
