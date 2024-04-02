@@ -1,4 +1,3 @@
-# draft-03
 FROM kixelated/moq-rs@sha256:f8abcef43f43b250b0c7e8bd64bb0bdc383e35749e342fcb477af6afb8cc6456
 
 # Install required utilities and ffmpeg

@@ -24,8 +24,6 @@ write_files:
       # Take longer and longer to restart the process.
       Restart=always
       RestartSec=10s
-      RestartSteps=6
-      RestartMaxDelaySec=1m
 
   - path: /etc/systemd/system/moq-clock.service
     permissions: 0644
