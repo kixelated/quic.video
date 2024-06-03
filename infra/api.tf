@@ -8,7 +8,7 @@ resource "google_cloud_run_v2_service" "api" {
     containers {
       image   = "docker.io/kixelated/moq-rs"
       command = ["moq-api"]
-      args    = ["--listen", "0.0.0.0:8080", "--redis", "redis://${google_redis_instance.api.host}:${google_redis_instance.api.port}"]
+      args    = ["--bind", "0.0.0.0:8080", "--redis", "redis://${google_redis_instance.api.host}:${google_redis_instance.api.port}"]
 
       ports {
         container_port = 8080

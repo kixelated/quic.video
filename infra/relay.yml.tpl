@@ -57,11 +57,11 @@ write_files:
         --cap-add=SYS_PTRACE \
         -v "/etc/cert:/etc/cert:ro" \
         -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
-        ${image} moq-relay --listen 0.0.0.0:443 \
+        ${image} moq-relay --bind 0.0.0.0:443 \
         --tls-cert "/etc/cert/${internal_host}.crt" --tls-key "/etc/cert/${internal_host}.key" \
         --tls-cert "/etc/cert/${public_host}.crt" --tls-key "/etc/cert/${public_host}.key" \
         --tls-root "/etc/cert/internal.ca" \
-        --api "${api_url}" --api-node "https://${internal_host}"
+        --api "${api_url}" --node "https://${internal_host}"
       ExecStop=docker stop moq-relay
 
   # GCP configures a firewall by default that blocks all UDP traffic
