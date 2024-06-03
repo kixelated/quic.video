@@ -18,12 +18,6 @@ variable "domain" {
   description = "domain name"
 }
 
-variable "commit" {
-  type        = bool
-  description = "use a one-year usage commit"
-  default     = false
-}
-
 variable "image_pub" {
   description = "moq-pub image"
   default     = "docker.io/kixelated/moq-pub"
@@ -40,38 +34,26 @@ locals {
     us-central = { # Iowa
       region  = "us-central1"
       zone    = "us-central1-a",
-      machine = "t2d-standard-1",
-      commit = var.commit ? {
-        cpu    = 1,
-        memory = 4,
-      } : null,
+      machine = "t2a-standard-1",
+      image   = "cos-cloud/cos-arm64-stable",
     },
     europe-west = { # Netherlands
       region  = "europe-west4",
       zone    = "europe-west4-b",
-      machine = "t2d-standard-1",
-      commit = var.commit ? {
-        cpu    = 1,
-        memory = 4,
-      } : null,
+      machine = "t2a-standard-1",
+      image   = "cos-cloud/cos-arm64-stable",
     },
     asia-southeast = { # Singapore
       region  = "asia-southeast1",
       zone    = "asia-southeast1-c",
-      machine = "t2d-standard-1",
-      commit = var.commit ? {
-        cpu    = 1,
-        memory = 4,
-      } : null,
+      machine = "t2a-standard-1",
+      image   = "cos-cloud/cos-arm64-stable",
     }
   }
   pub = {
     region  = "us-central1"
     zone    = "us-central1-f",
-    machine = "t2d-standard-1",
-    commit = var.commit ? {
-      cpu    = 1,
-      memory = 4,
-    } : null,
+    machine = "t2a-standard-1",
+    image   = "cos-cloud/cos-arm64-stable",
   }
 }

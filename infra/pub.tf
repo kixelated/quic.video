@@ -6,7 +6,7 @@ resource "google_compute_instance" "pub" {
 
   boot_disk {
     initialize_params {
-      image = "cos-cloud/cos-stable"
+      image = local.pub.image
     }
   }
 
@@ -48,20 +48,4 @@ resource "google_compute_address" "pub" {
   region       = local.pub.region
   address_type = "EXTERNAL"
   network_tier = "STANDARD"
-}
-
-resource "google_compute_region_commitment" "pub" {
-  count  = local.pub.commit != null ? 1 : 0
-  name   = "pub"
-  region = local.pub.region
-
-  plan = "TWELVE_MONTH"
-  resources {
-    type   = "VCPU"
-    amount = local.pub.commit.cpu
-  }
-  resources {
-    type   = "MEMORY"
-    amount = local.pub.commit.memory
-  }
 }

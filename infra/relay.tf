@@ -12,7 +12,7 @@ resource "google_compute_instance" "relay" {
 
   boot_disk {
     initialize_params {
-      image = "cos-cloud/cos-stable"
+      image = each.value.image
     }
   }
 
@@ -136,20 +136,4 @@ resource "tls_locally_signed_cert" "relay_internal" {
     "digital_signature",
     "server_auth"
   ]
-}
-
-resource "google_compute_region_commitment" "relay" {
-  for_each = { for k, v in local.relays : k => v if v.commit != null }
-  name     = "relay-${each.key}"
-  region   = each.value.region
-
-  plan = "TWELVE_MONTH"
-  resources {
-    type   = "VCPU"
-    amount = each.value.commit.cpu
-  }
-  resources {
-    type   = "MEMORY"
-    amount = each.value.commit.memory
-  }
 }
