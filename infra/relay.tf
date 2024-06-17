@@ -56,7 +56,7 @@ resource "google_compute_instance" "relay" {
 
   lifecycle {
     # There seems to be a terraform bug causing this to be recreated on every apply
-    ignore_changes = [boot_disk]
+    # ignore_changes = [boot_disk]
   }
 
   allow_stopping_for_update = true
