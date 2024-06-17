@@ -34,26 +34,26 @@ locals {
     us-central = { # Iowa
       region  = "us-central1"
       zone    = "us-central1-a",
-      machine = "t2a-standard-1",
-      image   = "cos-cloud/cos-arm64-stable",
+      machine = "t2d-standard-1",
+      image   = "cos-cloud/cos-stable",
     },
     europe-west = { # Netherlands
       region  = "europe-west4",
       zone    = "europe-west4-b",
-      machine = "t2a-standard-1",
-      image   = "cos-cloud/cos-arm64-stable",
+      machine = "t2d-standard-1",
+      image   = "cos-cloud/cos-stable",
     },
     asia-southeast = { # Singapore
       region  = "asia-southeast1",
       zone    = "asia-southeast1-c",
-      machine = "t2a-standard-1",
-      image   = "cos-cloud/cos-arm64-stable",
+      machine = "t2d-standard-1",
+      image   = "cos-cloud/cos-stable",
     }
   }
   pub = {
     region  = "us-central1"
     zone    = "us-central1-f",
-    machine = "t2a-standard-1",
-    image   = "cos-cloud/cos-arm64-stable",
+    machine = "t2d-standard-1",
+    image   = "cos-cloud/cos-stable",
   }
 }
