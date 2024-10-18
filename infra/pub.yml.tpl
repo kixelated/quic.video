@@ -12,7 +12,7 @@ write_files:
 
       [Service]
       ExecStart=docker run --rm \
-        --name moq-pub \
+        --name moq-karp \
         --network="host" \
         --pull=always \
         --cap-add=SYS_PTRACE \

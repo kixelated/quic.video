@@ -16,14 +16,14 @@ write_files:
     owner: root
 
   # Write the internal certificate to disk
-  - path: /etc/cert/${internal_host}.crt
+  - path: /etc/cert/${cluster_node}.crt
     content: |
       ${indent(6, internal_cert)}
     permissions: "0644"
     owner: root
 
   # Write the internal private key to disk
-  - path: /etc/cert/${internal_host}.key
+  - path: /etc/cert/${cluster_node}.key
     content: |
       ${indent(6, internal_key)}
     permissions: "0600"
@@ -58,10 +58,11 @@ write_files:
         -v "/etc/cert:/etc/cert:ro" \
         -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
         ${image} moq-relay --bind 0.0.0.0:443 \
-        --tls-cert "/etc/cert/${internal_host}.crt" --tls-key "/etc/cert/${internal_host}.key" \
+        --tls-cert "/etc/cert/${cluster_node}.crt" --tls-key "/etc/cert/${cluster_node}.key" \
         --tls-cert "/etc/cert/${public_host}.crt" --tls-key "/etc/cert/${public_host}.key" \
         --tls-root "/etc/cert/internal.ca" \
-        --api "${api_url}" --node "https://${internal_host}"
+        --cluster-root "${cluster_root}" \
+        --cluster-node "${cluster_node}"
       ExecStop=docker stop moq-relay
 
   # GCP configures a firewall by default that blocks all UDP traffic
