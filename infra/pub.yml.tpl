@@ -62,7 +62,29 @@ write_files:
       MaxFileSec=1day
       MaxRetentionSec=1week
 
+  # Add Watchtower systemd service to restart containers on update
+  - path: /etc/systemd/system/watchtower.service
+    permissions: "0644"
+    owner: root
+    content: |
+      [Unit]
+      Description=Watchtower to auto-update containers
+      After=docker.service
+      Wants=docker.service
+
+      [Service]
+      Restart=on-failure
+      RestartSec=10s
+      ExecStart=docker run --rm \
+        --name watchtower \
+        --volume /var/run/docker.sock:/var/run/docker.sock \
+        containrrr/watchtower \
+        --cleanup \
+        --interval 300
+      ExecStop=docker stop watchtower
+
 runcmd:
   - systemctl daemon-reload
   - systemctl restart docker
   - systemctl start moq-pub moq-clock
+  - systemctl start watchtower
