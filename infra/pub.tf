@@ -7,6 +7,9 @@ resource "google_compute_instance" "pub" {
   boot_disk {
     initialize_params {
       image = local.pub.image
+
+      size = 50 # 50 GB
+      type = "pd-standard"
     }
   }
 

@@ -13,6 +13,8 @@ resource "google_compute_instance" "relay" {
   boot_disk {
     initialize_params {
       image = each.value.image
+      size = 50  # 50 GB
+      type = "pd-standard"
     }
   }
 

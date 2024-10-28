@@ -1,25 +1,26 @@
 #cloud-config
 
 write_files:
-  - path: /etc/systemd/system/moq-pub.service
+  - path: /etc/systemd/system/moq-bbb.service
     permissions: 0644
     owner: root
     content: |
       [Unit]
-      Description=Run moq-pub via docker
+      Description=Run moq-bbb via docker
       Requires=docker.service
       After=docker.service
 
       [Service]
       ExecStart=docker run --rm \
-        --name moq-karp \
+        --name moq-bbb \
         --network="host" \
         --pull=always \
         --cap-add=SYS_PTRACE \
         -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
         -e REGION=${region} \
-        ${image}
-      ExecStop=docker stop moq-pub
+        --entrypoint moq-bbb \
+        ${image} --path bbb
+      ExecStop=docker stop moq-bbb
 
       # Take longer and longer to restart the process.
       Restart=always
@@ -41,7 +42,8 @@ write_files:
         --pull=always \
         --cap-add=SYS_PTRACE \
         -e RUST_LOG=info -e RUST_BACKTRACE=1 \
-        ${image} moq-clock --publish "https://relay.quic.video/clock"
+        --entrypoint moq-clock \
+        ${image} --publish "https://relay.quic.video/clock"
       ExecStop=docker stop moq-clock
 
       # Take longer and longer to restart the process.
@@ -61,6 +63,14 @@ write_files:
       SystemKeepFree=1G
       MaxFileSec=1day
       MaxRetentionSec=1week
+
+  # Delete docker images and containers that are no longer in use
+  - path: /etc/cron.weekly/docker-cleanup
+    permissions: "0755"
+    owner: root
+    content: |
+      #!/bin/sh
+      docker system prune -af
 
   # Add Watchtower systemd service to restart containers on update
   - path: /etc/systemd/system/watchtower.service
@@ -86,5 +96,5 @@ write_files:
 runcmd:
   - systemctl daemon-reload
   - systemctl restart docker
-  - systemctl start moq-pub moq-clock
+  - systemctl start moq-bbb moq-clock
   - systemctl start watchtower

@@ -57,7 +57,8 @@ write_files:
         --cap-add=SYS_PTRACE \
         -v "/etc/cert:/etc/cert:ro" \
         -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
-        ${image} moq-relay --bind 0.0.0.0:443 \
+        --entrypoint moq-relay \
+        ${image} --bind 0.0.0.0:443 \
         --tls-cert "/etc/cert/${cluster_node}.crt" --tls-key "/etc/cert/${cluster_node}.key" \
         --tls-cert "/etc/cert/${public_host}.crt" --tls-key "/etc/cert/${public_host}.key" \
         --tls-root "/etc/cert/internal.ca" \
@@ -91,6 +92,14 @@ write_files:
       SystemKeepFree=1G
       MaxFileSec=1day
       MaxRetentionSec=1week
+
+  # Delete docker images and containers that are no longer in use
+  - path: /etc/cron.weekly/docker-cleanup
+    permissions: "0755"
+    owner: root
+    content: |
+      #!/bin/sh
+      docker system prune -af
 
   # Add Watchtower systemd service to restart the container on update
   - path: /etc/systemd/system/watchtower.service
