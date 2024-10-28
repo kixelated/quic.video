@@ -52,8 +52,11 @@ locals {
   }
   pub = {
     region  = "us-central1"
-    zone    = "us-central1-f",
+    zone    = "us-central1-a",
     machine = "t2d-standard-1",
     image   = "cos-cloud/cos-stable",
   }
+  # To save an instance, we use a relay as a root
+  # In the future we should have a dedicated instance/cluster for this.
+  root = "relay-us-central.us-central1-a"
 }

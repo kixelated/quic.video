@@ -29,21 +29,21 @@ resource "google_compute_instance" "relay" {
     user-data = templatefile("${path.module}/relay.yml.tpl", {
       image = var.image_relay
 
-      # Address to an API server to register origins
-      api_url = google_cloud_run_v2_service.api.uri
-
       # The external address and certs
       public_host = var.domain
       public_cert = "${acme_certificate.relay.certificate_pem}${acme_certificate.relay.issuer_pem}"
       public_key  = acme_certificate.relay.private_key_pem
 
-      # Domain and certs used for internal traffic
-      # We reuse the GCE provided DNS: VM_NAME.ZONE.c.PROJECT_ID.internal
-      # See: https://cloud.google.com/compute/docs/internal-dns
-      internal_host = "relay-${each.key}.${each.value.zone}.c.${var.project}.internal"
+      # Certs used for internal traffic
       internal_cert = "${tls_locally_signed_cert.relay_internal[each.key].cert_pem}${tls_self_signed_cert.internal.cert_pem}"
       internal_key  = tls_private_key.relay_internal[each.key].private_key_pem
       internal_ca   = tls_self_signed_cert.internal.cert_pem
+
+      # The name we're using for clustering
+      # We reuse the GCE provided DNS: VM_NAME.ZONE.c.PROJECT_ID.internal
+      # See: https://cloud.google.com/compute/docs/internal-dns
+      cluster_node = "relay-${each.key}.${each.value.zone}.c.${var.project}.internal"
+      cluster_root = "${local.root}.c.${var.project}.internal"
     })
   }
 
