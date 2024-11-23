@@ -28,7 +28,7 @@ resource "google_compute_instance" "pub" {
     # cloud-init template
     user-data = templatefile("${path.module}/pub.yml.tpl", {
       addr   = "relay.${var.domain}"
-      image  = var.image_pub
+      docker = var.docker
       region = local.pub.region
     })
   }

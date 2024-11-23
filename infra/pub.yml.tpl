@@ -19,7 +19,7 @@ write_files:
         -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
         -e REGION=${region} \
         --entrypoint moq-bbb \
-        ${image} --path bbb
+        ${docker}/moq-karp --path bbb
       ExecStop=docker stop moq-bbb
 
       # Take longer and longer to restart the process.
@@ -42,8 +42,7 @@ write_files:
         --pull=always \
         --cap-add=SYS_PTRACE \
         -e RUST_LOG=info -e RUST_BACKTRACE=1 \
-        --entrypoint moq-clock \
-        ${image} --publish "https://relay.quic.video/clock"
+        ${docker}/moq-clock --publish "https://relay.quic.video/clock"
       ExecStop=docker stop moq-clock
 
       # Take longer and longer to restart the process.

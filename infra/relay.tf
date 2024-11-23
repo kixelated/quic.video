@@ -13,8 +13,8 @@ resource "google_compute_instance" "relay" {
   boot_disk {
     initialize_params {
       image = each.value.image
-      size = 50  # 50 GB
-      type = "pd-standard"
+      size  = 50 # 50 GB
+      type  = "pd-standard"
     }
   }
 
@@ -29,7 +29,7 @@ resource "google_compute_instance" "relay" {
   metadata = {
     # cloud-init template
     user-data = templatefile("${path.module}/relay.yml.tpl", {
-      image = var.image_relay
+      docker = var.docker
 
       # The external address and certs
       public_host = var.domain

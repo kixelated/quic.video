@@ -18,14 +18,9 @@ variable "domain" {
   description = "domain name"
 }
 
-variable "image_pub" {
-  description = "moq-pub image"
-  default     = "docker.io/kixelated/moq-pub"
-}
-
-variable "image_relay" {
-  description = "moq-relay image"
-  default     = "docker.io/kixelated/moq-rs"
+variable "docker" {
+  description = "Docker repository prefix"
+  default     = "docker.io/kixelated"
 }
 
 # Too complicated to specify via flags, so do it here.
