@@ -1,0 +1,22 @@
+{
+  "name": "rspress-doc-template",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "rspress build",
+    "check": "biome check --write",
+    "dev": "rspress dev",
+    "format": "biome format --write",
+    "preview": "rspress preview"
+  },
+  "dependencies": {
+    "rspress": "^1.37.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.3",
+    "@tailwindcss/forms": "^0.5.9",
+    "@tailwindcss/typography": "^0.5.15",
+    "@types/node": "^18.11.17",
+    "tailwindcss": "^3.4.15"
+  }
+}

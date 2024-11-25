@@ -1,2 +1,0 @@
-
-npm link ../../moq-web

@@ -1,5 +1,29 @@
-# quic.video
+# Rspress Website
 
-This repo contains the infrastructure for [quic.video](https://quic.video).
+## Setup
 
-The actual website is in [moq-js](https://github.com/kixelated/moq-js) until I find a good way to split the library and app.
+Install the dependencies:
+
+```bash
+npm install
+```
+
+## Get Started
+
+Start the dev server:
+
+```bash
+npm run dev
+```
+
+Build the website for production:
+
+```bash
+npm run build
+```
+
+Preview the production build locally:
+
+```bash
+npm run preview
+```
