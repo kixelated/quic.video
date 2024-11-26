@@ -2,7 +2,7 @@ import { Content, usePageData } from 'rspress/runtime';
 
 function Layout() {
 	const page = usePageData().page;
-	return <div className="flex flex-col md:flex-row gap-8 md:p-8 p-4 bg-slate-900 text-slate-100">
+	return <div className="flex flex-col md:flex-row gap-8 md:p-8 p-4 ">
 			<nav className="flex flex-row items-center md:flex-col md:w-72 md:gap-12 gap-4 w-full">
 				<a href="/" className="w-1/2 md:w-auto">
 					<img src="/logo.svg" className="w-52" alt="Media over QUIC" />

@@ -4,6 +4,11 @@
 @import 'tailwindcss/typography';
 @import 'tailwindcss/forms';
 
+:root {
+	--rp-c-bg: #0f172a;
+	--rp-c-text-1: #f1f5f9;
+}
+
 @layer components {
 	/* see https://tailwindcss.com/docs/typography-plugin */
 	.markdown {
