@@ -5,12 +5,9 @@
 	"private": true,
 	"scripts": {
 		"dev": "astro dev --open",
-		"start": "astro dev",
-		"build": "astro build",
+		"pack": "astro build",
 		"preview": "astro preview",
-		"astro": "astro",
-		"check": "biome check",
-		"fmt": "biome format",
+		"check": "biome ci && tsc --noEmit",
 		"fix": "biome check --write"
 	},
 	"dependencies": {
