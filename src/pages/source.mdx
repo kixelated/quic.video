@@ -1,0 +1,36 @@
+---
+layout: "@/layouts/global.astro"
+title: Source
+---
+
+# Rust!
+
+Native code is written in Rust and is available at [kixelated/moq-rs](https://github.com/kixelated/moq-rs).
+It's split into a few crates:
+
+|                                                                               crate | description                                                                                                                                           |
+| ----------------------------------------------------------------------------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+|                [moq-transport](https://docs.rs/moq-transport/latest/moq-transport/) | A library that mostly implements the [MoqTransport](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/) draft... with a few strong opinions.  |
+|                [moq-relay](https://github.com/kixelated/moq-rs/tree/main/moq-relay) | A MoQ server that connects publishers to subscribers, caching any duplicate subscriptions.                                                            |
+|                    [moq-karp](https://github.com/kixelated/moq-rs/tree/main/moq-karp) | A MoQ client that integrates with ffmpeg to publish media in a new container.                                                                                             |
+|                    [moq-web](https://github.com/kixelated/moq-rs/tree/main/moq-web) | A MoQ client utilizing WebAssembly, WebCodecs, and WebTransport for web support. |
+|                    [moq-gst](https://github.com/kixelated/moq-rs/tree/main/moq-gst) | A MoQ gstreamer plugin that can publish media via moq-karp. |
+|                [moq-clock](https://github.com/kixelated/moq-rs/tree/main/moq-clock) | It's a clock! Just to demonstate that MoqTransport can do more than media.                                                                            |
+| [quic.video](https://github.com/kixelated/quic.video) | This website lul. |
+
+
+Check out the [open issues](https://github.com/kixelated/moq-rs/issues) for a rough road map and potential contributions!
+
+There are some additional repositories that might be of interest:
+| crate | description |
+| [web-transport-quinn](https://docs.rs/web-transport-quinn/latest/web_transport_quinn/) | A [WebTransport](https://datatracker.ietf.org/doc/draft-ietf-webtrans-http3/) client and server utilizing [Quinn](https://github.com/quinn-rs/quinn). |
+| [web-transport-wasm](https://github.com/kixelated/web-transport-rs/tree/main/web-transport-wasm) | A WASM [WebTransport](https://datatracker.ietf.org/doc/draft-ietf-webtrans-http3/) wrapper around the `web-sys` bindings. |
+| [web-transport](https://github.com/kixelated/web-transport-rs) | A common interface, utilizing one of the above depending on the platform. |
+| [web-codecs](https://github.com/kixelated/web-codecs-rs) | A [WebCodecs](https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API) WASM wrapper providing a more ergonomic API. |
+
+# License
+
+Everything is licensed under MIT or Apache-2.0 so knock yourself out.
+
+If you do end up using MoQ for your project, let the world know! The more public traction we can
+get, the better we can make the standard.

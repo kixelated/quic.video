@@ -1,0 +1,33 @@
+{
+	"name": "quic.video",
+	"type": "module",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"dev": "astro dev --open",
+		"start": "astro dev",
+		"build": "astro build",
+		"preview": "astro preview",
+		"astro": "astro",
+		"check": "biome check",
+		"fmt": "biome format",
+		"fix": "biome check --write"
+	},
+	"dependencies": {
+		"@astrojs/mdx": "3.1.9",
+		"@astrojs/node": "8.3.4",
+		"@astrojs/solid-js": "4.4.4",
+		"@astrojs/tailwind": "5.1.2",
+		"@kixelated/moq": "^0.3.3",
+		"@tailwindcss/forms": "^0.5.9",
+		"@tailwindcss/typography": "^0.5.15",
+		"@types/dom-webcodecs": "^0.1.13",
+		"@typescript/lib-dom": "npm:@types/web@^0.0.115",
+		"astro": "4.16.16",
+		"solid-js": "^1.9.3",
+		"tailwindcss": "^3.4.15",
+		"vite-plugin-top-level-await": "^1.4.4",
+		"vite-plugin-wasm": "^3.3.0",
+		"vite-plugin-mkcert": "^1.17.6"
+	}
+}
