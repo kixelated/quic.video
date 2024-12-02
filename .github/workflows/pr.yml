@@ -1,0 +1,19 @@
+name: pr
+
+on:
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v2
+      - uses: biomejs/setup-biome@v2
+        with:
+          version: latest
+
+      - run: bun install
+      - run: bun check
