@@ -35,10 +35,9 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       # Build and push Docker image with Depot
-      - uses: depot/build-push-action@v1
-        id: depot
+      - uses: docker/build-push-action@v3
+        id: docker
         with:
-          project: hppp3x0qjc
           context: .
           push: true
           tags: ${{env.REGISTRY}}/${{env.IMAGE}}
@@ -52,4 +51,4 @@ jobs:
       - uses: google-github-actions/deploy-cloudrun@v1
         with:
           service: web
-          image: ${{env.REGISTRY}}/${{env.IMAGE}}@${{steps.depot.outputs.imageid}}
+          image: ${{env.REGISTRY}}/${{env.IMAGE}}@${{steps.docker.outputs.imageid}}
