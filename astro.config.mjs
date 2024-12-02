@@ -7,7 +7,6 @@ import tailwind from "@astrojs/tailwind"
 import { defineConfig } from "astro/config"
 
 import mkcert from "vite-plugin-mkcert"
-import topLevelAwait from "vite-plugin-top-level-await"
 import wasm from "vite-plugin-wasm"
 
 // https://astro.build/config
@@ -47,11 +46,9 @@ export default defineConfig({
 			mkcert(),
 
 			wasm(),
-
-			topLevelAwait(),
 		],
 		worker: {
-			plugins: [wasm(), topLevelAwait()],
+			plugins: [wasm()],
 		},
 		resolve: {
 			alias: {
