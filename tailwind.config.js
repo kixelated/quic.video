@@ -1,7 +1,7 @@
 module.exports = {
   content: [
     './src/**/*.tsx',
-    './docs/**/*.mdx',
+    './static/**/*.mdx',
     './styles/**/*.css',
     './theme/**/*.tsx',
   ],

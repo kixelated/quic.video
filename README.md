@@ -5,7 +5,7 @@
 Install the dependencies:
 
 ```bash
-npm install
+bun install
 ```
 
 ## Get Started
@@ -13,17 +13,17 @@ npm install
 Start the dev server:
 
 ```bash
-npm run dev
+bun dev
 ```
 
 Build the website for production:
 
 ```bash
-npm run build
+bun run build
 ```
 
 Preview the production build locally:
 
 ```bash
-npm run preview
+bun run preview
 ```
