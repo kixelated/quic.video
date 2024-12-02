@@ -1,18 +1,18 @@
 ---
-import "./global.css"
+import "./global.css";
 
 // NOTE: This is magically used as the type for Astro.props
 interface Props {
-	title: string
+	title: string;
 
 	frontmatter?: {
-		title: string
-		date: string
-	}
+		title: string;
+		date: string;
+	};
 }
 
-let { title, frontmatter } = Astro.props
-if (frontmatter?.title) title = frontmatter.title
+let { title, frontmatter } = Astro.props;
+if (frontmatter?.title) title = frontmatter.title;
 ---
 
 <!doctype html>

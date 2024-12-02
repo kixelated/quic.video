@@ -28,5 +28,8 @@
 		"tailwindcss": "^3.4.15",
 		"vite-plugin-wasm": "^3.3.0",
 		"vite-plugin-mkcert": "^1.17.6"
+	},
+	"devDependencies": {
+		"@types/node": "^22.10.1"
 	}
 }

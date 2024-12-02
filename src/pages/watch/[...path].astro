@@ -1,12 +1,12 @@
 ---
-export const prerender = false
+export const prerender = false;
 
-const { path } = Astro.params
-if (!path) return Astro.redirect("/404")
+const { path } = Astro.params;
+if (!path) return Astro.redirect("/404");
 
-import Issues from "@/components/issues.astro"
-import Watch from "@/components/watch.tsx"
-import Layout from "@/layouts/global.astro"
+import Issues from "@/components/issues.astro";
+import Watch from "@/components/watch.tsx";
+import Layout from "@/layouts/global.astro";
 ---
 
 <Layout title={`Watch - ${path}`}>

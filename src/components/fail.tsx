@@ -1,11 +1,11 @@
-import { Show, createEffect } from "solid-js"
+import { Show, createEffect } from "solid-js";
 
 export default function Fail(props: { error?: Error }) {
 	createEffect(() => {
 		if (props.error) {
-			console.error(props.error)
+			console.error(props.error);
 		}
-	})
+	});
 
 	return (
 		<Show when={props.error}>
@@ -15,5 +15,5 @@ export default function Fail(props: { error?: Error }) {
 				</div>
 			)}
 		</Show>
-	)
+	);
 }

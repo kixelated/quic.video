@@ -1,21 +1,21 @@
 ---
-import MainLayout from "../../layouts/global.astro"
+import MainLayout from "../../layouts/global.astro";
 
 //TODO: add the interface for the frontmatter of the blog posts
 interface Frontmatter {
-	title: string
-	cover: string
-	description: string
-	author: string
-	date: string
+	title: string;
+	cover: string;
+	description: string;
+	author: string;
+	date: string;
 }
 
-const posts = await Astro.glob<Frontmatter>("./*.mdx")
+const posts = await Astro.glob<Frontmatter>("./*.mdx");
 posts.sort((a, b) => {
-	const dateA = Date.parse(a.frontmatter.date)
-	const dateB = Date.parse(b.frontmatter.date)
-	return dateB - dateA
-})
+	const dateA = Date.parse(a.frontmatter.date);
+	const dateB = Date.parse(b.frontmatter.date);
+	return dateB - dateA;
+});
 ---
 
 <MainLayout title="Blog">

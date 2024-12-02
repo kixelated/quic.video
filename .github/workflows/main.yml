@@ -51,5 +51,5 @@ jobs:
       # Deploy to cloud run
       - uses: google-github-actions/deploy-cloudrun@v1
         with:
-          service: ${{env.SERVICE}}
+          service: web
           image: ${{env.REGISTRY}}/${{env.IMAGE}}@${{steps.depot.outputs.imageid}}

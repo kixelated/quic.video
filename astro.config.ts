@@ -1,13 +1,13 @@
-import fs from "node:fs"
-import path from "node:path"
-import mdx from "@astrojs/mdx"
-import nodejs from "@astrojs/node"
-import solidJs from "@astrojs/solid-js"
-import tailwind from "@astrojs/tailwind"
-import { defineConfig } from "astro/config"
+import fs from "node:fs";
+import path from "node:path";
+import mdx from "@astrojs/mdx";
+import nodejs from "@astrojs/node";
+import solidJs from "@astrojs/solid-js";
+import tailwind from "@astrojs/tailwind";
+import { defineConfig } from "astro/config";
 
-import mkcert from "vite-plugin-mkcert"
-import wasm from "vite-plugin-wasm"
+import mkcert from "vite-plugin-mkcert";
+import wasm from "vite-plugin-wasm";
 
 // https://astro.build/config
 export default defineConfig({
@@ -31,24 +31,18 @@ export default defineConfig({
 		},
 		base: "./",
 		server: {
-			// HTTPS is required for SharedArrayBuffer
-			https: true,
 			fs: {
 				allow: [
 					".",
-					// Allow `bun link`
+					// Allow `bun link @kixelated/moq`
 					fs.realpathSync(path.resolve("node_modules/@kixelated/moq")),
 				],
 			},
 		},
-		plugins: [
-			// Generates a self-signed certificate using mkcert
-			mkcert(),
-
-			wasm(),
-		],
+		plugins: [mkcert(), wasm()],
 		worker: {
-			plugins: [wasm()],
+			format: "es",
+			plugins: () => [wasm()],
 		},
 		resolve: {
 			alias: {
@@ -56,6 +50,4 @@ export default defineConfig({
 			},
 		},
 	},
-	// Don't add trailing slashes to paths
-	trailingSlash: "never",
-})
+});
