@@ -51,4 +51,4 @@ jobs:
       - uses: google-github-actions/deploy-cloudrun@v1
         with:
           service: web
-          image: ${{env.REGISTRY}}/${{env.IMAGE}}@${{steps.docker.outputs.imageid}}
+          image: ${{env.REGISTRY}}/${{env.IMAGE}}@${{steps.docker.outputs.digest}}
