@@ -5,7 +5,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "astro dev --open",
-		"pack": "astro build",
+		"pack": "astro build --production",
 		"preview": "astro preview",
 		"check": "biome ci && tsc --noEmit",
 		"fix": "biome check --write"
