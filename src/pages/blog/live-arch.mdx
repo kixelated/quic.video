@@ -1,0 +1,80 @@
+# Live Architecture
+
+It's time to get that Staff Engineer promotion.
+That's right, we're talking about distributed systems design.
+
+I'm going to walk through a few designs for the same system with increasing complexity.
+There's no right answer, just pros and cons, but I'd love to hear your favorites.
+Or @me with an alternative because you're super smart and I used to eat paste in school (true story).
+
+
+## Requirements 
+But first, a message from our sponsor: __requirements__
+
+We're going to build a real-time media application.
+There will be N broadcasters and M viewers in a room, some performing both roles.
+Think Discord or Google Meet or Zoom or _your least favorite app here_.
+
+Additional considerations:
+- Some users will have poor networks.
+- Some broadcasters will want higher quality/latency (ex. screen share) 
+- Some users might be geo-dispersed. ex. some in Europe and some in ~~freedom land~~ North America.
+- Some customers might be willing to pay for better connectivity/quality.
+
+Got that?
+Basically just make a conferencing application.
+
+## Design 0: Peer to Peer 
+We start with both the least complicated and yet somehow most complex design: __peer-to-peer__.
+That's right, boot up your favorite game from the 2000s and enter your friend's IP address manually.
+
+The design is very simple.
+Users connect directly to each other without pesky intermediate servers (unless you count routers).
+There should still be _some_ central server to exchange user details, like a "lobby" service, or else discovery becomes very difficult.
+Sorry, we're not going to build "Media over Blockchain" or something like BitTorrent sans trackers.
+
+The very first problem with P2P hits us immediately: how do you connect?
+In a client/client protocol, one of the two peers needs to act like a server using a public IP/port.
+But this usually not an option because IPv4 addresses are expensive and IPv6 addresses are somehow still unavailable.
+Instead, the internet consists of NATs that generate IP/port pairs for outgoing connections (client) but critically, reject incoming connections (server) unless configured to forward ports.
+
+And those NATs are a headache.
+WebRTC uses STUN/ICE (and the help of a middle server) to connect clients in what only can be described as a giant hack, smuggling IP/port pairs between "connections".
+However even this doesnt work in all scenarios (symmetric NATs) and some peers have to resort to a TURN, literally proxying UDP/TCP traffic through a middle server.
+
+But NATs are not the deal-breaker.
+That award is reserved for _multiple participants_.
+
+You see, if Alice is on a peer-to-peer call with Bob, then Alice needs to send their audio/video to Bob only.
+Thats like 3Mb/s at least for good quality video.
+But if Candy, Dandy, Eric, Fritz, Geof, Harry, Iguana, Joel, Katrina, Luke, Mochael, Nigel, 🍊, Paul, Q, Raul, Steve, Tavana, Uguana, Video, Windy, Xylan, Yennifer, and Zee all join the call, then now Alice needs to send N copies of their media.
+There's no way to share*; we need 78Mb/s of upload capacity now to make sure everyone gets the video.
+Your home Internet might be able to support that, but what about your cell phone?
+
+We need a different architecture.
+
+## Design -1: Multicast
+"Well of course, you daft blog author, that's why you use multicast!"
+
+It's true, multicast is the solution. 
+Instead of sending N unicast packets, you could send 1 multicast packet.
+The participants would all join a multicast group and then the routers will figure it out.
+
+Unfortunately, multicast doesn't actually work in practice.
+The main problem is that you're entirely reliant on ISPs to work together and build an optimal fanout architecture.
+There's limited support for multicast outside of datacenter environments that use the same brand of routers.
+I'm no expert on the subject, but those experts have tried.
+
+But I am an expert on congestion control, something that multicast doesn't really support.
+You see, if you're downloading live media at 6Mb/s and your Internet suddenly has issues, the unicast solution is to lower the send rate and only transmit important data (ex. audio).
+But multicast is a firehose that can't be turned off by the sender.
+The only option is to have a router drop (random*) packets turning your live stream into swiss cheese.
+
+So we're using unicast.
+But, we're using _the ideas behind multicast_.
+
+The broadcaster MUST send only one copy of the media.
+Instead of the network performing fanout (L2), we use the application layer (L7) instead.
+That's ultimately the premise behind CDNs: shorten and deduplicate the hops.
+But those are spoilers; keep reading.
+
