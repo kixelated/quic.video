@@ -74,7 +74,84 @@ So we're using unicast.
 But, we're using _the ideas behind multicast_.
 
 The broadcaster MUST send only one copy of the media.
-Instead of the network performing fanout (L2), we use the application layer (L7) instead.
-That's ultimately the premise behind CDNs: shorten and deduplicate the hops.
+Instead of the network layer (L2) performing fanout, we use the application layer (L7) instead.
+That's ultimately the premise behind CDNs: more expressive routing and caching can be performed at higher layers.
 But those are spoilers; keep reading.
 
+## Design 1: Hub and Spoke
+We're already at the most common architecture as far as I can tell (ex. Discord uses it).
+From now on, there will be pros and cons for each design.
+
+But first, ask yourself: "How do you determine which user connects to which server?"
+
+I've got an answer for you: have everyone connect to the same server.
+
+This is by far the simplest (and cheapest) architecture.
+There are unfortunately two problems:
+
+1. The maximum channel size is limited by the server size.
+2. Users far away from the server will have a degraded experience.
+
+When you hear the phrase "WebRTC doesn't scale", this is the architecture being referenced.
+A single host has limits in terms of throughput and quality.
+Our only option is to scale vertically, while other designs can scale horizontally.
+
+But like I said, it is the cheapest and simplest option which is why I think it's a good fit for an application like Discord.
+
+But _who_ decides which server to use?
+Ideally the server is the net closest to all users, but what if users trickle in one at a time?
+There's no right answer, only convoluted business logic, but usually it's based on the *host*.
+**Fun tip**: Next time you have a meeting, make sure the lone Euro member doesn't create the meeting.
+
+## Design 2: Point to Point 
+So you're serious about improving the user experience and have spare ~~cash~~ servers.
+Good?
+
+It's time to copy a HTTP CDN and put edge servers right next to each user.
+The unspoken rule of the internet: it sucks.
+
+We want our media packets to spend as little time as possible on the public internet and as much time on our private intranet.
+We then have the ability to prioritize/reserve traffic instead of fighting with the commoners using transit.
+It also gives us the ability to **deduplicate**, serving the same content to multiple users kinda like multicast.
+That's why Google even has a CDN edge on a cruise ship.
+
+The other benefit of point-to-point is more subtle: it prevents __tromboning__.
+For example, let's say someone from Boston is trying to call someone from the UK a ~~lolly gagger~~ (TODO make sure that properly censors the bad word).
+
+- If we're using a single SFU in us-west, then the traffic first heads west and then back east.
+- If we're using multiple SFUs, then the traffic more closely follows the shortest path.
+
+This tromboning is rare in practice as most traffic is regional, but shush I'm trying to over-engineer the system.
+We don't want to send traffic back and forth for no reason because it increases latency and reduces capacity.
+
+So yeah, we have every user connect to the closet server via anycast or geo-DNS.
+There's some database or gossip protocol used to discover the "origin" server for each user.
+When the server needs to route traffic to a user, it routes it to the origin instead.
+
+But the end result looks like a tangled mess.
+Or because it 'twis the season, the end result looks more like my 🎄 lights after they magically knotted themselves in the attic (a miracle).
+This is no good, because if every edge can connect to any other edge, there can be a lot of duplicated traffic on each link.
+
+## Design 3: A Tree
+The internet certainly behaves like a net.
+There are many forks and traffic needs to figure out if it should go right or left.
+
+We need to avoid our media going both left and right because it's a waste of our limited network capacity.
+But we need to avoid multiple copies too.
+
+For example, let's say an edge in the UK wants to fetch content from an origin in San Francisco
+It could fetch from a server in Ireland, then New York, then Chicago, then Utah, then Frisco (nobody calls it that).
+If other servers take a similar route, intersecting at some point, then we can combine multiple fetches into one.
+
+It was called a tree at Twitch but it's really more like a river with many tributaries.
+Each layer in the tree compounds, reducing hundreds of thousands of edge requests into a handful of origin requests.
+
+But computing this tree is not easy.
+It was literally created by hand at Twitch and updated every time there was outage of some sort.
+The process has since been automated as some smart engineers earned their paychecks, only to be scrapped as Twitch embraced the mothership (AMZN).
+
+
+
+
+
+## Design 4: Constraints 
