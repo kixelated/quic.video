@@ -147,11 +147,74 @@ It was called a tree at Twitch but it's really more like a river with many tribu
 Each layer in the tree compounds, reducing hundreds of thousands of edge requests into a handful of origin requests.
 
 But computing this tree is not easy.
-It was literally created by hand at Twitch and updated every time there was outage of some sort.
-The process has since been automated as some smart engineers earned their paychecks, only to be scrapped as Twitch embraced the mothership (AMZN).
+Ar Twitch we literally updated it by hand every time there was outage or some sort of change to the network topology.
+The process has since been automated as some smart engineers earned their paychecks... only to be scrapped as Twitch was absorbed into the mothership.
+But that's a tale for another time...
 
+So yeah, we're doing some application-based routing to try and maximize the cache-hit ratio.
+This means less duplicate media flowing over the backbone which means less compute and network capacity needed, which means less money burned on the cloud.
+It's just getting increasingly difficult to design as users can join from any edge and leave at any time.
 
+## Design 4: Coalesce
+The key word in that last sentence is _any_.
+If a user can connect to _any_ edge, then we've already started at a disadvantage.
 
+For example, let's say there's 3 Australian viewers connecting to our service and we have 6 servers in our Sydney datacenter.
+If each user connects via anycast or round-robin DNS to the "closest" edge, there's actually some randomization involved to break ties.
+Our servers within the Sydney data center have equal latency so our users will be assigned randomly.
+This works, but it's not the cheapest.
 
+You see, we want all of those users to connect to the same host so we can serve them from a single cache.
+If they're connected to different edges within the same datacenter, then we need to transfer the media between those hosts eating up more compute and network resources.
+Every host within the datacenter provides an equal user experience (provided they aren't full) so coalescing users to the same host is pure cost savings.
 
-## Design 4: Constraints 
+We need to designate at least one server per datacenter as the "owner" of each meeting.
+But there's a gotcha, as now we can cause lopsided load as some meetings are larger than others.
+We also need the ability to spill over to additional servers for the largest events as a single server is not enough to serve the Superbowl.
+
+There's a few ways to accomplish this.
+One approach is to create a service that assigns each user to a host, but it quickly becomes a monolith as it needs the state of the entire system.
+Another approach is to rely on hashing, returning a stateless assignment based on the meeting name with some mechanism to avoid overloading individual hosts.
+
+## Design 5: Optimization 
+Now we're in the optimization end-game.
+
+One key flaw in the previous designs is the word "any".
+We went from a user connecting to a single host to the user connecting to _any_ host.
+
+If we get academic for just a second, we have a connected graph.
+- Every node in the graph is a user or server.
+- Every edge is a possible route between servers or a user.
+
+The number of permutations balloons out of control.
+Even finding the shortest path starts becoming difficult.
+But we're not trying to find the shortest path, we're also trying to find a cheap one.
+
+There's a cost associated with every node and edge.
+Some are cheap, some are shit, and some are both although there's not much correlation.
+Interconnect is a world of politics filled with price gouging and anti-competitive behavior.
+No specifics will be mentioned lest I get sued by a South Korean ISP, or a German one, or really any nationality.
+
+So, we have a classic graph optimization problem where every node/edge has a cost.
+But what's really cool about this problem is that _only unique traffic counts_.
+The more users we serve from cache, the cheaper a node/link becomes _per user_.
+
+What's the ramifications of this?
+Well, maybe serving those 3 users from Australia out of the Syndey data center isn't worth it.
+It's expensive to reserve capacity on a wire sitting on the floor of the world's largest ocean.
+The Aussies are used to awful Internet, how about we send their traffic over congestion transit links instead?
+
+Maybe if there were 20 users then the cost would average out to something more palatable.
+But again, users can join/leave at any time so the "optimal" decision constantly changes.
+It's no feasible to constantly _recalculating splines_ so at some point you have to rely on heuristics.
+
+And we have plenty of crude heuristics.
+Before beefing up capacity, Twitch would only allow assignments to data centers based on _global_ viewership. 
+20 Aussies watching a neighborhood event?
+Sorry mate, best we can do is LA.
+100 Brazilian viewers and the first Australian viewer shows up?
+Welcome to our Sydney data center.
+
+I believe this optimization problem is impossible to solve at scale.
+But it's also the secret sauce behind every CDN; as you scale up, more can be cached but where do you draw the line between quality/cost?
+
