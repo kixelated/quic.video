@@ -89,8 +89,8 @@ write_files:
       [Journal]
       SystemMaxUse=500M
       SystemKeepFree=1G
-      MaxFileSec=1day
-      MaxRetentionSec=1week
+      MaxFileSec=1hour
+      MaxRetentionSec=1day
 
   # Delete docker images and containers that are no longer in use
   - path: /etc/cron.weekly/docker-cleanup
