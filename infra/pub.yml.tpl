@@ -19,7 +19,7 @@ write_files:
         -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
         -e REGION=${region} \
         --entrypoint moq-bbb \
-        ${docker}/moq-karp --path bbb
+        ${docker}/moq-karp
       ExecStop=docker stop moq-bbb
 
       # Take longer and longer to restart the process.
@@ -60,8 +60,8 @@ write_files:
       [Journal]
       SystemMaxUse=500M
       SystemKeepFree=1G
-      MaxFileSec=1day
-      MaxRetentionSec=1week
+      MaxFileSec=1hour
+      MaxRetentionSec=1day
 
   # Delete docker images and containers that are no longer in use
   - path: /etc/cron.weekly/docker-cleanup
