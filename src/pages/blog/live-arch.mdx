@@ -1,11 +1,17 @@
-# Architect (like a boss)
+# Live Video Architecture: For Scale and Profit?
 
 It's time to get that Staff Engineer promotion.
-That's right, we're talking about distributed systems design.
+That's right, we're talking about _distributed systems design_.
+It's a topic with surprisingly few (public) resources out there because the big companies that have to solve these scaling problems are not eager to share.
+
+Well I am!
 
 I'm going to walk through a few designs for the same system with increasing complexity.
-There's no right answer, just pros and cons, but I'd love to hear your favorites.
-Or @me with an alternative because you're super smart and I used to eat paste in school (true story).
+As with many design problems, there's no right answer.
+This is not a leet-code problem where you can count the number of cycles a program takes to execute.
+It all boils down to pros and cons depending on your problem.
+
+But @me if you know best because you're a super smart Web3 affifiando while I used to eat paste in school (true).
 
 
 ## Requirements 
@@ -13,34 +19,40 @@ But first, a message from our sponsor: __requirements__
 
 We're going to build a real-time media application.
 There will be N broadcasters and M viewers in a room, some performing both roles.
-Think Discord or Google Meet or Zoom or _your least favorite app here_.
+Think Discord or Google Meet or Zoom or _your least favorite meeting app_ (there's a lot of them).
 
-Additional considerations:
+Considerations to be had:
 - Some users will have poor networks.
-- Some broadcasters will want higher quality/latency (ex. screen share) 
-- Some users might be geo-dispersed. ex. some in Europe and some in ~~freedom land~~ North America.
+- Some users will want higher quality/latency (ex. screen share) 
+- Some users might be geo-dispersed. ex. some might live in Europe while some live in Freedom.
 - Some customers might be willing to pay for better connectivity/quality.
 
 Got that?
 Basically just make a conferencing application.
 
 ## Design 0: Peer to Peer 
-We start with both the least complicated and yet somehow most complex design: __peer-to-peer__.
-That's right, boot up your favorite game from the 2000s and enter your friend's IP address manually.
+We start with somehow both the least and most complex design: __peer-to-peer__.
 
-The design is very simple.
-Users connect directly to each other without pesky intermediate servers (unless you count routers).
-There should still be _some_ central server to exchange user details, like a "lobby" service, or else discovery becomes very difficult.
-Sorry, we're not going to build "Media over Blockchain" or something like BitTorrent sans trackers.
+That's right, boot up your favorite game from the 2000s and enter your friend's IP address manually.
+We don't need no stinking servers, at least until your "friend" enables `noclip`.
+
+The design is very simple, even if the implementation isn't.
+Users connect directly to each other with only routers and switches in the middle.
+There should still _some_ central server to exchange user details, like a "lobby" service, because we don't want to enter IPs manually or scan the Internet for friends.
+Sorry, we're not going to build "Media over Blockchain".
 
 The very first problem with P2P hits us immediately: how do you connect?
-In a client/client protocol, one of the two peers needs to act like a server using a public IP/port.
-But this usually not an option because IPv4 addresses are expensive and IPv6 addresses are somehow still unavailable.
-Instead, the internet consists of NATs that generate IP/port pairs for outgoing connections (client) but critically, reject incoming connections (server) unless configured to forward ports.
+One of the clients needs to have a static IP/port which is unlikely because of these pesky things called __NATs__.
 
-And those NATs are a headache.
-WebRTC uses STUN/ICE (and the help of a middle server) to connect clients in what only can be described as a giant hack, smuggling IP/port pairs between "connections".
-However even this doesnt work in all scenarios (symmetric NATs) and some peers have to resort to a TURN, literally proxying UDP/TCP traffic through a middle server.
+In a client/client protocol, one of the two peers needs to  IP/port.
+
+You see, IPv4 addresses are expensive and somehow the Internet hasn't embraced IPv6 yet.
+When a client creates a connection to a server, a NAT basically leases it a temporary IP/port pair until the connection is idle.
+A client's public IP address can (and will) change potentially on a per-connection basis.
+
+And these NATs are a headache.
+WebRTC uses STUN/ICE (and the help of a middle server) to connect clients in what only can be described as a giant hack: smuggling IP/port pairs between "connections".
+However, this doesnt work in all scenarios (symmetric NATs) and some peers have to resort to a TURN, literally proxying UDP/TCP traffic through a middle server.
 
 But NATs are not the deal-breaker.
 That award is reserved for _multiple participants_.
@@ -48,7 +60,7 @@ That award is reserved for _multiple participants_.
 You see, if Alice is on a peer-to-peer call with Bob, then Alice needs to send their audio/video to Bob only.
 Thats like 3Mb/s at least for good quality video.
 But if Candy, Dandy, Eric, Fritz, Geof, Harry, Iguana, Joel, Katrina, Luke, Mochael, Nigel, 🍊, Paul, Q, Raul, Steve, Tavana, Uguana, Video, Windy, Xylan, Yennifer, and Zee all join the call, then now Alice needs to send N copies of their media.
-There's no way to share*; we need 78Mb/s of upload capacity now to make sure everyone gets the video.
+There's no way to share the upload*, and now we need at least 78Mb/s of upload capacity now to make sure everyone gets the video.
 Your home Internet might be able to support that, but what about your cell phone?
 
 We need a different architecture.
@@ -56,63 +68,85 @@ We need a different architecture.
 ## Design -1: Multicast
 "Well of course, you daft blog author, that's why you use multicast!"
 
-It's true, multicast is the solution. 
+It's true, multicast let's you share uploads. 
 Instead of sending N unicast packets, you could send 1 multicast packet.
 The participants would all join a multicast group and then the routers will figure it out.
 
 Unfortunately, multicast doesn't actually work in practice.
-The main problem is that you're entirely reliant on ISPs to work together and build an optimal fanout architecture.
+The main problem is that we're entirely reliant on ISPs to work together and build an optimal fanout architecture, and that's just not happening.
 There's limited support for multicast outside of datacenter environments that use the same brand of routers.
-I'm no expert on the subject, but those experts have tried.
-
-But I am an expert on congestion control, something that multicast doesn't really support.
-You see, if you're downloading live media at 6Mb/s and your Internet suddenly has issues, the unicast solution is to lower the send rate and only transmit important data (ex. audio).
-But multicast is a firehose that can't be turned off by the sender.
-The only option is to have a router drop (random*) packets turning your live stream into swiss cheese.
 
 So we're using unicast.
 But, we're using _the ideas behind multicast_.
 
-The broadcaster MUST send only one copy of the media.
-Instead of the network layer (L2) performing fanout, we use the application layer (L7) instead.
+**New Requirement:** The broadcaster MUST send only one copy of the media.
+Instead of the network layer (L2) performing fanout via multicast, we can fanout at the application layer (L7) instead.
 That's ultimately the premise behind CDNs: more expressive routing and caching can be performed at higher layers.
 But those are spoilers; keep reading.
 
 ## Design 1: Hub and Spoke
-We're already at the most common architecture as far as I can tell (ex. Discord uses it).
-From now on, there will be pros and cons for each design.
-
-But first, ask yourself: "How do you determine which user connects to which server?"
+Okay so we're going to use servers with public IPs.
+We must first ask ourselves: "How do you determine which client connects to which server?"
 
 I've got an answer for you: have everyone connect to the same server.
 
-This is by far the simplest (and cheapest) architecture.
-There are unfortunately two problems:
+We're already at the most common conferencing architecture.
+Discord uses it as do many conferencing applications.
+It's a good deaign when meetings consist of a handful of cost-sensitive users.
+I thought distributed systems design was supposed to be hard.
 
+Unfortunately, there are two problems with our simple approach:
 1. The maximum channel size is limited by the server size.
 2. Users far away from the server will have a degraded experience.
 
 When you hear the phrase "WebRTC doesn't scale", this is the architecture being referenced.
 A single host has limits in terms of throughput and quality.
-Our only option is to scale vertically, while other designs can scale horizontally.
+If we want to have thousands of people in the same room our only option is to scale vertically.
+You can throw larger CPUs and NICs at the problem but eventually you hit a limit.
+Other designs can scale horizontally so this isn't a fundamental problem with WebRTC.
 
-But like I said, it is the cheapest and simplest option which is why I think it's a good fit for an application like Discord.
+And _who_ decides which server to use?
+Ideally, the server is the closest on average to all users, but what if users trickle in one at a time?
+There's no right answer, only convoluted business logic, but usually it's based on the first user to connect (aka the "host").
 
-But _who_ decides which server to use?
-Ideally the server is the net closest to all users, but what if users trickle in one at a time?
-There's no right answer, only convoluted business logic, but usually it's based on the *host*.
-**Fun tip**: Next time you have a meeting, make sure the lone Euro member doesn't create the meeting.
+**Fun tip**: Next time you have a meeting, make sure the solo Euro member doesn't create the meeting.
+Let them suffer alone with poor video quality and free healthcare.
 
-## Design 2: Point to Point 
-So you're serious about improving the user experience and have spare ~~cash~~ servers.
+## Design 2: One to Many
+So you're serious about improving the user experience and have additional cash to throw around?
 Good?
 
-It's time to copy a HTTP CDN and put edge servers right next to each user.
-The unspoken rule of the internet: it sucks.
+There is an unspoken rule of the internet: it sucks.
+The "public" internet consists of interconnected ISPs and transit providers that want to pay as little as possible while keeping customers happy enough.
+You might have a fiber internet connection to your ISP's servers, but obviously they're not going to give you a dedicated fiber connection to everywhere in the world.
+You're going to get a dedicated connection to the nearest speed test website and that's it.
 
-We want our media packets to spend as little time as possible on the public internet and as much time on our private intranet.
-We then have the ability to prioritize/reserve traffic instead of fighting with the commoners using transit.
-It also gives us the ability to **deduplicate**, serving the same content to multiple users kinda like multicast.
+The internet is the world's largest sharing experiment.
+But to get the most reliable experience, we need to explicitly not share.
+We want our media packets to spend as little time as possible on the public **inter**net and as much time on our private **intra**net.
+
+That's right, it's time to copy a HTTP CDN and put edge servers next to each user.
+Queue the map with all of the datacenters around the world.
+
+<globe of dots>
+
+That's the one, good stuff.
+
+We want servers around the world.
+Users will connect to the closest server in order to minimize the amount of time their packets spend on the internet mingling with commoners.
+
+Once the packets are in our network, we can better control the quality/cost.
+We're now a toddler who refuses to share with anyone else and can prioritize the most important traffic.
+
+How do you know which region is the closest?
+
+## Design 3: Deduplication
+
+So like I said, 
+We lease dedicated links and transit in regions that matter.
+We also now have the ability to prioritize/reserve traffic instead of fighting with the commoners using transit.
+
+But critically, It also gives us the ability to **deduplicate**, serving the same content to multiple users kinda like multicast.
 That's why Google even has a CDN edge on a cruise ship.
 
 The other benefit of point-to-point is more subtle: it prevents __tromboning__.
@@ -132,7 +166,7 @@ But the end result looks like a tangled mess.
 Or because it 'twis the season, the end result looks more like my 🎄 lights after they magically knotted themselves in the attic (a miracle).
 This is no good, because if every edge can connect to any other edge, there can be a lot of duplicated traffic on each link.
 
-## Design 3: A Tree
+## Design 4: A Tree
 The internet certainly behaves like a net.
 There are many forks and traffic needs to figure out if it should go right or left.
 
@@ -155,7 +189,7 @@ So yeah, we're doing some application-based routing to try and maximize the cach
 This means less duplicate media flowing over the backbone which means less compute and network capacity needed, which means less money burned on the cloud.
 It's just getting increasingly difficult to design as users can join from any edge and leave at any time.
 
-## Design 4: Coalesce
+## Design 5: Coalesce
 The key word in that last sentence is _any_.
 If a user can connect to _any_ edge, then we've already started at a disadvantage.
 
@@ -176,7 +210,7 @@ There's a few ways to accomplish this.
 One approach is to create a service that assigns each user to a host, but it quickly becomes a monolith as it needs the state of the entire system.
 Another approach is to rely on hashing, returning a stateless assignment based on the meeting name with some mechanism to avoid overloading individual hosts.
 
-## Design 5: Optimization 
+## Design 6: Optimization 
 Now we're in the optimization end-game.
 
 One key flaw in the previous designs is the word "any".
@@ -218,3 +252,6 @@ Welcome to our Sydney data center.
 I believe this optimization problem is impossible to solve at scale.
 But it's also the secret sauce behind every CDN; as you scale up, more can be cached but where do you draw the line between quality/cost?
 
+# quic.video
+
+<map of 3 edges>
