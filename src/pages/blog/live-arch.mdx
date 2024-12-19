@@ -2,16 +2,11 @@
 
 It's time to get that Staff Engineer promotion.
 That's right, we're talking about _distributed systems design_.
-It's a topic with surprisingly few (public) resources out there because the big companies that have to solve these scaling problems are not eager to share.
+We're going to design a live video system one interation at a time with increasing complexity.
 
-Well I am!
-
-I'm going to walk through a few designs for the same system with increasing complexity.
-As with many design problems, there's no right answer.
-This is not a leet-code problem where you can count the number of cycles a program takes to execute.
-It all boils down to pros and cons depending on your problem.
-
-But @me if you know best because you're a super smart Web3 affifiando while I used to eat paste in school (true).
+Be warned that there is no right answer.
+This is not an optimization problem where you can literally count the number of cycles a program takes to execute.
+It all boils down to pros and cons and how they align with your specific product.
 
 
 ## Requirements 
@@ -112,7 +107,7 @@ There's no right answer, only convoluted business logic, but usually it's based 
 **Fun tip**: Next time you have a meeting, make sure the solo Euro member doesn't create the meeting.
 Let them suffer alone with poor video quality and free healthcare.
 
-## Design 2: One to Many
+## Design 2: Edge Nodes
 So you're serious about improving the user experience and have additional cash to throw around?
 Good?
 
@@ -132,19 +127,31 @@ Queue the map with all of the datacenters around the world.
 
 That's the one, good stuff.
 
-We want servers around the world.
-Users will connect to the closest server in order to minimize the amount of time their packets spend on the internet mingling with commoners.
+So we provision servers around the world and users will connect to the closest one.
+This minimizes the amount of time our user's packets spend mingling with the commoners.
+We're now a toddler who refuses to share with anyone else and can better control the quality/cost once the packets are in our network.
 
-Once the packets are in our network, we can better control the quality/cost.
-We're now a toddler who refuses to share with anyone else and can prioritize the most important traffic.
+But how does a user know which server is the closest?
+There's a few options:
 
-How do you know which region is the closest?
+1. Ping them all, use the min.
+2. Use GeoDNS
+3. Use anycast.
+
+I'm a big anycast 🪭 as are most CDNs.
+Basically, all of our servers advertise the same IP address and BGP figures out which one is closest.
+This gives ISPs greater control on how traffic should be routed, potentially over paths with higher RTTs but lower congestion.
+
+But I'm going to stop blabbing about anycast; we've got _distributed systems_ to design.
+
+Note that we still have a central server that "owns" the meeting room.
+This is commonly called the "origin" and each edge node needs to know it's address to proxy media.
+Store this in a database or something.
+
 
 ## Design 3: Deduplication
 
-So like I said, 
-We lease dedicated links and transit in regions that matter.
-We also now have the ability to prioritize/reserve traffic instead of fighting with the commoners using transit.
+So the previous design has users connect to the closest server, but how do the servers 
 
 But critically, It also gives us the ability to **deduplicate**, serving the same content to multiple users kinda like multicast.
 That's why Google even has a CDN edge on a cruise ship.
