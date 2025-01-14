@@ -19,7 +19,9 @@ write_files:
         -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
         -e REGION=${region} \
         --entrypoint moq-bbb \
-        ${docker}/moq-karp
+        ${docker}/moq-karp \
+        publish "https://relay.quic.video/demo/bbb"
+
       ExecStop=docker stop moq-bbb
 
       # Take longer and longer to restart the process.
