@@ -1,4 +1,4 @@
-import "@kixelated/moq/element/video";
+import "@kixelated/moq/video";
 
 export default function Watch(props: { path: string }) {
 	// Use query params to allow overriding environment variables.
