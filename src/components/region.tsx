@@ -22,7 +22,12 @@ export default function Region(props: { path: string; setUrl: Setter<string> }) 
 
 	return (
 		<div class="flex gap-4 items-center mt-8 mb-8">
-			<span class="font-bold">Region:</span>
+			<span
+				class="font-bold"
+				title="Connect to the indicated server. 'Auto' will use Geo-DNS to select the closest server for the best latency and quality. Select a far-away region to test the performance with increased congestion and latency."
+			>
+				Relay:
+			</span>
 			<button
 				type="button"
 				onClick={() => setRegion(null)}
