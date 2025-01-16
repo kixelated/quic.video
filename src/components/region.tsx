@@ -1,5 +1,5 @@
 import "@kixelated/moq/video";
-import { createEffect, createSignal, For, type Setter } from "solid-js";
+import { For, type Setter, createEffect, createSignal } from "solid-js";
 
 // Exposes a region selector to allow overriding the region used by the relay.
 export default function Region(props: { path: string; setUrl: Setter<string> }) {
