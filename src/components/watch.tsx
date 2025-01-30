@@ -1,4 +1,3 @@
-import "@shoelace-style/shoelace/dist/themes/dark.css";
 import "@kixelated/moq/watch";
 
 export default function Watch(props: { path: string }) {
