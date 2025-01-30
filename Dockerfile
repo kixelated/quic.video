@@ -1,12 +1,13 @@
 FROM node:slim
 
 WORKDIR /app
+ENV NODE_ENV=production
+
+COPY package.json package-lock.json .
+RUN npm ci
 
 COPY . .
-
-ENV NODE_ENV=production
-RUN npm ci
 RUN npm run build
 
 ENV HOST="0.0.0.0"
-CMD [ "node", "run", "./dist/server/entry.mjs" ]
+CMD [ "node", "./dist/server/entry.mjs" ]
