@@ -35,7 +35,7 @@ export default defineConfig({
 			fs: {
 				allow: [
 					".",
-					// Allow `bun link @kixelated/moq`
+					// Allow `npm link @kixelated/moq`
 					fs.realpathSync(path.resolve("node_modules/@kixelated/moq")),
 				],
 			},

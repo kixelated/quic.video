@@ -11,10 +11,10 @@ Join the [Discord](https://discord.gg/FCYF3p99mr) for updates and discussion.
 
 ## Setup
 
-Install the dependencies with `bun`:
+Install the dependencies with `npm`:
 
 ```bash
-bun i
+npm i
 ```
 
 ## Development
@@ -22,7 +22,7 @@ bun i
 Run the development web server:
 
 ```bash
-bun dev
+npm run dev
 ```
 
 ## License

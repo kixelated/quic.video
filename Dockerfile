@@ -1,12 +1,12 @@
-FROM oven/bun:latest
+FROM node:slim
 
 WORKDIR /app
 
 COPY . .
 
 ENV NODE_ENV=production
-RUN bun install --frozen-lockfile --production
-RUN bun pack
+RUN npm ci
+RUN npm run build
 
 ENV HOST="0.0.0.0"
-CMD [ "bun", "run", "./dist/server/entry.mjs" ]
+CMD [ "node", "run", "./dist/server/entry.mjs" ]

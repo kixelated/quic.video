@@ -10,10 +10,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
       - uses: biomejs/setup-biome@v2
-        with:
-          version: latest
 
-      - run: bun install
-      - run: bun check
+      - run: npm ci
+      - run: npm run check
