@@ -1,5 +1,5 @@
 <p align="center">
-	<img height="128px" src="https://github.com/kixelated/quic.video/blob/main/.github/logo.svg" alt="Media over QUIC">
+	<img height="128px" src="https://github.com/kixelated/quic.video/blob/main/public/home/logo.svg" alt="Media over QUIC">
 </p>
 
 This repository contains the code for [quic.video](https://quic.video).
