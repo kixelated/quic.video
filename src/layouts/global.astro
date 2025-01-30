@@ -1,5 +1,6 @@
 ---
 import "./global.css";
+import "@shoelace-style/shoelace/dist/themes/dark.css";
 
 // NOTE: This is magically used as the type for Astro.props
 interface Props {
@@ -16,7 +17,7 @@ if (frontmatter?.title) title = frontmatter.title;
 ---
 
 <!doctype html>
-<html lang="en" class="bg-slate-900 text-slate-100">
+<html lang="en" class="bg-slate-900 text-slate-100 sl-theme-dark">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="description" content="Media over QUIC is a new live media protocol in development by the IETF." />

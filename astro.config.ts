@@ -7,6 +7,7 @@ import tailwind from "@astrojs/tailwind";
 import { defineConfig } from "astro/config";
 
 import mkcert from "vite-plugin-mkcert";
+import { viteStaticCopy } from "vite-plugin-static-copy";
 import wasm from "vite-plugin-wasm";
 
 // https://astro.build/config
@@ -39,7 +40,19 @@ export default defineConfig({
 				],
 			},
 		},
-		plugins: [mkcert(), wasm()],
+		plugins: [
+			mkcert(),
+			wasm(),
+			viteStaticCopy({
+				hook: "buildStart",
+				targets: [
+					{
+						src: "node_modules/@shoelace-style/shoelace/dist/assets/**/*",
+						dest: "assets",
+					},
+				],
+			}),
+		],
 		worker: {
 			format: "es",
 			plugins: () => [wasm()],
