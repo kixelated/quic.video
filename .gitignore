@@ -20,7 +20,7 @@ pnpm-debug.log*
 yarn.lock
 pnpm-lock.yaml
 tsconfig.tsbuildinfo
-package-lock.json
+bun.lockb
 
 # Mac shit
 .DS_Store
