@@ -7,8 +7,8 @@ import tailwind from "@astrojs/tailwind";
 import { defineConfig } from "astro/config";
 
 import mkcert from "vite-plugin-mkcert";
-import wasm from "vite-plugin-wasm";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import wasm from "vite-plugin-wasm";
 
 // https://astro.build/config
 export default defineConfig({
