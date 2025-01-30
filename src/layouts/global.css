@@ -26,7 +26,7 @@
 	button,
 	.form-button {
 		@apply rounded-md border-0 bg-slate-700 font-bold shadow-sm hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
-		@apply px-12 py-4 text-2xl;
+		@apply px-8 py-3 text-lg;
 	}
 
 	input,

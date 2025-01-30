@@ -62,6 +62,7 @@ export default defineConfig({
 				"@": "/src",
 			},
 		},
+		// Workaround for: https://github.com/vitejs/vite/issues/8427
 		optimizeDeps: {
 			exclude: ["@kixelated/moq"],
 		},
