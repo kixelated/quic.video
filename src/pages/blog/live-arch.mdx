@@ -1,12 +1,12 @@
-# Live Video Architecture: For Scale and Profit?
+# Live Video Architecture: Scale or Profit?
 
 It's time to get that Staff Engineer promotion.
 That's right, we're talking about _distributed systems design_.
-We're going to design a live video system one interation at a time with increasing complexity.
+It's not every day that you get to design a live video system (without blindly asking ChatGPT at least).
 
-Be warned that there is no right answer.
-This is not an optimization problem where you can literally count the number of cycles a program takes to execute.
-It all boils down to pros and cons and how they align with your specific product.
+Each is an iteration on the previous design with increasing complexity and usually cost.
+Be warned that there is never a "right" answer in systems design and the investment you should make depends solely on your product.
+Start small and build upon success and failure
 
 
 ## Requirements 
@@ -19,7 +19,7 @@ Think Discord or Google Meet or Zoom or _your least favorite meeting app_ (there
 Considerations to be had:
 - Some users will have poor networks.
 - Some users will want higher quality/latency (ex. screen share) 
-- Some users might be geo-dispersed. ex. some might live in Europe while some live in Freedom.
+- Some users might be geo-dispersed. ex. some might live in Europe while some might live in North of Mexico, and there's an ocean between them.
 - Some customers might be willing to pay for better connectivity/quality.
 
 Got that?
@@ -29,28 +29,26 @@ Basically just make a conferencing application.
 We start with somehow both the least and most complex design: __peer-to-peer__.
 
 That's right, boot up your favorite game from the 2000s and enter your friend's IP address manually.
-We don't need no stinking servers, at least until your "friend" enables `noclip`.
+We don't need no stinking servers... at least until your "friend" enables `noclip`.
 
 The design is very simple, even if the implementation isn't.
 Users connect directly to each other with only routers and switches in the middle.
-There should still _some_ central server to exchange user details, like a "lobby" service, because we don't want to enter IPs manually or scan the Internet for friends.
-Sorry, we're not going to build "Media over Blockchain".
 
 The very first problem with P2P hits us immediately: how do you connect?
 One of the clients needs to have a static IP/port which is unlikely because of these pesky things called __NATs__.
 
-In a client/client protocol, one of the two peers needs to  IP/port.
+Even in a client/client protocol, one of the clients needs a public IP address.
+You see, firewalls and NATs are widespread (even with IPv6) and unless configured (port forwarding), they only allow outgoing connections.
+Even a fully peer-to-peer protocol requires at least one client to be the designated IT guy and act as a server just to get connections established.
 
-You see, IPv4 addresses are expensive and somehow the Internet hasn't embraced IPv6 yet.
-When a client creates a connection to a server, a NAT basically leases it a temporary IP/port pair until the connection is idle.
-A client's public IP address can (and will) change potentially on a per-connection basis.
+But you also should still have _some_ central server to exchange user details, like a "lobby" service, because we don't want to enter IPs manually or scan the Internet for friends.
+No, we're not going to build "Media over Blockchain".
+This same server can be used to punch holes in NATs *most of the time* via a protocol like ICE/STUN used in WebRTC.
+I say *most of the time* with slanty text because it doesn't work for symmetric NATs.
+Depending on the router you have at home, peer-to-peer might be impossible without literally proxying all traffic through an intermediate server (TURN). 
 
-And these NATs are a headache.
-WebRTC uses STUN/ICE (and the help of a middle server) to connect clients in what only can be described as a giant hack: smuggling IP/port pairs between "connections".
-However, this doesnt work in all scenarios (symmetric NATs) and some peers have to resort to a TURN, literally proxying UDP/TCP traffic through a middle server.
-
-But NATs are not the deal-breaker.
-That award is reserved for _multiple participants_.
+But NATs are not the deal-breaker for P2P in many applications.
+That award is reserved for _fanout_.
 
 You see, if Alice is on a peer-to-peer call with Bob, then Alice needs to send their audio/video to Bob only.
 Thats like 3Mb/s at least for good quality video.
@@ -63,13 +61,17 @@ We need a different architecture.
 ## Design -1: Multicast
 "Well of course, you daft blog author, that's why you use multicast!"
 
-It's true, multicast let's you share uploads. 
-Instead of sending N unicast packets, you could send 1 multicast packet.
-The participants would all join a multicast group and then the routers will figure it out.
+It's true, multicast lets you send one packet to multiple destinations.
+The participants would all join a multicast group and then the network would figure it out.
 
-Unfortunately, multicast doesn't actually work in practice.
-The main problem is that we're entirely reliant on ISPs to work together and build an optimal fanout architecture, and that's just not happening.
-There's limited support for multicast outside of datacenter environments that use the same brand of routers.
+"But, you daft blog author, nobody uses multicast!"
+
+It's true, the protocol designed to solve all of our problems doesn't actually work on the internet.
+There are a number of reasons but I'd be lying if I said I knew why.
+My theory is that its because multicast requires the world's ISPs to collaborate and work together to build what amounts to a global CDN.
+Multicast is still a good option within internal networks and datacenters provided you buy the right networking equipment.
+
+So instead of asking ISPs to build a global CDN, we're going to build a global CDN using unicast.
 
 So we're using unicast.
 But, we're using _the ideas behind multicast_.
