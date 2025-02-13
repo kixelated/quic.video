@@ -9,7 +9,7 @@ export default function Watch(props: { path: string }) {
 
 	return (
 		<div>
-			<moq-watch prop:url={url()} prop:controls={true} prop:status={true} class="rounded-lg overflow-hidden" />
+			<moq-watch prop:url={url()} prop:controls={true} prop:status={true} prop:latency={100} class="rounded-lg overflow-hidden" />
 			<Region setUrl={setUrl} path={props.path} />
 		</div>
 	);
