@@ -5,7 +5,7 @@ Let's bend it to our will.
 
 We're going to hack QUIC.
 "Hack" like a ROM-hack, not "hack" like a prison sentence (unless Nintendo is involved).
-We're not trying to be malicious, but rather unlock new functionality while maintaining specification compliance.
+We're not trying to be malicious, but rather unlock new functionality while remaining compliant.
 
 We can do this easily because unlike TCP, QUIC is implemented in *userspace*.
 That means we can take a QUIC library, tweak a few lines of code, and unlock new functionality while still being compliant with the spec.
@@ -89,12 +89,37 @@ How does a QUIC library know?
 The RFC outlines an algorithm that I'll attempt to simplify:
 
 - The sender increments a sequence number for each packet.
-- Upon receiving a packet, the receiver will schedule an ACK up to `max_ack_delay` in the future.
-- If the sender does not receive an ACK after waiting multiple RTTs, it will send another packet (potentially an empty PING).
-- After receiving an ACK, the sender will consider 
+- Upon receiving a packet, the receiver will start a timer to ACK the sequence number, batching with any others that arrive within `max_ack_delay`.
+- If the sender does not receive an ACK after waiting multiple RTTs, it will send another packet (like a PING) to poke the receiver.
+- After finally receiving an ACK, the sender *may* decide that a packet was lost if:
+  - 3 newer sequences were ACKed.
+  - or a multiple of the RTT has elapsed.
+- As the congestion controller allows, retransmit any lost packets and repeat. 
 
-Before considering it lost, a typical QUIC library will not consider it lost until 3 newer packets have been received first, or a multiple of the RTT has elapsed.
-A sender waits until an ACK has been 
+You don't need to understand the algorithm: I'll help.
+If a packet is lost, it takes anywhere from 1-3 RTTs to detect the loss and retransmit.
+It's particularly bad for the last few packets of a burst.
+
+### We Can Do Better 
+So how can we make QUIC better support real-time applications that can't wait multiple round trips?
+
+The trick is that a QUIC receiver MUST be prepared to accept duplicate or redundant packets.
+This can happen naturally if a packet is reordered or excessively queued over the network.
+Nothing is stopping us from sending a boatload of packets.
+
+Instead of sitting around doing nothing, our QUIC library could pre-emptively retransmit data even before it's considered lost.
+Maybe we only enable this above a certain RTT where retransmissions cause unacceptable delay.
+But sending redundant copies of data is nothing new; let's go a step further and embrace QUIC streams.
+
+At the end of the day, a QUIC STREAM frame is a byte offset and payload.
+Let's say we transmit our game state as STREAM 0-230 and 33ms later we transmit any deltas as STREAM 230-250.
+If the original STREAM frame is lost, well we can't actually decode the delta and suffer from HEAD-OF-LINE blocking.
+
+If latency is critical, you could instead modify the QUIC library to transmit STREAM 0-250 as the second packet.
+There's no need to wait a fixed amount before retransmitting dependencies.
+
+And this is exactly what the game dev was doing but using a custom UDP protocol, complete with acknowledgements and all sorts of stuff QUIC provides for free.
+Forking a library and changing a few lines feels *so wrong* but it can a valid solution.
 
 ## Application Limited 
 
