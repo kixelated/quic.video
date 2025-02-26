@@ -1,37 +1,52 @@
-# Hacking QUIC
+# Abusing QUIC
 We're going to hack QUIC.
-"Hack" like a ROM-hack, not "hack" like a prison sentence (unless Nintendo is involved).
-We're not trying to be malicious, but rather unlock new functionality while remaining compliant with the specification.
-That's a top 10 nerd pickup line right there.
+"Hack" like a ROM-hack, not "hack" like a prison sentence.
+Unless Nintendo is involved.
 
+We're not trying to be malicious, but rather unlock new functionality while remaining compliant with the specification.
 We can do this easily because unlike TCP, QUIC is implemented in *userspace*.
-That means we can take a QUIC library, tweak a few lines of code, and unlock new functionality while still being compliant with the spec.
+That means we can take a QUIC library, tweak a few lines of code, and unlock *new* functionality that the greybeards wanted to keep from us.
 We can ship our modified library as part of our application; nobody will suspect a thing.
 
-The one disclaimer is that we can't modify web clients, as the browser safe-guards their previous UDP sockets like it's Fort Knox.
+The one disclaimer is that we can't modify web clients; the browser safe-guards their precious UDP sockets like it's Fort Knox.
 We have to use the WebTransport API which uses the browser's built in QUIC library.
-Although that doesn't stop us from using a modified server so many of these are still possible.
+Our server-side modifications will still work, but short of wasting a zero-day exploit, we can't modify the client.
+
 
 ## Proper QUIC Datagrams
 I've been quite critical in the past about QUIC datagrams.
 Bold statements like "they are bait" and "never use datagrams".
-But some developers don't want to know the truth, and just want their beloved UDP datagrams.
+But some developers don't want to know the truth and just want their beloved UDP datagrams.
 
-The problem is that QUIC datagrams are not UDP datagrams, they are:
-1. Congestion controlled.
+The problem is that QUIC datagrams are *not* UDP datagrams.
+That's would be something closer to DTLS.
+Instead, QUIC datagrams:
+1. Are congestion controlled.
 2. Trigger acknowledgements.
-3. Acknowledgements can't be surfaced to the application.
+3. Avoid surfacing these acknowledgements.
 4. May be batched.
 
-We can fix *some* of these short-comings by modifying a standard QUIC library.
+We're going to try to fix *some* of these short-comings by modifying a standard QUIC library.
 Be warned though, you're entering dingus territory.
 
-### Congestion Control
-We've already established that you're a dingus.
-QUIC libraries expect developers like to act like you understand how networks behave and send unlimited packets.
-It was an explicit goal to not let you do that.
+### Dingus Alert 
+QUIC libraries expect developers like *you* so they baby-proof the shotgun.
+They don't want web developers, sporting their favorite "I 💕 node_modules" T-shirt, to access the raw power of UDP and aim it straight at their foot.
 
-So let's do it anyway.
+That's why there is no UDP socket Web API.
+Heck, there's not even a TCP socket Web API as WebSockets force a HTTP handshake for *reasons*.
+You can get kiiiind of close with WebRTC data channels but they are broken for so many reasons.
+
+QUIC (via WebTransport) doesn't change that mentality.
+
+
+Nor is there a way to do
+
+### Congestion Control
+
+
+But let's suspend reality for a second.
+
 
 The "truth" is that there's nothing stopping a library from sending an unlimited number of QUIC datagrams.
 The specification is the equivalent of a pinky promise because there's no mechanism to enforce a limit on the receiving end.
@@ -158,23 +173,39 @@ Forking a library feels *so dirty* but it magically works.
 
 
 ### Some Caveats
-Okay it's not the same as the game dev solution; it's actually better.
+Okay it's not the same as the game dev solution; it's actually better because of **congestion control**.
+And once again, you do ~need~ want congestion control.
 
-Retransmitting data can quickly balloon out of control.
-Congestion can cause bufferbloat, which is when routers queue packets instead of dropping them.
-If you retransmit every 30ms, but let's say congestion causes the RTT to (temporarily) increase to 500ms... well now you're transmitting 15x the data and further aggravating any congestion.
+Otherwise, retransmitting data can quickly balloon out of control.
+Congestion can cause bufferbloat, which is when routers queue packets for an unknown amount of time (potentially for seconds).
+Surprise!
+It turns out that a router doesn't have to drop a packet when overloaded, but instead it can queue it in RAM.
+
+Let's say you retransmit every 30ms and everything works great on your PC.
+A user from Brazil or India downloads your application and it initially works great too.
+But eventually their ISP gets overwhelmed and congestion causes the RTT to (temporarily) increase to 500ms.
+...well now you're transmitting 15x the data and further aggravating any congestion.
 It's a vicious loop and you've basically built your own DDoS agent.
 
-This is yet another reason why you should never disable congestion control.
-Yes, I'm still scarred by a Q&A "question" after one of my talks.
-Your home grown live video protocol without congestion control is not novel or smart.
+But QUIC can avoid this issue because retransmissions are gated by congestion control.
+Even when a packet is considered lost, or my hypothetical `stream.retransmit()` is called, a QUIC library won't immediately retransmit.
+Instead, retransmissions are queued up until the congestion controller deems it appropriate.
+Note that a late acknowledgement or stream reset will cancel a queued retransmission (unless your QUIC library sucks).
 
-QUIC retransmission are gated by congestion control, so while your real-time application may be clammoring for MORE PACKETS, fortunately QUIC is smart enough to ignore you.
-If the network is fully saturated, you need to send fewer packets to drain any queues, not more.
+Why?
+If the network is fully saturated, you need to send fewer packets to drain any network queues, not more.
+Even ignoring bufferbloat, networks are finite resources and blind retransmissions are the easiest way to join the UDP Wall of Shame.
+In this instance,.the QUIC greybeards will stop you from doing bad thing.
+The children yearn for the mines, but the adults yearn for child protection laws.
 
-And if the network is fully saturated, or the receiver just drove through a tunnel with no internet access (increasingly rare), you can start over.
-Cancel the previous QUIC stream and make a new one once the deltas become larger than a snapshot.
-It's that easy.
+Under extreme congestion, or when temporarily offline, the backlog of queued data will keep growing and growing.
+Once the size of queued delta updates grows larger than the size of a new snapshot, cut your losses and start over.
+Reset the stream with deltas to prevent new transmissions and create a new stream with the snapshot.
+Repeat as needed; it's that easy!
+
+I know this horse has already been beaten, battered, and deep fried, but this is yet another benefit of congestion control.
+Packets are queued locally so they can be cancelled instantaneously.
+Otherwise they would be queued on some intermediate router (ex. for 500ms).
 
 ## Application Limited 
 
