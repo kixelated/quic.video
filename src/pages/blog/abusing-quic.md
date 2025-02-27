@@ -12,6 +12,37 @@ The one disclaimer is that we can't modify web clients; the browser safe-guards 
 We have to use the WebTransport API which uses the browser's built in QUIC library.
 Our server-side modifications will still work, but short of wasting a zero-day exploit, we can't modify the client.
 
+But first, a disclaimer:
+
+## Dingus Territory 
+QUIC was designed with developers like *you* in mind.
+Yes *you*, wearing your favorite "I 💕 node_modules" T-shirt about to rewrite your website again using the Next-est framework released literally seconds ago.
+
+*You are a dingus*.
+
+The greybeards that designed QUIC, the QUIC libraries, and the related web APIs do not respect you.
+They think that given a shotgun, the first thing you're going to do is blow your own foot off.
+And they're right of course.
+
+That's why there is no UDP socket Web API.
+WebRTC data channels claim to have "unreliable" messages but don't even get me started.
+Heck, there's not even a TCP socket Web API; WebSockets force a HTTP handshake for *reasons*.
+
+QUIC (via WebTransport) doesn't change that mentality.
+You can't even disable encryption aka TLS aka HTTPS.
+Because otherwise *some dingus* would disable it because they think it make computer go slow (it doesn't) and oh no now North Korea has some more bitcoins.
+It's not a good look to provide users with unsafe APIs.
+
+But let's suspend reality for a second.
+Let's say that *You* are a savant who fully understands QUIC and networking.
+You're here because you understand the ramifications of your actions and want to push the boundaries of QUIC.
+That's great because I have a blog post for you.
+
+For everyone else, heed my warnings.
+Friends don't let friends design UDP protocols.
+(And we're friends?)
+You should start simple and use the intended QUIC API before reaching for that shotgun.
+
 
 ## Proper QUIC Datagrams
 I've been quite critical in the past about QUIC datagrams.
@@ -19,75 +50,97 @@ Bold statements like "they are bait" and "never use datagrams".
 But some developers don't want to know the truth and just want their beloved UDP datagrams.
 
 The problem is that QUIC datagrams are *not* UDP datagrams.
-That's would be something closer to DTLS.
+That would be something closer to DTLS.
 Instead, QUIC datagrams:
 1. Are congestion controlled.
 2. Trigger acknowledgements.
-3. Avoid surfacing these acknowledgements.
+3. Do not expose these acknowledgements.
 4. May be batched.
 
 We're going to try to fix *some* of these short-comings by modifying a standard QUIC library.
 Be warned though, you're entering dingus territory.
 
-### Dingus Alert 
-QUIC libraries expect developers like *you* so they baby-proof the shotgun.
-They don't want web developers, sporting their favorite "I 💕 node_modules" T-shirt, to access the raw power of UDP and aim it straight at their foot.
-
-That's why there is no UDP socket Web API.
-Heck, there's not even a TCP socket Web API as WebSockets force a HTTP handshake for *reasons*.
-You can get kiiiind of close with WebRTC data channels but they are broken for so many reasons.
-
-QUIC (via WebTransport) doesn't change that mentality.
-
-
-Nor is there a way to do
-
 ### Congestion Control
-
-
-But let's suspend reality for a second.
-
-
 The "truth" is that there's nothing stopping a library from sending an unlimited number of QUIC datagrams.
-The specification is the equivalent of a pinky promise because there's no mechanism to enforce a limit on the receiving end.
-You'll run into flow control limits with QUIC streams, but not with QUIC datagrams.
-All we need to do is comment out one check.
+There's only some black pixels on a text document forming the word SHOULD and sometimes SHOULD NOT.
 
-But you do *need* congestion control if you're sending data over the Internet.
-Otherwise you'll suffer from congestion, bufferbloat, high loss, and other symptoms 
+"Congestion Control" is that SHOULD NOT preventing you from flooding the network.
+There's many algorithms out there, but basically they guess if the network can handle more traffic.
+The simplest form of congestion control is to send less data when packet loss is high.
+
+But to the dingus, this looks like an artifical limit.
+And it's true, many networks could sustain a higher throughput if this pesky congestion control is disabled.
+All we need to do is comment out one check and bam, we can send QUIC datagrams at an unlimited rate.
+
+I joke but PLEASE do not do this.
+
+You *need* some form of congestion control if you're sending data over the internet.
+Otherwise you'll suffer from congestion, bufferbloat, high loss, and other symptoms.
 These are not symptoms of the latest disease kept under wraps by the Trump administration, but rather a reality of the internet being a shared resource.
-But nobody said you *have* to use QUIC's congestion control; disable it and implement your own if you dare.
+
+But it's no fun starting a blog with back to back lectures.
+We're here to abuse QUIC damnit, not the readers.
+
+But nobody said that you have to use *QUIC's congestion control*.
+It's pluggable, implement your own!
+Unlike TCP, which buries the congestion controller in the kernel, QUIC libraries often expose it as an interace.
+Found a startup where you pipe each ACK to ChatGPT and let the funding roll in.
+Or do something boring and write a master's thesis.
 
 percentile meme
 
-And note that congestion control is not specific to QUIC datagrams.
+And note that custom congestion control is not specific to QUIC datagrams.
 You can use a custom congestion controller for QUIC streams too!
 
+Or completely disable it, you do you.
+
 ### Acknowledgements
-This might sound bizarre if you're used to using UDP, but QUIC will explicitly acknowledge each datagram.
-However, these are **not** used for retransmissions, so what are they for?
+QUIC will reply with an acknowledgement packet are receiving each datagram.
+This might sound absolutely bonkers if you're used to UDP.
+These are **not** used for retransmissions, so what are they for?
 
 ...they're only for congestion control.
-But we just disabled QUIC's congestion control!
-We'll just get bombarded with useless acknowledgements.
-They are batched and quite efficient so it's not the end of the world, but I can already feel your angst.
+But what if we just disabled QUIC's congestion control!
+Now we're going to get bombarded with useless acknowledgements!
 
-The most cleverest of dinguses amongst us (amogus?) may think you could leverage these ACKs for your own application.
-Unfortunately, there's an edge case discovered by yours truely where QUIC may acknowledge a datagram but never deliver it to the application.
-So if you're using QUIC datagrams, yes you do have to implement your own ACK/NACK protocol in the application and yes, it does feel terrible.
+The good news is that QUIC acknowledgements are batched, potentially at the end of your data packets, and aee quite efficient.
+It's only a few extra bytes/packsts and not the end of the world, but I can already feel your angst.
 
-But let's get rid of these useless ACKs.
+The most cleverest of dinguses amongst us (amogus?) may think you could leverage these ACKs.
+What if we used these otherwise "useless" ACKs to tell our application if a packet was received?
+That way we won't have to implement our own ACK/NACK mechanism for reliability.
+
+Unfortunately, there's an edge case discovered by yours truely where QUIC may acknowledge a datagram but not deliver it to the application.
+This will happen if a QUIC library processes a packet but the application (ex. Javascript web page) is too slow.
+
+So yes, if you're using QUIC datagrams, then you will have to implement your own ACK/NACK protocol in your application dor any reliable data.
+One datagram will trigger a QUIC ACK, your custom ACK, and a QUIC ACK for your custom ACK.
+Yes, it does feel terrible; like a mud shower on Wednesday.
+
+So let's get rid of these useless ACKs.
 If you control the receiver, you can tweak the `max_ack_delay`.
 This is a parameter exchanged during the handshake that indicates how long the implementation can wait before sending an acknowledgement.
 Crank it up to 1000ms (the default is 25ms) and the number of acknowledgement packets should slow to a trickle, acting almost as a keep-alive.
 
-Be warned that this will (somewhat) impact other QUIC frames, especially STREAM retransmissions.
-It may also throw a wrench into congestion controllers that expect timely feedback.
-IMO only hack the ack delay if you've already hacked the sender to not care about acknowledgements, otherwise its not worth it, and even then it's borderline.
+Be warned that this will impact all QUIC frames, *especially* STREAM retransmissions.
+It may also throw a wrench into the congestion controller too as they expect timely feedback.
+The chaos you've sown will be legendary.
+
+So only consider this route if you've gone full dingus and completely disabled congestion control and retransmissions.
+I'm sure it couldn't get worse.
 
 ### Batching
 Most QUIC libraries will automatically fill a UDP packet with as much data as it can.
 This is dope, but as we established, you're a dingus and can't have nice things.
+
+Maybe you're high on the thrill of sending unlimited packets and now need to figure out why so many of them are getting dropped now.
+What if we sent 100 byte packets along with extra some parity bits to fix this pesky "random" packet loss.
+Somebody call Nobel, I've got a dynamite idea.
+
+
+
+
+
 
 Let's say you want to send 100 byte datagrams and don't want QUIC to coalesce them into a single UDP packet.
 Maybe you're making a custom FEC scheme or something and you want the packets to be fully independent.
@@ -103,14 +156,15 @@ Tweak a few lines of code and boop, you're sending a proper UDP packet for each 
 
 ## Rapid Retransmit 
 I was inspired to write this blog post because someone joined my (dope) Discord server.
-They asked if they could do all of the above so they could implement their own acknowledgements and retransmissions.
+They asked if they could do all of the above so they would have proper QUIC datagrams.
+Then they could implement their own acknowledgements and retransmissions.
 
 So I asked them... why not use QUIC streams?
 They already provide reliability, ordering, and can be cancelled.
 What more could you want?
 
 ### What More Could We Want?
-QUIC is pretty poor for real-time latency.
+Unfortunately, QUIC is pretty poor for real-time latency.
 It's not designed for small payloads that need to arrive ASAP, even if it means worse efficiency.
 
 Let's say a packet gets lost over the network.
