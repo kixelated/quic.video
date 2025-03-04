@@ -57,7 +57,7 @@ write_files:
         --cap-add=SYS_PTRACE \
         -v "/etc/cert:/etc/cert:ro" \
         -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
-        ${docker}/moq-relay --bind 0.0.0.0:443 \
+        ${docker}/moq-relay --bind [::]:443 \
         --tls-cert "/etc/cert/${cluster_node}.crt" --tls-key "/etc/cert/${cluster_node}.key" \
         --tls-cert "/etc/cert/${public_host}.crt" --tls-key "/etc/cert/${public_host}.key" \
         --tls-root "/etc/cert/internal.ca" \
