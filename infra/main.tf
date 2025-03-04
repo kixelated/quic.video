@@ -2,7 +2,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "4.74.0"
+      version = "~> 5.0"
     }
 
     acme = {
@@ -16,7 +16,7 @@ terraform {
     prefix = "terraform/state"
   }
 
-  required_version = ">= 0.14"
+  required_version = ">= 1.5"
 }
 
 provider "google" {
