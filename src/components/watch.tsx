@@ -11,7 +11,7 @@ export default function Watch(props: { path: string }) {
 	return (
 		<div>
 			<moq-watch-ui class="rounded-lg overflow-hidden">
-				<moq-watch prop:url={url()} />
+				<moq-watch prop:url={url()} prop:latency={100} />
 			</moq-watch-ui>
 
 			<Region setUrl={setUrl} path={props.path} />
