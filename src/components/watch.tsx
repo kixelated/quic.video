@@ -1,4 +1,5 @@
 import "@kixelated/moq/watch";
+import "@kixelated/moq/watch/ui";
 
 import { createSignal } from "solid-js";
 
@@ -9,7 +10,10 @@ export default function Watch(props: { path: string }) {
 
 	return (
 		<div>
-			<moq-watch prop:url={url()} prop:controls={true} prop:status={true} class="rounded-lg overflow-hidden" />
+			<moq-watch-ui class="rounded-lg overflow-hidden">
+				<moq-watch prop:url={url()} />
+			</moq-watch-ui>
+
 			<Region setUrl={setUrl} path={props.path} />
 		</div>
 	);
