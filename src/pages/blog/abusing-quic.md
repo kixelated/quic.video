@@ -5,14 +5,10 @@ Unless Nintendo is involved.
 
 We're not trying to be malicious, but rather unlock new functionality while remaining compliant with the specification.
 We can do this easily because unlike TCP, QUIC is implemented in *userspace*.
-That means we can take a QUIC library, tweak a few lines of code, and unlock *new* functionality that the greybeards wanted to keep from us.
-We can ship our modified library as part of our application; nobody will suspect a thing.
+That means we can take a QUIC library, tweak a few lines of code, and unlock new functionality that the greybeards *attempted* to keep from us.
+We then ship our modified library as part of our application and nobody will suspect a thing.
 
-The one disclaimer is that we can't modify web clients; the browser safe-guards their precious UDP sockets like it's Fort Knox.
-We have to use the WebTransport API which uses the browser's built in QUIC library.
-Our server-side modifications will still work, but short of wasting a zero-day exploit, we can't modify the client.
-
-But first, a disclaimer:
+But before we continue, a disclaimer:
 
 ## Dingus Territory 
 QUIC was designed with developers like *you* in mind.
@@ -26,20 +22,21 @@ And they're right of course.
 
 That's why there is no UDP socket Web API.
 WebRTC data channels claim to have "unreliable" messages but don't even get me started.
-Heck, there's not even a TCP socket Web API; WebSockets force a HTTP handshake for *reasons*.
+Heck, there's not even a native TCP socket Web API.
+WebSockets are a close approximation but force a HTTP handshake and additional framing for *reasons*.
 
-QUIC (via WebTransport) doesn't change that mentality.
-You can't even disable encryption aka TLS aka HTTPS.
-Because otherwise *some dingus* would disable it because they think it make computer go slow (it doesn't) and oh no now North Korea has some more bitcoins.
-It's not a good look to provide users with unsafe APIs.
+QUIC doesn't change that mentality.
+Short of wasting a zero-day exploit, we have to use the browser's built-in QUIC library via the WebTransport API.
+Browser vendors like Google don't want *you*, the commoner, doing any of the stuff mentioned in this article and ruining their cultivated garden.
+But that's not going to stop us from modifying the server or the clients we control (ex. native app).
 
-But let's suspend reality for a second.
-Let's say that *You* are a savant who fully understands QUIC and networking.
-You're here because you understand the ramifications of your actions and want to push the boundaries of QUIC.
-That's great because I have a blog post for you.
+However, in doing so, you must constantly evaluate if you are the *dingus*.
+QUIC famously does not let you disable encryption because otherwise *some dingus* would disable it because they think it make computer go slow (it doesn't) and oh no now North Korea has some more meme coins.
+Almost everyone believes that encryption is slow, but once you actually benchmark AES-GCM, it turns out that almost everyone is the dingus.
+Yes, there are legitimate use-cases where a full TLS handshake is not worth it, but when the safe API is the best API 99% of the time, then it becomes the only API.
 
-For everyone else, heed my warnings.
-Friends don't let friends design UDP protocols.
+This article is the equivalent of using the `unsafe` keyword in Rust.
+Read it, soak up the power, but heed my warnings, as friends don't let friends design UDP protocols.
 (And we're friends?)
 You should start simple and use the intended QUIC API before reaching for that shotgun.
 
@@ -51,7 +48,7 @@ But some developers don't want to know the truth and just want their beloved UDP
 
 The problem is that QUIC datagrams are *not* UDP datagrams.
 That would be something closer to DTLS.
-Instead, QUIC datagrams:
+Unlike UDP datagrams, QUIC datagrams:
 1. Are congestion controlled.
 2. Trigger acknowledgements.
 3. Do not expose these acknowledgements.
