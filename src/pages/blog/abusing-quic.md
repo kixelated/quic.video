@@ -58,18 +58,20 @@ We're going to try to fix *some* of these short-comings by modifying a standard 
 Be warned though, you're entering dingus territory.
 
 ### Congestion Control
-The "truth" is that there's nothing stopping a library from sending an unlimited number of QUIC datagrams.
-There's only some black pixels on a text document forming the word SHOULD and sometimes SHOULD NOT.
+The truth is that there's nothing stopping a library from sending an unlimited number of QUIC datagrams.
+There's only a few pixels on a document somewhere saying you SHOULD NOT do this.
 
-"Congestion Control" is that SHOULD NOT preventing you from flooding the network.
-There's many algorithms out there, but basically they guess if the network can handle more traffic.
-The simplest form of congestion control is to send less data when packet loss is high.
+"Congestion Control" is that SHOULD NOT.
+There's many congestion control algorithms out there and they are is an educated guess on if the network can handle more traffic.
+The simplest form of congestion control is to send less data when packet loss is high and send more data when packet loss is low.
 
-But to the dingus, this looks like an artifical limit.
-And it's true, many networks could sustain a higher throughput if this pesky congestion control is disabled.
+But this is an artifical limit that is begging to be broken.
+It's often a hiderance as many networks could sustain a higher throughput without this pesky congestion control.
 All we need to do is comment out one check and bam, we can send QUIC datagrams at an unlimited rate.
 
-I joke but PLEASE do not do this.
+But PLEASE do not do this unless you know what you are doing... or are convinced that you know what you are doing.
+
+[ percentile meme ]
 
 You *need* some form of congestion control if you're sending data over the internet.
 Otherwise you'll suffer from congestion, bufferbloat, high loss, and other symptoms.
@@ -77,19 +79,17 @@ These are not symptoms of the latest disease kept under wraps by the Trump admin
 
 But it's no fun starting a blog with back to back lectures.
 We're here to abuse QUIC damnit, not the readers.
+Nobody said that you have to use *QUIC's congestion control*.
 
-But nobody said that you have to use *QUIC's congestion control*.
-It's pluggable, implement your own!
-Unlike TCP, which buries the congestion controller in the kernel, QUIC libraries often expose it as an interace.
-Found a startup where you pipe each ACK to ChatGPT and let the funding roll in.
-Or do something boring and write a master's thesis.
-
-percentile meme
-
+In fact, QUIC is designed with pluggable congestion control in mind.
+The good libraries expose an interface s you can ship your latest and greatest congestion controller alongside with your application.
+You can't do this with TCP as it's buried inside the kernel, so +1 points to QUIC.
 And note that custom congestion control is not specific to QUIC datagrams.
 You can use a custom congestion controller for QUIC streams too!
 
-Or completely disable it, you do you.
+So found a startup where you pipe each ACK to ChatGPT and let the funding roll in.
+Or do something boring and write a master's thesis about curve fitting or something.
+Or completely disable congestion control altogether, you do you.
 
 ### Acknowledgements
 QUIC will reply with an acknowledgement packet are receiving each datagram.
@@ -97,22 +97,28 @@ This might sound absolutely bonkers if you're used to UDP.
 These are **not** used for retransmissions, so what are they for?
 
 ...they're only for congestion control.
-But what if we just disabled QUIC's congestion control!
+But what if we just disabled QUIC's congestion control?
 Now we're going to get bombarded with useless acknowledgements!
 
-The good news is that QUIC acknowledgements are batched, potentially at the end of your data packets, and aee quite efficient.
-It's only a few extra bytes/packsts and not the end of the world, but I can already feel your angst.
+The good news is that QUIC acknowledgements are batched, potentially appended to your data packets, and are quite efficient.
+It's only a few extra bytes/packets so it's not the end of the world.
+But I can already feel your angst; your uncontrollable urge to optimize this *wasted bandwidth*.
 
-The most cleverest of dinguses amongst us (amogus?) may think you could leverage these ACKs.
+The most cleverest of dinguses amongst us (amogus?) might try to leverage these ACKs.
 What if we used these otherwise "useless" ACKs to tell our application if a packet was received?
 That way we won't have to implement our own ACK/NACK mechanism for reliability.
+Somebody call Nobel, that's a dynamite idea.
 
-Unfortunately, there's an edge case discovered by yours truely where QUIC may acknowledge a datagram but not deliver it to the application.
-This will happen if a QUIC library processes a packet but the application (ex. Javascript web page) is too slow.
+You can absolutely hack the QUIC library to expose which datagrams were acknowledged by the remote.
 
-So yes, if you're using QUIC datagrams, then you will have to implement your own ACK/NACK protocol in your application dor any reliable data.
-One datagram will trigger a QUIC ACK, your custom ACK, and a QUIC ACK for your custom ACK.
-Yes, it does feel terrible; like a mud shower on Wednesday.
+...but unfortunately, there's an edge case discovered by yours truely where QUIC may acknowledge a datagram but not deliver it to the application.
+This will happen if a QUIC library processes a packet but the application (ex. Javascript web page) is too slow to process it.
+It's not a deal breaker especially if your application is only semi-reliable, but it's quite unfortunate.
+Note: QUIC streams don't suffer from this because of flow control.
+
+If you're using QUIC datagrams and want more reliability... then you should to implement your own ACK/NACK protocol.
+This is gross because one datagram will trigger a QUIC ACK, your custom ACK, and a QUIC ACK for your custom ACK.
+The angst is overwhelming now.
 
 So let's get rid of these useless ACKs.
 If you control the receiver, you can tweak the `max_ack_delay`.
@@ -130,20 +136,35 @@ I'm sure it couldn't get worse.
 Most QUIC libraries will automatically fill a UDP packet with as much data as it can.
 This is dope, but as we established, you're a dingus and can't have nice things.
 
-Maybe you're high on the thrill of sending unlimited packets and now need to figure out why so many of them are getting dropped now.
-What if we sent 100 byte packets along with extra some parity bits to fix this pesky "random" packet loss.
-Somebody call Nobel, I've got a dynamite idea.
+Let's you're high on the thrill of sending unlimited packets after disabling congestion control.
+However, sometimes a bunch of packets get lost and you need to figure out why.
+Surely it can't be the consequences of your actions?
+
+"No!
+It's the network's fault!
+I'm going to shotgun additional copies to ensure at least one arrives..."
+
+I cringed a little bit writing that because I've sat through presentations by staff (video) engineers claiming the same thing.
+You've cringed reading this blog instead.
+
+Now there are multiple things wrong with this line of thinking.
+It turns out there's no secret cheat code to the internet: sending more packets will cause proportially *more* packet loss as devices get fully saturated.
+But we're going to save that for the finale and instead focus on **atomicity**.
+
+Packet loss instinctively feels like an independent event, like a coin toss on a router.
+Sending the same packet back-to-back means you get to toss the coin again, right?
+In reality, a "packet" is a high level abstraction.
+Even the humble UDP packet will get coalesced at a lower level (ex. Ethernet, WiFi) that may even be using it's own recovery scheme.
+Your "independent" packets may actually be fate-bound and dropped together.
+
+QUIC takes this a step further and batches everything, including datagrams.
+Ten 100 byte datagrams may appear disjoint in your application but secretly get combined into one UDP datagram under the covers.
 
 
 
+Your brain used to be smooth but now it's wrinkly af.
 
 
-
-Let's say you want to send 100 byte datagrams and don't want QUIC to coalesce them into a single UDP packet.
-Maybe you're making a custom FEC scheme or something and you want the packets to be fully independent.
-
-I interupt this example to proclaim that this is a terrible idea.
-Your packets will still get coalesced at a lower level (ex. Ethernet, WiFi) that may even be using it's own FEC scheme.
 More UDP packets means more context switching means worse performance.
 
 But I'm here to pretend not to judge.
