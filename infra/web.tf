@@ -6,7 +6,7 @@ resource "google_cloud_run_v2_service" "web" {
 
   template {
     containers {
-      image = "docker.io/kixelated/moq-js"
+      image = "docker.io/kixelated/quic.video"
     }
   }
 
