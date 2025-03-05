@@ -1,19 +1,3 @@
-resource "google_compute_network" "relay" {
-  name                    = "relay"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "relay" {
-  for_each = local.relays
-
-  name             = "relay-${each.key}"
-  ip_cidr_range    = "10.${index(keys(local.relays), each.key) + 1}.0.0/24"
-  region           = each.value.region
-  network          = google_compute_network.relay.id
-  stack_type       = "IPV4_IPV6"
-  ipv6_access_type = "EXTERNAL"
-}
-
 resource "google_compute_instance" "relay" {
   for_each = local.relays
 
@@ -35,20 +19,10 @@ resource "google_compute_instance" "relay" {
   }
 
   network_interface {
-    network    = google_compute_network.relay.id
-    subnetwork = google_compute_subnetwork.relay[each.key].id
-    stack_type = "IPV4_IPV6"
+    network = "default"
 
     access_config {
-      nat_ip                 = google_compute_address.relay[each.key].address
-      network_tier           = "PREMIUM"
-      public_ptr_domain_name = "relay.${each.key}.${var.domain}."
-    }
-
-    ipv6_access_config {
-      network_tier           = "PREMIUM"
-      public_ptr_domain_name = "relay.${each.key}.${var.domain}."
-      external_ipv6          = google_compute_address.relay_ipv6[each.key].address
+      nat_ip = google_compute_address.relay[each.key].address
     }
   }
 
@@ -82,6 +56,11 @@ resource "google_compute_instance" "relay" {
   # For the firewall
   tags = ["relay"]
 
+  lifecycle {
+    # There seems to be a terraform bug causing this to be recreated on every apply
+    # ignore_changes = [boot_disk]
+  }
+
   allow_stopping_for_update = true
 }
 
@@ -90,22 +69,6 @@ resource "google_compute_address" "relay" {
 
   name   = "relay-${each.key}"
   region = each.value.region
-
-  address_type = "EXTERNAL"
-  ip_version   = "IPV4"
-  network_tier = "PREMIUM"
-}
-
-resource "google_compute_address" "relay_ipv6" {
-  for_each = local.relays
-
-  name               = "relay-${each.key}-ipv6"
-  region             = each.value.region
-  address_type       = "EXTERNAL"
-  ip_version         = "IPV6"
-  ipv6_endpoint_type = "VM"
-  network_tier       = "PREMIUM"
-  subnetwork         = google_compute_subnetwork.relay[each.key].id
 }
 
 # Create a DNS entry for each node.
@@ -122,7 +85,7 @@ resource "google_dns_record_set" "relay" {
 # Allow UDP 443
 resource "google_compute_firewall" "relay" {
   name    = "relay"
-  network = google_compute_network.relay.id
+  network = "default"
 
   allow {
     protocol = "udp"
@@ -132,21 +95,6 @@ resource "google_compute_firewall" "relay" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["relay"]
 }
-
-# Allow UDP 443 for IPv6
-resource "google_compute_firewall" "relay_ipv6" {
-  name    = "relay-ipv6"
-  network = google_compute_network.relay.id
-
-  allow {
-    protocol = "udp"
-    ports    = ["443"]
-  }
-
-  source_ranges = ["::/0"]
-  target_tags   = ["relay"]
-}
-
 
 # We must use a legacy health check for the UDP load balancer
 resource "google_compute_http_health_check" "relay" {

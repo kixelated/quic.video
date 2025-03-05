@@ -1,4 +1,4 @@
-# Global Geo DNS for IPv4, routing to the closest region.
+# Global Geo DNS, routing to the closest region.
 resource "google_dns_record_set" "relay_global" {
   name         = "relay.${var.domain}."
   type         = "A"
@@ -13,27 +13,6 @@ resource "google_dns_record_set" "relay_global" {
         location = geo.value.region
         rrdatas = [
           google_compute_address.relay[geo.key].address
-        ]
-      }
-    }
-  }
-}
-
-# Global Geo DNS for IPv6, routing to the closest region.
-resource "google_dns_record_set" "relay_global_ipv6" {
-  name         = "relay.${var.domain}."
-  type         = "AAAA"
-  ttl          = 60
-  managed_zone = google_dns_managed_zone.public.name
-
-  routing_policy {
-    dynamic "geo" {
-      for_each = local.relays
-
-      content {
-        location = geo.value.region
-        rrdatas = [
-          google_compute_address.relay_ipv6[geo.key].address
         ]
       }
     }
