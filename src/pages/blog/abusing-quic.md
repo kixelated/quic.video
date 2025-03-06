@@ -187,16 +187,20 @@ Okay so we've hacked QUIC datagrams to pieces, but why?
 
 I was actually inspired to write this blog post because someone joined my (dope) Discord server.
 They asked if they could do all of the above so they would have proper QUIC datagrams.
-Only then they could implement their own acknowledgements and retransmissions.
 
 The use-game is vidya games.
 The most common approach for video games is to process game state at a constant "tick" rate.
 VALORANT, for example, uses a tick rate of [128 Hz](https://playvalorant.com/en-us/news/dev/how-we-got-to-the-best-performing-valorant-servers-since-launch/) meaning each update covers a 7.8ms period.
 It's really not too difficult from frame rate (my vidya background) but latency is more crucial otherwise nerds get mad.
 
-But why disassemble QUIC only to reassemble parts of it?
-QUIC srreams provide reliability, ordering, and can be cancelled.
-What more could you want?
+So the idea is to transmit each game tick as a QUIC datagram.
+However, that would involve transmitting a lot of redundant information, as two game ticks may be very similar to each other.
+So the idea is to implement custom acknowledgements and (re)transmit only the unacknowledged deltas.
+
+If you've had the pleasure of implementing QUIC before, this might sound very similar to how QUIC streams work internally.
+In fact, this line of thinking is what lead me to ditch RTP over QUIC (datagrams) and embrace Media over QUIC (streams).
+So why disassemble QUIC only to reassemble parts of it?
+If we used QUIC streams instead, what more could you want?
 
 ### What More Could We Want?
 Look, I may be one of the biggest QUIC fanboys, but I've got to admit that QUIC is pretty poor for real-time latency.
@@ -243,15 +247,32 @@ Of course not what a dumb rhetorical question.
 We can use QUIC streams!
 A QUIC stream is nothing more than a byte slice.
 The stream is arbitrarily split into STREAM frames that consists of an offset and a payload.
-The QUIC reviever reassembles these frames in order before flushing to the application, although some QUIC libraries allow flushing out of order.
+The QUIC reviever reassembles these frames in order before flushing to the application.
+Some QUIC libraries even allow the application to read stream chunks out of order.
+
+How do we use QUIC streams for vidya games?
+Let's suppose we start with a base game state of 1000 bytes and each tick there's an update of 100 bytes.
+We make a new stream, serialize the base game state, and constantly append each update.
+QUIC will ensure that the update and deltas arrive in the intended order so it's super easy to parse.
+
+But not so fast, there's a **huge** issue.
+We just implemented head-of-line blocking and our protocol is suddenly no better than TCP!
+I was promised that QUIC was supposed to fix this...
+
+
 
 We can abuse the fact that a QUIC receiver must be prepared to accept duplicate or redundant STREAM frames.
 This can happen naturally if a packet is lost or arrives out of order.
 You might see where this is going: nothing can stop us from sending a boatload of packets.
 
+
+
+
 Our QUIC library does not need to wait for a (negative) acknowledgement before retransmitting a stream chunk.
 We could just send it again, and again, and again every 50ms.
 If it's a duplicate, then QUIC will silently ignore it.
+
+## A Problem
 
 But there's a pretty major issue with this approach:
 **BUFFERBLOAT**.
@@ -261,8 +282,11 @@ It turns out that some routers may queue packets for an undisclosed amount of ti
 Let's say you retransmit every 50ms and everything works great on your PC.
 A user from Brazil or India downloads your application and it initially works great too.
 But eventually their ISP gets overwhelmed and congestion causes the RTT to (temporarily) increase to 500ms.
-...well now you're transmitting 10x the data and further aggravating any congestion.
+...well now you're transmitting 10x the data, potentially aggravating any congestion and preventing recovery.
 It's a vicious loop and you've basically built your own DDoS agent.
+
+For the distributed engineers amogus, this is the networking equivalent of an F5 refresh storm.
+
 
 Either way, sending redundant copies of data is nothing new.
 Let's go a step further and embrace QUIC streams.
