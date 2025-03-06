@@ -1,4 +1,7 @@
-# Abusing QUIC
+# Abusing QUIC Datagrams
+This is the first part of our QUIC hackathon.
+Read [Abusing QUIC Streams](/blog/abusing-quic-streams) if you like ordered data like a normal human being.
+
 We're going to hack QUIC.
 "Hack" like a ROM-hack, not "hack" like a prison sentence.
 Unless Nintendo is involved.
@@ -10,7 +13,7 @@ We then ship our modified library as part of our application and nobody will sus
 
 But before we continue, a disclaimer:
 
-## Dingus Territory 
+## Dingus Territory
 QUIC was designed with developers like *you* in mind.
 Yes *you*, wearing your favorite "I 💕 node_modules" T-shirt about to rewrite your website again using the Next-est framework released literally seconds ago.
 
@@ -181,7 +184,7 @@ Tweak a few lines of code and boop, you're sending a proper UDP packet for each 
 I'm not sure why you would, because it can only worsen performance, but I'm here (to pretend) not to judge.
 Your brain used to be smooth but now it's wrinkly af 🧠🔥.
 
-## Real-time Streams 
+## Real-time Streams
 Look, I may be one of the biggest QUIC fanboys on the planet, but I've got to admit that QUIC streams are pretty poor for real-time latency.
 They're designed for not designed for bulk delivery, not small payloads that need to arrive ASAP like voice calls.
 It's the reason why the dinguses reach for datagrams.
@@ -208,7 +211,7 @@ The RFC outlines a *recommended* algorithm that I'll attempt to simplify:
 - After finally receiving an ACK, the sender *may* decide that a packet was lost if:
   - 3 newer sequences were ACKed.
   - or a multiple of the RTT has elapsed.
-- As the congestion controller allows, retransmit any lost packets and repeat. 
+- As the congestion controller allows, retransmit any lost packets and repeat.
 
 Skipped that boring, "simplified" wall of text?
 I don't blame you.
@@ -226,7 +229,7 @@ Throw QUIC into the mix and some packets will take 300ms to 450ms of conservativ
 *cyka bylat*
 
 
-### Head-of-line Blocking 
+### Head-of-line Blocking
 We're not done yet.
 QUIC streams are also poor for real-time because they introduce head-of-line blocking.
 
@@ -251,7 +254,7 @@ No cushy software engineering gig for you.
 *Create a stream, write the word "hello", then later write "world".*
 
 This is classic head-of-line blocking. If the packet containing "hello" gets lost over the network, then we can't actually use the "world" message if it arrives first.
-But that's okay in this scenario because of my arbitrary rules 
+But that's okay in this scenario because of my arbitrary rules
 
 The real problem is that when the "hello" packet is lost, it won't arrive for *at least* an RTT after "world" because of the affirmationed retransmission logic.
 That's no good.
@@ -270,7 +273,7 @@ For you library maintainers out there, consider adding this as a `stream.retrans
 
 ### BBR
 
-## Improper QUIC Streams 
+## Improper QUIC Streams
 Okay so we've hacked QUIC datagrams to pieces, but why?
 
 I was actually inspired to write this blog post because someone joined my (dope) Discord server.
@@ -310,7 +313,7 @@ The RFC outlines a *recommended* algorithm that I'll attempt to simplify:
 - After finally receiving an ACK, the sender *may* decide that a packet was lost if:
   - 3 newer sequences were ACKed.
   - or a multiple of the RTT has elapsed.
-- As the congestion controller allows, retransmit any lost packets and repeat. 
+- As the congestion controller allows, retransmit any lost packets and repeat.
 
 Skipped that boring wall of text?
 I don't blame you.
@@ -379,7 +382,7 @@ For the distributed engineers amogus, this is the networking equivalent of an F5
 Either way, sending redundant copies of data is nothing new.
 Let's go a step further and embrace QUIC streams.
 
-### How I Learned to Embrace the Stream 
+### How I Learned to Embrace the Stream
 
 
 At the end of the day, a QUIC STREAM frame is a byte offset and payload.
@@ -436,7 +439,7 @@ Repeat as needed; it's that easy!
 
 I know this horse has already been beaten, battered, and deep fried, but this is yet another benefit of congestion control.
 Packets are queued locally so they can be cancelled instantaneously.
-Otherwise they would be queued on some intermediate router (ex. for 500ms). 
+Otherwise they would be queued on some intermediate router (ex. for 500ms).
 
 ## Hack the Library
 https://github.com/quinn-rs/quinn/blob/6bfd24861e65649a7b00a9a8345273fe1d853a90/quinn-proto/src/frame.rs#L211
