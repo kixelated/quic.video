@@ -181,6 +181,94 @@ Tweak a few lines of code and boop, you're sending a proper UDP packet for each 
 I'm not sure why you would, because it can only worsen performance, but I'm here (to pretend) not to judge.
 Your brain used to be smooth but now it's wrinkly af 🧠🔥.
 
+## Real-time Streams 
+Look, I may be one of the biggest QUIC fanboys on the planet, but I've got to admit that QUIC streams are pretty poor for real-time latency.
+They're designed for not designed for bulk delivery, not small payloads that need to arrive ASAP like voice calls.
+It's the reason why the dinguses reach for datagrams.
+
+But don't take my wrinkle brain statements as fact.
+Let's dive deeper and FIX IT.
+
+### Detecting Loss
+```
+|  |i
+|| |_
+```
+
+*How does a QUIC library know when a packet is lost?*
+
+It doesn't.
+There's no explicit signal from routers (yet?) when a packet is lost.
+A QUIC library has to instead use FACTS and LOGIC to make an educated guess.
+The RFC outlines a *recommended* algorithm that I'll attempt to simplify:
+
+- The sender increments a sequence number for each packet.
+- Upon receiving a packet, the receiver will start a timer to ACK that sequence number, batching with any others that arrive within `max_ack_delay`.
+- If the sender does not receive an ACK after waiting multiple RTTs, it will send another packet (like a PING) to poke the receiver and hopefully start the ACK timer.
+- After finally receiving an ACK, the sender *may* decide that a packet was lost if:
+  - 3 newer sequences were ACKed.
+  - or a multiple of the RTT has elapsed.
+- As the congestion controller allows, retransmit any lost packets and repeat. 
+
+Skipped that boring, "simplified" wall of text?
+I don't blame you.
+You're just here for the funny blog and *maaaaybe* learn something along the way.
+
+I'll help.
+If a packet is lost, it takes anywhere from 1-3 RTTs to detect the loss and retransmit.
+It's particularly bad for the last few packets in a burst because if they're lost, nothing starts the acknowledgement timer and the sender will have to poke.
+"You still alive over there?".
+The tail of our stream will take longer (on average) to arrive unless there's other data in flight to perform this poking.
+
+And just in case I lost you in the acronym soup, RTT is just another way of saying "your ping".
+So if you're playing Counter Strike cross-continent with a ping of 150ms, you're already at a disadvantage.
+Throw QUIC into the mix and some packets will take 300ms to 450ms of conservative retransmissions.
+*cyka bylat*
+
+
+### Head-of-line Blocking 
+We're not done yet.
+QUIC streams are also poor for real-time because they introduce head-of-line blocking.
+
+Let's suppose we want to stream real-time chat over QUIC.
+But we're super latency sensitive, like it's a bad rash, and need the latest sentence as soon as possible.
+We can't settle for random words; we need the full thing in order baby.
+The itch is absolutely unbearable and we're okay being a little bit wasteful.
+
+If the broadcaster types "hello" followed shortly by "world", we have a few options.
+Pop quiz, which approach is subjectively the best:
+
+Option A: Create a stream, write the word "hello", then later write "world".
+Option B: Create a stream and write "0hello". Later, create another stream and write "5world". The number at the start is the offset.
+Option C: Create a stream and write "hello". Later, create another stream and write "helloworld".
+Option D: Abuse QUIC (no spoilers)
+
+If you answered D then you're correct.
+Let's use a red pen and explain why the other students are failing the exam.
+No cushy software engineering gig for you.
+
+#### Option A
+*Create a stream, write the word "hello", then later write "world".*
+
+This is classic head-of-line blocking. If the packet containing "hello" gets lost over the network, then we can't actually use the "world" message if it arrives first.
+But that's okay in this scenario because of my arbitrary rules 
+
+The real problem is that when the "hello" packet is lost, it won't arrive for *at least* an RTT after "world" because of the affirmationed retransmission logic.
+That's no good.
+
+#### Option B
+*Create a stream and write "0hello". Later, create another stream and write "5world". The number at the start is the offset.*
+
+I didn't explain how multiple streams work because a bad teacher blames their students.
+And I wanted to blame you.
+
+
+QUIC will retransmit any unacknowledged fragments of a stream.
+But like I said above, only when a packet is considered lost.
+But with the power of h4cks, we could have the QUIC library *assume* the rest of the stream is lost and needs to be retransmitted.
+For you library maintainers out there, consider adding this as a `stream.retransmit()` method and feel free to forge my username into the git commit.
+
+### BBR
 
 ## Improper QUIC Streams 
 Okay so we've hacked QUIC datagrams to pieces, but why?
