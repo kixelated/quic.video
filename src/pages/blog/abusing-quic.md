@@ -187,10 +187,15 @@ Okay so we've hacked QUIC datagrams to pieces, but why?
 
 I was actually inspired to write this blog post because someone joined my (dope) Discord server.
 They asked if they could do all of the above so they would have proper QUIC datagrams.
-Then they could implement their own acknowledgements and retransmissions.
+Only then they could implement their own acknowledgements and retransmissions.
 
-So I asked them... why not use QUIC streams?
-They already provide reliability, ordering, and can be cancelled.
+The use-game is vidya games.
+The most common approach for video games is to process game state at a constant "tick" rate.
+VALORANT, for example, uses a tick rate of [128 Hz](https://playvalorant.com/en-us/news/dev/how-we-got-to-the-best-performing-valorant-servers-since-launch/) meaning each update covers a 7.8ms period.
+It's really not too difficult from frame rate (my vidya background) but latency is more crucial otherwise nerds get mad.
+
+But why disassemble QUIC only to reassemble parts of it?
+QUIC srreams provide reliability, ordering, and can be cancelled.
 What more could you want?
 
 ### What More Could We Want?
@@ -198,17 +203,14 @@ Look, I may be one of the biggest QUIC fanboys, but I've got to admit that QUIC 
 It's not designed for small payloads that need to arrive ASAP, like voice calls.
 
 But don't take my wrinkle brain statements as fact.
-Let's dive deeper into the conceptual abyss.
-How does a QUIC library know when a packet is lost?
+Let's dive deeper.
 
-The unfortunate reality is that it doesn't.
-There's no explicit signal (yet?) from routers.
-A QUIC library has to instead use FACTS and LOGIC like Ben Shapiro losing a debate against a debate against a university student.
-Yes I did make a second political joke in a nerd blog about networking, but that shouldn't be a surprise because I use Rust.
-🏳️‍🌈🏳️‍⚧️:usa:
+*How does a QUIC library know when a packet is lost?*
 
-Anyway, QUIC works by making an educated guess that a packet is lost and needs to be retransmitted.
-The RFC outlines an algorithm and some *recommended* behavior that I'll attempt to simplify:
+It doesn't.
+There's no explicit signal from routers (yet?) when a packet is lost.
+A QUIC library has to instead use FACTS and LOGIC to make an educated guess.
+The RFC outlines a *recommended* algorithm that I'll attempt to simplify:
 
 - The sender increments a sequence number for each packet.
 - Upon receiving a packet, the receiver will start a timer to ACK that sequence number, batching with any others that arrive within `max_ack_delay`.
@@ -220,29 +222,53 @@ The RFC outlines an algorithm and some *recommended* behavior that I'll attempt 
 
 Skipped that boring wall of text?
 I don't blame you.
-You're just here for the funny (political?) blog and *maaaaybe* learn something along the way.
+You're just here for the funny blog and *maaaaybe* learn something along the way.
 
 I'll help.
 If a packet is lost, it takes anywhere from 1-3 RTTs to detect the loss and retransmit.
-It's particularly bad for the last few packets of a burst because if they're lost, nothing starts the acknowledgement timer and the sender will have to poke (via the PTO timer).
+It's particularly bad for the last few packets in a burst because if they're lost, nothing starts the acknowledgement timer and the sender will have to poke.
+"You still alive over there?"
 
-But wait what's an RTT?
-I just completely glossed over that acronym and expected Google to hallucination an explanation.
-The Round Trip Time, is pretty self-explanatory: it's the time it takes for a packet to complete a circuit to and then from a remote (aka "ping").
-So if you're playing Counter Strike cross-continent, you're already at a disadvantage because it takes 150ms for your packets to register.
-Throw QUIC into the mix and some packets will take 300ms-450ms because of the conservative retransmissions.
+And just in case I lost you in the acronym soup, RTT is just another way of saying "your ping".
+So if you're playing Counter Strike cross-continent with a ping of 150ms, you're already at a disadvantage.
+Throw QUIC into the mix and some packets will take 300ms to 450ms of conservative retransmissions.
 *cyka bylat*
 
-### We Can Do Better 
+### We Can Do Better?
 So how can we make QUIC better support real-time applications that can't wait multiple round trips?
+Should we give up and admit that networking peaked with UDP?
 
-The trick is that a QUIC receiver MUST be prepared to accept duplicate or redundant packets.
-This can happen naturally if a packet is reordered or excessively queued over the network.
-You might see where this is going: nothing can stop us from abusing this behavior and sending a boatload of packets.
+Of course not what a dumb rhetorical question.
 
-Instead of sitting around doing nothing, our QUIC library could pre-emptively retransmit data even before it's considered lost.
-Maybe we only enable this above a certain RTT where retransmissions cause unacceptable delay.
-But sending redundant copies of data is nothing new; let's go a step further and embrace QUIC streams.
+We can use QUIC streams!
+A QUIC stream is nothing more than a byte slice.
+The stream is arbitrarily split into STREAM frames that consists of an offset and a payload.
+The QUIC reviever reassembles these frames in order before flushing to the application, although some QUIC libraries allow flushing out of order.
+
+We can abuse the fact that a QUIC receiver must be prepared to accept duplicate or redundant STREAM frames.
+This can happen naturally if a packet is lost or arrives out of order.
+You might see where this is going: nothing can stop us from sending a boatload of packets.
+
+Our QUIC library does not need to wait for a (negative) acknowledgement before retransmitting a stream chunk.
+We could just send it again, and again, and again every 50ms.
+If it's a duplicate, then QUIC will silently ignore it.
+
+But there's a pretty major issue with this approach:
+**BUFFERBLOAT**.
+Surprise!
+It turns out that some routers may queue packets for an undisclosed amount of time when overloaded.
+
+Let's say you retransmit every 50ms and everything works great on your PC.
+A user from Brazil or India downloads your application and it initially works great too.
+But eventually their ISP gets overwhelmed and congestion causes the RTT to (temporarily) increase to 500ms.
+...well now you're transmitting 10x the data and further aggravating any congestion.
+It's a vicious loop and you've basically built your own DDoS agent.
+
+Either way, sending redundant copies of data is nothing new.
+Let's go a step further and embrace QUIC streams.
+
+### How I Learned to Embrace the Stream 
+
 
 At the end of the day, a QUIC STREAM frame is a byte offset and payload.
 Let's say we transmit our game state as STREAM 0-230 and 33ms later we transmit 20 bytes of deltas as STREAM 230-250.
@@ -272,10 +298,7 @@ Forking a library feels *so dirty* but it magically works.
 Okay it's not the same as the game dev solution; it's actually better because of **congestion control**.
 And once again, you do ~need~ want congestion control.
 
-Otherwise, retransmitting data can quickly balloon out of control.
-Congestion can cause bufferbloat, which is when routers queue packets for an unknown amount of time (potentially for seconds).
-Surprise!
-It turns out that a router doesn't have to drop a packet when overloaded, but instead it can queue it in RAM.
+
 
 Let's say you retransmit every 30ms and everything works great on your PC.
 A user from Brazil or India downloads your application and it initially works great too.
@@ -301,9 +324,7 @@ Repeat as needed; it's that easy!
 
 I know this horse has already been beaten, battered, and deep fried, but this is yet another benefit of congestion control.
 Packets are queued locally so they can be cancelled instantaneously.
-Otherwise they would be queued on some intermediate router (ex. for 500ms).
-
-## Application Limited 
+Otherwise they would be queued on some intermediate router (ex. for 500ms). 
 
 ## Hack the Library
 https://github.com/quinn-rs/quinn/blob/6bfd24861e65649a7b00a9a8345273fe1d853a90/quinn-proto/src/frame.rs#L211
