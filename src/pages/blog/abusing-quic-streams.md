@@ -133,9 +133,9 @@ The QUIC receiver reassembles these STREAM frames based on the offset then flush
 The magic trick depends on an important fact:
 A QUIC receiver must be prepared to accept duplicate, overlapping, or otherwise redundant STREAM frames.
 
-See, there's no requirement that a STREAM frame is retransmitted verbatim.
+See, there's no requirement that the *same* STREAM frame is retransmitted.
 If STREAM 10-20 is lost, we could retransmit it as STREAM 10-15, STREAM 17-20, and STREAM 15-17 if we wanted to.
-This is actually super useful because we can cram a UDP packet full of miscallenous STREAM frames without worrying about overrunning the MTU.
+This is on purpose and super useful because we can cram a UDP packet full of miscallenous STREAM frames without worrying about overrunning the MTU.
 
 Grab your favorite sleeveless shirt because we are *abusive*.
 
@@ -155,17 +155,11 @@ Remember the part where I said:
 
 We're back baby.
 That's because as covered in the previous section, it's totally legal to retransmit a stream chunk without waiting for an acknowledgement.
-There's nothing actually stopping us flooding the network with duplicate copies.
-We could just send it again, and again, and again, and again, and again every 50ms.
-If it's a duplicate, then QUIC will silently ignore it.
+The specification says don't do it, but there's nothing *actually* stopping us flooding the network with duplicate copies.
+If QUIC receives a duplicate stream chunk, it will silently ignore it.
 
-
-
-
-
-
-
-## A Problem
+So rather than wait 450ms for a (worst-case) acknowledgement, what if we just... don't?
+We could just transmit the same stream chunk again, and again, and again, and again, and again every 50ms.
 
 But there's a pretty major issue with this approach:
 **BUFFERBLOAT**.
@@ -179,69 +173,36 @@ But eventually their ISP gets overwhelmed and congestion causes the RTT to (temp
 It's a vicious loop and you've basically built your own DDoS agent.
 
 For the distributed engineers amogus, this is the networking equivalent of an F5 refresh storm.
+Blind retransmissions are the easiest way to join the UDP Wall of Shame.
 
 
-Either way, sending redundant copies of data is nothing new.
-Let's go a step further and embrace QUIC streams.
+### Congestion Control to the Rescue
+Actually I just lied.
 
-### How I Learned to Embrace the Stream
+This infinite loop of pain, suffering, and bloat is what would happen if you retransmitted using UDP datagrams.
+But not with QUIC streams (and datagrams).
 
-
-At the end of the day, a QUIC STREAM frame is a byte offset and payload.
-Let's say we transmit our game state as STREAM 0-230 and 33ms later we transmit 20 bytes of deltas as STREAM 230-250.
-If the original STREAM frame is lost, well even if we receive those 20 bytes, we can't actually decode them and suffer from HEAD-OF-LINE blocking.
-
-My game dev friend thinks this is unacceptable and made his own ACK-based algorithm on top of QUIC datagrams instead.
-The sender ticks every 30ms and sends a delta from the last acknowledged state, even if that data might be in-flight already.
-Pretty cool right?
-Why doesn't QUIC do this?
-
-It does.
-
-(mind blown)
-
-QUIC will retransmit any unacknowledged fragments of a stream.
-But like I said above, only when a packet is considered lost.
-But with the power of h4cks, we could have the QUIC library *assume* the rest of the stream is lost and needs to be retransmitted.
-For you library maintainers out there, consider adding this as a `stream.retransmit()` method and feel free to forge my username into the git commit.
-
-So to continue our example above, we can modify QUIC to send byte offsets 0-250 instead of just 230-250.
-And now we can accomplish the exact* same behavior as the game dev but without custom acknowledgements, retransmissions, deltas, and reassembly buffers.
-
-Forking a library feels *so dirty* but it magically works.
-
-
-### Some Caveats
-Okay it's not the same as the game dev solution; it's actually better because of **congestion control**.
-And once again, you do ~need~ want congestion control.
-
-
-
-Let's say you retransmit every 30ms and everything works great on your PC.
-A user from Brazil or India downloads your application and it initially works great too.
-But eventually their ISP gets overwhelmed and congestion causes the RTT to (temporarily) increase to 500ms.
-...well now you're transmitting 15x the data and further aggravating any congestion.
-It's a vicious loop and you've basically built your own DDoS agent.
-
-But QUIC can avoid this issue because retransmissions are gated by congestion control.
+Retransmissions are gated by congestion conntrol.
 Even when a packet is considered lost, or my hypothetical `stream.retransmit()` is called, a QUIC library won't immediately retransmit.
-Instead, retransmissions are queued up until the congestion controller deems it appropriate.
-Note that a late acknowledgement or stream reset will cancel a queued retransmission (unless your QUIC library sucks).
+Instead, stream retransmissions are queued up until the congestion controller allows more packets to be sent.
 
-Why?
-If the network is fully saturated, you need to send fewer packets to drain any network queues, not more.
-Even ignoring bufferbloat, networks are finite resources and blind retransmissions are the easiest way to join the UDP Wall of Shame.
-In this instance,.the QUIC greybeards will stop you from doing bad thing.
+The QUIC greybeards will stop you from doing bad thing.
 The children yearn for the mines, but the adults yearn for child protection laws.
 
-Under extreme congestion, or when temporarily offline, the backlog of queued data will keep growing and growing.
-Once the size of queued delta updates grows larger than the size of a new snapshot, cut your losses and start over.
-Reset the stream with deltas to prevent new transmissions and create a new stream with the snapshot.
-Repeat as needed; it's that easy!
+But now we have a new problem.
+Our precious data is getting queued locally and latency starts to climb.
+If we do nothing, then nothing gets dropped and oh no, we just reimplemented TCP.
 
-I know this horse has already been beaten, battered, and deep fried, but this is yet another benefit of congestion control.
-Packets are queued locally so they can be cancelled instantaneously.
-Otherwise they would be queued on some intermediate router (ex. for 500ms).
+At some point we have to take the L and wipe the buffer clean.
+QUIC lets you do this by resetting a stream, notifying the receiver and cancelling any queued (re)transmissions.
+We can then make a new stream (for free*) and start over with a new base.
+For those more media inclined, this would mean resetting the current GoP and encoding a new I-frame on a new stream.
 
-## Hack the Library
-https://github.com/quinn-rs/quinn/blob/6bfd24861e65649a7b00a9a8345273fe1d853a90/quinn-proto/src/frame.rs#L211
+To recap:
+- Using UDP directly: our data gets queued and arbitrarily dropped by some router in the void.
+- Using QUIC datagrams, our data get dropped locally (congestion control) and arbitrarily dropped by the void, although less often.
+- Using QUIC streams, our data gets queued locally (congestion control) and explicitly dropped when we choose.
+
+I can't believe there aren't more QUIC stream fanboys.
+It's a great abstraction because *you do not understand networking* nor should your application care how stuff gets split into IP packets.
+Your application should deal with queues that get drained at an unpredictable rate.
