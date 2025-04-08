@@ -46,8 +46,7 @@ Is AES-GCM slow and worth disabling? Absolutely not, profile your application an
 
 When the safe API is the best API 99% of the time, then it becomes the only API.
 This article is the equivalent of using the `unsafe` keyword in Rust.
-If you know what you're doing, then you can make the world a slightly better place.
-And feel really smart, let's be honest that's why you're here.
+If you know what you're doing, then you can make the world a slightly better place (but mostly feel really smart).
 But if you mess up, you wasted a ton of time for a worse product.
 
 So heed my warnings.
@@ -173,288 +172,53 @@ Surely it can't be the consequences of your actions?
 It's the network's fault!
 I'm going to send additional copies to ensure at least one arrives..."
 
-I cringed a bit writing that (while you cringed reading this blog).
+I cringed a bit writing that.
+Not as much as you've cringed while reading this blog, but a close 🥈.
 See, I've sat through too presentations by principal engineers claiming the same thing.
-FEC is the solution to a problem, but a different problem.
 It turns out there's no secret cheat code to the internet: sending more packets will cause proportially *more* packet loss as devices get fully saturated.
 
-But we're going to save that for the finale rant and instead focus on **atomicity**.
+FEC is the solution to a problem, but a different problem.
+I already wrote Never* Use Datagrams and you should read that.
+Instead, we're going to focus on **atomicity**.
+
 Like I said earlier, packet loss instinctively feels like an independent event: a coin toss on a router somewhere.
-Sending the same packet back-to-back means you get to toss the coin again, right?
+But sending the same packet back-to-back does *not* mean you get a second flip of the coin.
 
-Not really, because a "packet" is a high level abstraction.
-Even the humble UDP packet will get coalesced at a lower level with it's own recovery scheme.
-For example, 7 UDP packets (1.2KB MTU*) can fit snug into a jumbo Ethernet frame.
-If your protocol depends on "independent" packets, then you may be distraught to learn that they are actually somewhat fate-bound and may be dropped in batches.
+An IP packet is actually quite a high level abstraction.
+Our payload of data has to somehow get serialized into a physical transmission and that's the job of a lower level protocol.
+For example, 7 IP packets (1.2KB MTU*) can fit snug into a jumbo Ethernet frame.
+These frames then get sliced into different dimensions, be it time or frequency or whatever, as they traverse an underlying medium.
+A protocol like Wifi will automatically apply redundancy and even retransmissions based on the properties of the medium.
+And let's not forget intermediate routers because they will batch packets too, it's just more efficient.
 
-QUIC takes this a step further and batches everything, including datagrams.
-You may send ten, 100 byte datagrams that appear disjoint in your application but may secretly get combined into one UDP datagram under the covers.
-You're at the mercy of the QUIC library, which is at the mercy of the lower level transport.
+So if your protocol depends on "independent" packets, then you will be distraught to learn that no such thing exists.
+Packets can (and will) be dropped in batches despite your best efforts to avoid batching.
 
-Fortunately, QUIC cannot split a datagram across multiple UDP packets.
-If your datagrams are large enough (>600 bytes*) then you can sleep easy knowing they won't get combined with other datagrams.
-But just like everything else thus far, we can disable this behavior entirely.
-Tweak a few lines of code and boop, you're sending a proper UDP packet for each QUIC datagram.
+That's why QUIC goes the other direction and batches everything, including datagrams.
+An application may appear to send ten disjoint datagrams but under the hood, they may get secretly combined into one UDP datagram to avoid redundant headers.
+If not QUIC, then another layer would perform (less efficient) batching.
 
-I'm not sure why you would, because it can only worsen performance, but I'm here (to pretend) not to judge.
+The ratio of lectures to hacks is approaching dangerous levels.
+Fuck it, lets disable batching.
+
+If you control the QUIC library, one snip and you can short-circuit the batching.
+Each QUIC datagram is now a UDP packet, hazzah!
+The library should still perform *some* batching and append stuff like ACKs to packets.
+Please have mercy and don't require separate UDP packets for our ill-fated ACK friends.
+
+But even if you don't control the QUIC library (ex. browser), you can abuse the fact that QUIC cannot split a datagram across multiple packets.
+If your datagrams are large enough (>600 bytes*) then you can sleep easy knowing they won't get combined.
+...unless the QUIC library supports MTU discovery, because while the minimum MTU is 1.2KB, the maximum is 64KB.
+
+I'm not sure why you would disable batching because it can only worsen performance, but I'm here (to pretend) not to judge.
 Your brain used to be smooth but now it's wrinkly af 🧠🔥.
 
-## Real-time Streams
-Look, I may be one of the biggest QUIC fanboys on the planet, but I've got to admit that QUIC streams are pretty poor for real-time latency.
-They're designed for not designed for bulk delivery, not small payloads that need to arrive ASAP like voice calls.
-It's the reason why the dinguses reach for datagrams.
-
-But don't take my wrinkle brain statements as fact.
-Let's dive deeper and FIX IT.
-
-### Detecting Loss
-```
-|  |i
-|| |_
-```
-
-*How does a QUIC library know when a packet is lost?*
-
-It doesn't.
-There's no explicit signal from routers (yet?) when a packet is lost.
-A QUIC library has to instead use FACTS and LOGIC to make an educated guess.
-The RFC outlines a *recommended* algorithm that I'll attempt to simplify:
-
-- The sender increments a sequence number for each packet.
-- Upon receiving a packet, the receiver will start a timer to ACK that sequence number, batching with any others that arrive within `max_ack_delay`.
-- If the sender does not receive an ACK after waiting multiple RTTs, it will send another packet (like a PING) to poke the receiver and hopefully start the ACK timer.
-- After finally receiving an ACK, the sender *may* decide that a packet was lost if:
-  - 3 newer sequences were ACKed.
-  - or a multiple of the RTT has elapsed.
-- As the congestion controller allows, retransmit any lost packets and repeat.
-
-Skipped that boring, "simplified" wall of text?
-I don't blame you.
-You're just here for the funny blog and *maaaaybe* learn something along the way.
-
-I'll help.
-If a packet is lost, it takes anywhere from 1-3 RTTs to detect the loss and retransmit.
-It's particularly bad for the last few packets in a burst because if they're lost, nothing starts the acknowledgement timer and the sender will have to poke.
-"You still alive over there?".
-The tail of our stream will take longer (on average) to arrive unless there's other data in flight to perform this poking.
-
-And just in case I lost you in the acronym soup, RTT is just another way of saying "your ping".
-So if you're playing Counter Strike cross-continent with a ping of 150ms, you're already at a disadvantage.
-Throw QUIC into the mix and some packets will take 300ms to 450ms of conservative retransmissions.
-*cyka bylat*
-
-
-### Head-of-line Blocking
-We're not done yet.
-QUIC streams are also poor for real-time because they introduce head-of-line blocking.
-
-Let's suppose we want to stream real-time chat over QUIC.
-But we're super latency sensitive, like it's a bad rash, and need the latest sentence as soon as possible.
-We can't settle for random words; we need the full thing in order baby.
-The itch is absolutely unbearable and we're okay being a little bit wasteful.
-
-If the broadcaster types "hello" followed shortly by "world", we have a few options.
-Pop quiz, which approach is subjectively the best:
-
-Option A: Create a stream, write the word "hello", then later write "world".
-Option B: Create a stream and write "0hello". Later, create another stream and write "5world". The number at the start is the offset.
-Option C: Create a stream and write "hello". Later, create another stream and write "helloworld".
-Option D: Abuse QUIC (no spoilers)
-
-If you answered D then you're correct.
-Let's use a red pen and explain why the other students are failing the exam.
-No cushy software engineering gig for you.
-
-#### Option A
-*Create a stream, write the word "hello", then later write "world".*
-
-This is classic head-of-line blocking. If the packet containing "hello" gets lost over the network, then we can't actually use the "world" message if it arrives first.
-But that's okay in this scenario because of my arbitrary rules
-
-The real problem is that when the "hello" packet is lost, it won't arrive for *at least* an RTT after "world" because of the affirmationed retransmission logic.
-That's no good.
-
-#### Option B
-*Create a stream and write "0hello". Later, create another stream and write "5world". The number at the start is the offset.*
-
-I didn't explain how multiple streams work because a bad teacher blames their students.
-And I wanted to blame you.
-
-
-QUIC will retransmit any unacknowledged fragments of a stream.
-But like I said above, only when a packet is considered lost.
-But with the power of h4cks, we could have the QUIC library *assume* the rest of the stream is lost and needs to be retransmitted.
-For you library maintainers out there, consider adding this as a `stream.retransmit()` method and feel free to forge my username into the git commit.
-
-### BBR
-
-## Improper QUIC Streams
-Okay so we've hacked QUIC datagrams to pieces, but why?
-
-I was actually inspired to write this blog post because someone joined my (dope) Discord server.
-They asked if they could do all of the above so they would have proper QUIC datagrams.
-
-The use-game is vidya games.
-The most common approach for video games is to process game state at a constant "tick" rate.
-VALORANT, for example, uses a tick rate of [128 Hz](https://playvalorant.com/en-us/news/dev/how-we-got-to-the-best-performing-valorant-servers-since-launch/) meaning each update covers a 7.8ms period.
-It's really not too difficult from frame rate (my vidya background) but latency is more crucial otherwise nerds get mad.
-
-So the idea is to transmit each game tick as a QUIC datagram.
-However, that would involve transmitting a lot of redundant information, as two game ticks may be very similar to each other.
-So the idea is to implement custom acknowledgements and (re)transmit only the unacknowledged deltas.
-
-If you've had the pleasure of implementing QUIC before, this might sound very similar to how QUIC streams work internally.
-In fact, this line of thinking is what lead me to ditch RTP over QUIC (datagrams) and embrace Media over QUIC (streams).
-So why disassemble QUIC only to reassemble parts of it?
-If we used QUIC streams instead, what more could you want?
-
-### What More Could We Want?
-Look, I may be one of the biggest QUIC fanboys, but I've got to admit that QUIC is pretty poor for real-time latency.
-It's not designed for small payloads that need to arrive ASAP, like voice calls.
-
-But don't take my wrinkle brain statements as fact.
-Let's dive deeper.
-
-*How does a QUIC library know when a packet is lost?*
-
-It doesn't.
-There's no explicit signal from routers (yet?) when a packet is lost.
-A QUIC library has to instead use FACTS and LOGIC to make an educated guess.
-The RFC outlines a *recommended* algorithm that I'll attempt to simplify:
-
-- The sender increments a sequence number for each packet.
-- Upon receiving a packet, the receiver will start a timer to ACK that sequence number, batching with any others that arrive within `max_ack_delay`.
-- If the sender does not receive an ACK after waiting multiple RTTs, it will send another packet (like a PING) to poke the receiver and hopefully start the ACK timer.
-- After finally receiving an ACK, the sender *may* decide that a packet was lost if:
-  - 3 newer sequences were ACKed.
-  - or a multiple of the RTT has elapsed.
-- As the congestion controller allows, retransmit any lost packets and repeat.
-
-Skipped that boring wall of text?
-I don't blame you.
-You're just here for the funny blog and *maaaaybe* learn something along the way.
-
-I'll help.
-If a packet is lost, it takes anywhere from 1-3 RTTs to detect the loss and retransmit.
-It's particularly bad for the last few packets in a burst because if they're lost, nothing starts the acknowledgement timer and the sender will have to poke.
-"You still alive over there?"
-
-And just in case I lost you in the acronym soup, RTT is just another way of saying "your ping".
-So if you're playing Counter Strike cross-continent with a ping of 150ms, you're already at a disadvantage.
-Throw QUIC into the mix and some packets will take 300ms to 450ms of conservative retransmissions.
-*cyka bylat*
-
-### We Can Do Better?
-So how can we make QUIC better support real-time applications that can't wait multiple round trips?
-Should we give up and admit that networking peaked with UDP?
-
-Of course not what a dumb rhetorical question.
-
-We can use QUIC streams!
-A QUIC stream is nothing more than a byte slice.
-The stream is arbitrarily split into STREAM frames that consists of an offset and a payload.
-The QUIC reviever reassembles these frames in order before flushing to the application.
-Some QUIC libraries even allow the application to read stream chunks out of order.
-
-How do we use QUIC streams for vidya games?
-Let's suppose we start with a base game state of 1000 bytes and each tick there's an update of 100 bytes.
-We make a new stream, serialize the base game state, and constantly append each update.
-QUIC will ensure that the update and deltas arrive in the intended order so it's super easy to parse.
-
-But not so fast, there's a **huge** issue.
-We just implemented head-of-line blocking and our protocol is suddenly no better than TCP!
-I was promised that QUIC was supposed to fix this...
-
-
-
-We can abuse the fact that a QUIC receiver must be prepared to accept duplicate or redundant STREAM frames.
-This can happen naturally if a packet is lost or arrives out of order.
-You might see where this is going: nothing can stop us from sending a boatload of packets.
-
-
-
-
-Our QUIC library does not need to wait for a (negative) acknowledgement before retransmitting a stream chunk.
-We could just send it again, and again, and again every 50ms.
-If it's a duplicate, then QUIC will silently ignore it.
-
-## A Problem
-
-But there's a pretty major issue with this approach:
-**BUFFERBLOAT**.
-Surprise!
-It turns out that some routers may queue packets for an undisclosed amount of time when overloaded.
-
-Let's say you retransmit every 50ms and everything works great on your PC.
-A user from Brazil or India downloads your application and it initially works great too.
-But eventually their ISP gets overwhelmed and congestion causes the RTT to (temporarily) increase to 500ms.
-...well now you're transmitting 10x the data, potentially aggravating any congestion and preventing recovery.
-It's a vicious loop and you've basically built your own DDoS agent.
-
-For the distributed engineers amogus, this is the networking equivalent of an F5 refresh storm.
-
-
-Either way, sending redundant copies of data is nothing new.
-Let's go a step further and embrace QUIC streams.
-
-### How I Learned to Embrace the Stream
-
-
-At the end of the day, a QUIC STREAM frame is a byte offset and payload.
-Let's say we transmit our game state as STREAM 0-230 and 33ms later we transmit 20 bytes of deltas as STREAM 230-250.
-If the original STREAM frame is lost, well even if we receive those 20 bytes, we can't actually decode them and suffer from HEAD-OF-LINE blocking.
-
-My game dev friend thinks this is unacceptable and made his own ACK-based algorithm on top of QUIC datagrams instead.
-The sender ticks every 30ms and sends a delta from the last acknowledged state, even if that data might be in-flight already.
-Pretty cool right?
-Why doesn't QUIC do this?
-
-It does.
-
-(mind blown)
-
-QUIC will retransmit any unacknowledged fragments of a stream.
-But like I said above, only when a packet is considered lost.
-But with the power of h4cks, we could have the QUIC library *assume* the rest of the stream is lost and needs to be retransmitted.
-For you library maintainers out there, consider adding this as a `stream.retransmit()` method and feel free to forge my username into the git commit.
-
-So to continue our example above, we can modify QUIC to send byte offsets 0-250 instead of just 230-250.
-And now we can accomplish the exact* same behavior as the game dev but without custom acknowledgements, retransmissions, deltas, and reassembly buffers.
-
-Forking a library feels *so dirty* but it magically works.
-
-
-### Some Caveats
-Okay it's not the same as the game dev solution; it's actually better because of **congestion control**.
-And once again, you do ~need~ want congestion control.
-
-
-
-Let's say you retransmit every 30ms and everything works great on your PC.
-A user from Brazil or India downloads your application and it initially works great too.
-But eventually their ISP gets overwhelmed and congestion causes the RTT to (temporarily) increase to 500ms.
-...well now you're transmitting 15x the data and further aggravating any congestion.
-It's a vicious loop and you've basically built your own DDoS agent.
-
-But QUIC can avoid this issue because retransmissions are gated by congestion control.
-Even when a packet is considered lost, or my hypothetical `stream.retransmit()` is called, a QUIC library won't immediately retransmit.
-Instead, retransmissions are queued up until the congestion controller deems it appropriate.
-Note that a late acknowledgement or stream reset will cancel a queued retransmission (unless your QUIC library sucks).
-
-Why?
-If the network is fully saturated, you need to send fewer packets to drain any network queues, not more.
-Even ignoring bufferbloat, networks are finite resources and blind retransmissions are the easiest way to join the UDP Wall of Shame.
-In this instance,.the QUIC greybeards will stop you from doing bad thing.
-The children yearn for the mines, but the adults yearn for child protection laws.
-
-Under extreme congestion, or when temporarily offline, the backlog of queued data will keep growing and growing.
-Once the size of queued delta updates grows larger than the size of a new snapshot, cut your losses and start over.
-Reset the stream with deltas to prevent new transmissions and create a new stream with the snapshot.
-Repeat as needed; it's that easy!
-
-I know this horse has already been beaten, battered, and deep fried, but this is yet another benefit of congestion control.
-Packets are queued locally so they can be cancelled instantaneously.
-Otherwise they would be queued on some intermediate router (ex. for 500ms).
+## Conclusion 
+I know you just want your precious UDP datagrams but they're kept in a locked drawer lest you hurt yourself.
+But I've given you the key and it's your turn to prove me right.
+
+If you want to "hack" QUIC for more constructive purposes, check out my next blog about QUIC streams.
+There's actually some changes you could make without incurring self-harm.
 
 ## Hack the Library
 https://github.com/quinn-rs/quinn/blob/6bfd24861e65649a7b00a9a8345273fe1d853a90/quinn-proto/src/frame.rs#L211
