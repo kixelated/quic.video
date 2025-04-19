@@ -2,9 +2,30 @@
 This is the second part of our QUIC hackathon.
 Read [Abusing QUIC Datagrams](/blog/abusing-quic-datagrams) if byte streams confuse you.
 
-Look, I may be one of the biggest QUIC fanboys on the planet, but I've got to admit that QUIC streams are pretty poor for real-time latency.
-They're designed for not designed for bulk delivery, not small payloads that need to arrive ASAP like voice calls.
-It's the reason why the dinguses reach for datagrams.
+Look, I may be one of the biggest QUIC fanboys on the planet.
+I'm ashamed to admit that QUIC streams are meh for real-time latency.
+
+I know, I know, I just spent the last blog post chastising you, the `I <3 node_modules` developer, for daring to dream.
+For daring to vibe code.
+
+
+## QUIC 101
+It's by design: QUIC streams trickle.
+
+
+
+
+
+Thi
+ou could reach for datagrams like a dingus 
+
+QUIC streams are designed to trickle, relying on retransmissions to *eventually* patch any holes caused by packet loss.
+The key 
+
+QUIC datagrams are the intended alternative, but as I outlined in my last blog post, they're bait for dinguses.
+
+But what if I told you that we can abuse QUIC streams to better achieve real-time latency?
+
 
 But don't take my wrinkle brain statements as fact.
 Let's dive deeper and FIX IT.
@@ -15,11 +36,22 @@ Let's dive deeper and FIX IT.
 || |_
 ```
 
-*How does a QUIC library know when a packet is lost?*
+QUIC streams are continuous byte streams that rely on retransmissions to *eventually* patch any holes caused by packet loss.
+The key word being *eventually*, as QUIC won't waste bandwidth on retransmissions unless theyre needed.
 
-It doesn't.
-There's no explicit signal from routers (yet?) when a packet is lost.
-A QUIC library has to instead use FACTS and LOGIC to make an educated guess.
+**Pop quiz:**
+*How does a QUIC library know when a packet is lost and needs to be retransmitted?*
+
+**Answer**:
+Trick question, it doesn't.
+
+A pop quiz this early into a blog post?
+AND a trick question?
+That's not fair.
+
+There's no explicit signal from routers when a packet is lost.
+L4S might change that on some networks but I wouldn't get your hopes up.
+Instead, a QUIC library has to instead use FACTS and LOGIC to make an educated guess.
 The RFC outlines a *recommended* algorithm that I'll attempt to simplify:
 
 - The sender increments a sequence number for each packet.
