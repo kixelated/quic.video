@@ -6,29 +6,52 @@ Look, I may be one of the biggest QUIC fanboys on the planet.
 I'm ashamed to admit that QUIC streams are meh for real-time latency.
 
 I know, I know, I just spent the last blog post chastising you, the `I <3 node_modules` developer, for daring to dream.
+For daring to send individual IP packets without a higher level abstraction.
 For daring to vibe code.
+
+Fret not because we can "fix" QUIC streams with some clever library tweaks.
+It's more work and more wasted bytes but that's basically our job as programmers, right?
+A small price to pay.
 
 
 ## QUIC 101
-It's by design: QUIC streams trickle.
+QUIC streams trickle.
 
+Just like TCP, all of the data written to a QUIC steam will eventually arrive (unless cancelled).
+If there's packet loss, retransmissions will *eventually* patch any holes.
+If there's poor network conditions, congestion control will slow down the send rate until it *eventually* recovers.
+If the receiver is CPU starved, flow control will pause transmissions until they *eventually* recover.
 
+Like the DMV, QUIC steams are little more than queues.
+You write data to the end while the QUIC library transmits packet-sized chunks from the front.
+In the business we call this a FIFO.
 
+But what happens when you have royal data that must arrive ASAP?
+If we write to the end of a stream, then it might get queued behind peasant data that is blocked for whatever reason.
+This called "head-of-line" blocking and it has plagued TCP since its inception.
 
+Enter Robespierre.
+QUIC is a huge advancement over TCP because it offers off-with-the-head-of-line blocking.
+Instead of appending to an existing stream, we can open a new stream and (optionally) reset the existing stream.
+Our royal stream can be marked highest priority while the peasant stream can be sent to the guillotine.
 
-Thi
-ou could reach for datagrams like a dingus 
+Yes I know the royals were actually guillotined first so the French Revolution wasn't the best analogy.
+But look eventually every Frenchman with a history got the choppy choppy so you can treat it as a FILO queue.
+But unlike the French Revolution, there's no cost for creating or cancelling a QUIC stream.
 
-QUIC streams are designed to trickle, relying on retransmissions to *eventually* patch any holes caused by packet loss.
-The key 
+So if you don't care about ordering, make a new QUIC stream for each message.
+If newer messages are more important, then deprioritize or cancel older streams.
+This sounds easy, so what's the problem?
 
-QUIC datagrams are the intended alternative, but as I outlined in my last blog post, they're bait for dinguses.
+Three words.
+Twenty seven words.
+Seventy eight* pixels of whitespace:
 
-But what if I told you that we can abuse QUIC streams to better achieve real-time latency?
+- Retransmissions
+- Delta Encoding 
 
+/* I didn't actually count, direct your hatemail to @kixelated on Discord.
 
-But don't take my wrinkle brain statements as fact.
-Let's dive deeper and FIX IT.
 
 ## Detecting Loss
 ```
@@ -37,7 +60,11 @@ Let's dive deeper and FIX IT.
 ```
 
 QUIC streams are continuous byte streams that rely on retransmissions to *eventually* patch any holes caused by packet loss.
-The key word being *eventually*, as QUIC won't waste bandwidth on retransmissions unless theyre needed.
+I keep putting *eventually* in *italics* but have yet to explain why.
+
+QUIC was primarily designed for HTTP/3 and bulk data transfers.
+The average transfer speed matters the most when you're downloading `porn.zip`.
+In order to achieve that, QUIC and TCP won't waste bandwidth on retransmitting the same data again unless it's absolutely needed.
 
 **Pop quiz:**
 *How does a QUIC library know when a packet is lost and needs to be retransmitted?*
