@@ -43,14 +43,8 @@ So if you don't care about ordering, make a new QUIC stream for each message.
 If newer messages are more important, then deprioritize or cancel older streams.
 This sounds easy, so what's the problem?
 
-Three words.
-Twenty seven words.
-Seventy eight* pixels of whitespace:
-
-- Retransmissions
-- Delta Encoding 
-
-/* I didn't actually count, direct your hatemail to @kixelated on Discord.
+Come with me, little one.
+We're going on an adventure.
 
 
 ## Detecting Loss
@@ -60,10 +54,10 @@ Seventy eight* pixels of whitespace:
 ```
 
 QUIC streams are continuous byte streams that rely on retransmissions to *eventually* patch any holes caused by packet loss.
-I keep putting *eventually* in *italics* but have yet to explain why.
+I keep putting *eventually* in *italics* and now it's finally time to explain why.
 
 QUIC was primarily designed for HTTP/3 and bulk data transfers.
-The average transfer speed matters the most when you're downloading `porn.zip`.
+The average transfer speed matters the most when you're downloading `pron.zip`.
 In order to achieve that, QUIC and TCP won't waste bandwidth on retransmitting the same data again unless it's absolutely needed.
 
 **Pop quiz:**
@@ -73,7 +67,7 @@ In order to achieve that, QUIC and TCP won't waste bandwidth on retransmitting t
 Trick question, it doesn't.
 
 A pop quiz this early into a blog post?
-AND a trick question?
+AND it's a trick question?
 That's not fair.
 
 There's no explicit signal from routers when a packet is lost.
@@ -82,33 +76,71 @@ Instead, a QUIC library has to instead use FACTS and LOGIC to make an educated g
 The RFC outlines a *recommended* algorithm that I'll attempt to simplify:
 
 - The sender increments a sequence number for each packet.
-- Upon receiving a packet, the receiver will start a timer to ACK that sequence number, batching with any others that arrive within `max_ack_delay`.
-- If the sender does not receive an ACK after waiting multiple RTTs, it will send another packet (like a PING) to poke the receiver and hopefully start the ACK timer.
-- After finally receiving an ACK, the sender *may* decide that a packet was lost if:
+- Upon receiving a packet, the receiver will start a timer. Once this timer expires, it will ACK that sequence number and any others that arrive in the meantime.
+- If the sender does not receive an ACK after waiting multiple RTTs, either the original packet or the ACK probably got lost.
+- The sender will poke the receiver by sending another packet (potentially a 1-byte PING) to have them send another ACK.
+- Eventually the poke works and the sender receives an ACK indicating which packets were received.
+- **FINALLY** the sender *may* decide that a packet was lost if:
   - 3 newer sequences were ACKed.
   - or a multiple of the RTT has elapsed.
 - As the congestion controller allows, retransmit any lost packets and repeat.
 
 Skipped that boring, "simplified" wall of text?
 I don't blame you.
-You're just here for the funny blog and *maaaaybe* learn something along the way.
+You're just here for the funny blog.
 
 I'll help.
-If a packet is lost, it takes anywhere from 1-3 RTTs to detect the loss and retransmit.
-It's particularly bad for the last few packets in a burst because if they're lost, nothing starts the acknowledgement timer and the sender will have to poke.
-"You still alive over there?".
-The tail of our stream will take longer (on average) to arrive unless there's other data in flight to perform this poking.
+What this means is that if a packet is lost, it takes anywhere from 1-3 RTTs to detect the loss and retransmit.
+If you're sending a lot of data, then it's closer to 1RTT because new packets indirectly trigger ACKs for lost packets 
+But if you're sending a tiiiiny amount of data, and for the last packet in a burst, then it takes closer to 3RTT to recover.
 
 And just in case I lost you in the acronym soup, RTT is just another way of saying "your ping".
 So if you're playing Counter Strike cross-continent with a ping of 150ms, you're already at a disadvantage.
-Throw QUIC into the mix and some packets will take 300ms to 450ms of conservative retransmissions.
+Throw QUIC into the mix and some packets will take 300ms to 450ms.
 *cyka bylat*
 
 
-## Head-of-line Blocking
-We're not done with packet loss yet, but let's put an `!Unpin` in it.
+## Delta Encoding 
+We're not done with retransmissions yet, but let's put an `!Unpin` in it.
 
-QUIC streams are also poor for real-time because they introduce head-of-line blocking.
+If you're sending time series data over the Internet, there's a good chance that it can benefit from delta encoding.
+The most common example is, *checks notes*, video encoding.
+Wow that's 
+
+Video encoding works by creating a base image called a "keyframe" (or I-frame) that is not too dissimilar from a PNG or JPEG.
+Doing this for every frame requires a lot of data which is why animated "GIFs" used to look so ass.
+Video encoding instead abuses the fact that most frames of a video are very similar and primarily encodes frames as deltas of previous (and sometimes future!) frames.
+
+Delta encoding significantly lowers the bitrate because it removes redundancies.
+However it introduces dependencies, as packets now depend on previous packets otherwise the data is corrupt and causes trippy effects.
+Some encodings are self-healing like Opus (audio), while other encodings have to start over with a new base (video).
+
+Streams (TCP, QUIC, Unix, etc) are great for delta encoding because they guarantee data arrives and in order.
+The application can reference a previous byte range without worrying about pesky holes.
+It's like a new pair of underwear, you can just put it on.
+
+But new underwear is not the most efficient.
+If you're in a hurry, you grab whatever you can find and hope the holes aren't in unfortunate places.
+There's no time to order new underwear; your rock it.
+The user experience will suffer but Sonic gotta go fast.
+
+If you're rich, you can buy extra pairs to make your underwear redundant.
+Maybe you get unlucky and grab a holey pair, but there's a fresh pair stapled to it just for such an unfortunate occasion.
+Yeah it's more expensive because of tariffs but Scrooge gotta McDuck.
+
+QUIC streams take the slow approach.
+If QUIC finds a hole in the metaphorical underwear, it will order a hole-sized patch and sow it on.
+It gives you a good experience while wasting the least amount of pricy cotton.
+
+But we're smarter than *default behavior*.
+We can modify a QUIC sender so there's some urgency.
+The next shipment of underwear comes with a bag of patches for the previous shipment of underwear.
+
+
+QUIC streams are absolutely built for delta encoding as they deliver data reliably and in order.
+There's no holes in this pristine data stream.
+
+However, this causes a problem for real-time latency, as packets become dependent on each other.
 
 Let's suppose we want to stream real-time chat over QUIC.
 But we're super latency sensitive, like it's a bad rash, and need the latest sentence as soon as possible.
