@@ -1,0 +1,34 @@
+## Ancient History 
+Humor grandpa for a moment and let me tell you a story.
+
+5 years ago (!) I was tasked with reducing latency on Twitch by utilizing WebRTC.
+The research project meandered, pivoting tech stacks multiple times as new problems reared their ugly head.
+We went from libwebrtc, to Pion, to an optimized rewrite of Pion, to using data-channels only, to hacking data-channels for "datagram" support so we could abstract away WebRTC.
+
+But datagram support alone is meaningless; we needed some features on top like retransmissions.
+One fateful day I decided to create a spreadsheet of existing video/networking protocols and their features.
+Spreadsheets are lame but this one was awesome, with color coding for pros/cons and shit.
+It's when I realized that SRT is terrible (over the Internet) and there wasn't anything real exciting on the horizon.
+
+But then I discovered QUIC and HTTP/3.
+QUIC is amazing and cool and does some really smart things.
+But browsers only exposed QUIC via HTTP/3, and the HTTP semantics make real-time a little bit challenging.
+Ideally we could push new frames without utilizing the web's longest living hack: long-polling.
+
+I think I Googled "WebSockets but for QUIC" and found WebTransport.
+And sure enough there was a brand new Chrome origin trial released two weeks prior.
+I requested an access token to use WebTransport on `*.twitch.tv`  and I wasn't aware of any other companies doing the same.
+It was bleeding edge stuff, we're talking 100% CPU usage on the network thread because of a bug in the event loop.
+I whipped together a prototype and sure enough, we had pivoted once more.
+
+The majority of Twitch viewers use Chrome and we could embed a QUIC with our native apps.
+However one risk remained: Safari.
+Apple was already an early adopter of HTTP/3 but we needed to ensure this new tech made it into browsers.
+We couldn't ditch HLS until some combination of MSE (for iOS), WebCodecs, and WebTransport was available in Safari.
+
+So I got permission to release our Media over QUIC protocol called Warp.
+We published a draft via the IETF, a fantastic and open standards organization responsible for every* networking protocol: QUIC, HTTP, DNS, TCP, etc.
+And crucially an organization with active Apple participants who might like the ideas and prioritize browser support.
+Cynically, that's the purpose of standards organizations.
+You're there to convince others to support your thing so you can benefit somehow.
+
