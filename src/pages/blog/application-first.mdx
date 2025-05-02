@@ -1,0 +1,210 @@
+---
+layout: "@/layouts/global.astro"
+title: Application First
+author: kixelated
+description: Yolo. Time for a startup.
+cover: "/blog/never-use-datagrams/bodies.jpeg"
+date: 2025-05-02
+---
+
+# Application First
+Today was my last day at Discord.
+It's a great company with a great product and great people.
+If you're an A/V engineer in SF, [take my job](https://discord.com/jobs/7953473002) and make me proud.
+
+My brain says I'm making a mistake, but my heart wants to kamikaze into the sun.
+It's time to double down on this passion project.
+
+**tl;dr**
+- I'm making a startup to progress Media over QUIC.
+- Any generic components will be open-source.
+- It's going to be sick.
+
+<figure>
+	![Ball of gas](/blog/application-first/sun.png)
+	<figcaption>Artistic interpretation of a real mood I swear.</figcaption>
+</figure>
+
+## Media over QUIC
+But before I explain more, I have to bore you with some history.
+
+I've been working on Media over QUIC for a long time.
+My fateful project to reduce latency at Twitch was over 5 years ago (!).
+We tried using WebRTC, but it just kind of sucked; it wasn't designed for our use case.
+I eventually stumbled upon QUIC/WebTransport and [pivoted once more](https://quic.video/blog/distribution-at-twitch).
+
+I built something called Warp as a LL-HLS replacement for Twitch and it was pretty good.
+We needed more browser support and somehow had to convince Apple this was worth adding to Safari.
+So I got permission to release it as an [IETF draft](https://www.ietf.org/archive/id/draft-lcurley-warp-00.html) despite knowing nothing about standards bodies.
+And when I say "permission", I mean we needed to get Twitch lawyers to fight against Amazon lawyers to participate in the IETF and strike down a provincial patent filed without my knowledge.
+**FUN TIMES WERE HAD.**
+
+Unfortunately, priorities at Twitch changed and Warp was only briefly in production for 10% of Chrome users.
+Amazon finally noticed that we were losing a ton of money and the post-Covid downsizing began.
+But hey, I got severance and used it to build this crude [quic.video](https://quic.video) website while in a coffee shop in Tokyo.
+I'm back in San Francisco now; a huge downgrade.
+
+## Standardization
+It turned out that the Warp draft struck a chord within IETF.
+[Meta](https://www.ietf.org/archive/id/draft-kpugin-rush-03.html) and [Cisco](https://www.ietf.org/archive/id/draft-jennings-mimi-quicr-proto-00.html) had both published similar drafts.
+All I had to do was [combine our drafts](https://www.ietf.org/archive/id/draft-lcurley-warp-04.html) and boom, we'd have the start of a new standard.
+The [Media over QUIC](https://datatracker.ietf.org/group/moq/about/) working group was born.
+It's apparently the most active working group [with a variety of drafts](https://datatracker.ietf.org/group/moq/documents/) aiming to shake up the industry.
+
+However.
+HOWEVER.
+[I decided this was not the most productive path](https://quic.video/blog/transfork).
+I stopped my involvement, and I'm no longer listed as an author on the [latest moq-transport draft](https://www.ietf.org/archive/id/draft-ietf-moq-transport-11.html).
+It would have been cool to put *author of RFC9876* on my resume.
+Oh well.
+
+Trying to standardize an experimental protocol is just a huge time sink.
+Arguing with multiple people from a big established company (__*cough*__ Cisco __*cough*__) was a nightmare.
+I was going nowhere in a hurry.
+
+I decided it would be better to join an existing company, like **Discord**, and see if I couldn't replace WebRTC from within.
+I'm kind of a gamer and have always wanted to work at Discord.
+My BBF had just become the boss of the A/V team and I was like "I'm in".
+
+Well that failed.
+I did some neat things at Discord, like rewriting the WebRTC SFU in Rust.
+But my primary passion is MoQ and it just didn't make any product sense.
+
+- Why would you rewrite your established A/V stack for nearly zero new features?
+- Why not fork WebRTC (even more) instead?
+- Who cares about a "simpler" protocol when everything already "works"?
+
+Discord is prioritizing the right projects and making incremental improvements.
+I can't disagree with any of the decisions and priorities.
+Like I said, it's a great company and I hope one day they'll end up using MoQ.
+
+But I can't keep working on WebRTC.
+There's just too many things that I wish I could improve but I'm forced to maintain compatibility with `libwebrtc` for browser support.
+It's a (lucrative) dead end.
+
+<figure>
+	![Let me out](/blog/application-first/eric-andre.jpg)
+	<figcaption>**LET ME OUUUUUT**</figcaption>
+</figure>
+
+## Strengths First
+I'm guilty of advocating for new tech just for the sake of it.
+It's how you push boundaries.
+But it's also how you pivot in a circle.
+And boy do I love rewriting stuff.
+
+It might sound obvious, but you need to figure out what a new technology is good at *before* you use it.
+It could be significantly faster, or have significantly more features, or be significantly cheaper.
+But it has to have *something*.
+Otherwise you're just migrating to the nextest Javacript framework and irritating every coworker in a 5-mile radius.
+
+So what is Media over QUIC good at?
+Well, the story around CDN support is great, which is why so many CDN companies are actively participating and building prototypes.
+Google, Akamai, Cloudflare, Fastly, etc.
+
+But what real *product* use cases does it solve?
+Why would you use it over WebRTC or HLS/DASH or SRT or RTMP or TeamSpeak?
+Don't get me wrong, CDN support is great, but I'm not going to rebuild my entire media stack for that, nor would it be cheaper than existing HTTP and WebRTC CDNs.
+I need something users care about.
+
+That's where the standardization effort falls short.
+The working group is focused on dumb shit like reinventing HTTP/1.1 pipelining via [FETCH](https://www.ietf.org/archive/id/draft-ietf-moq-transport-11.html#name-fetch).
+The motivation is to support VOD, which is noble, but it's something HLS/DASH (via HTTP) already does very well.
+There's no point reinventing the [\<video\>](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/video) tag.
+
+I'm guilty of this too.
+Literally click on the [Watch](/watch) button in the navigation bar and you'll see a reinvented [\<video\>](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/video) tag.
+It doesn't even work properly and I haven't fixed it because the demo is so underwhelming.
+
+Here's how we break out of this rut.
+
+## Application First
+I'm making a startup so I *have* to focus on the product.
+
+I'm not collecting a paycheck or any venture capital.
+This has to be a good usage of Media over QUIC or I don't get paid.
+I mean, it's not like my family is going to starve if I decide to rewrite the transport layer *again*, but you get the idea.
+
+Using Media over QUIC is a selfish requirement because I'm in too deep.
+I've got too much personal legacy tied up in the project to walk away and join some AI startup.
+It's not how you're supposed to build a startup but I think I have the expertise and passion to make it work.
+
+<figure>
+	![AI over QUIC](/blog/application-first/ai.png)
+	<figcaption>The backup exit strategy. Send your checks now.</figcaption>
+</figure>
+
+So what sort of product can we build on top of MoQ?
+What strengths does it have that we can exploit?
+
+The main advantage of Media over QUIC is that you can break out of the WebRTC jail.
+Suddenly, you can implement features that Google Meet doesn't care about... hence why they're not in WebRTC.
+Web is the primary focus (not native) because it's the bottleneck.
+
+And I believe the game-changing features are on the front-end.
+Utilize WebCodecs, WebGPU, WebAudio, WebTransport, etc to build something isn't possible on yesterday's browser.
+Make something slick, gimmicky, and hope it catches on.
+And cringe.
+Super cringe, something that a serious company would never touch.
+
+It's a little disappointing because I primarily enjoy Rust and backend services.
+But it's time to swallow my pride and double down on the front-end via **Typescript**.
+This demo currently uses [Rust+WASM](https://quic.video/blog/to-wasm) but it's time to hit the revert button.
+Oops.
+
+
+## Open Source Second
+I don't want to build this alone.
+I love open source and want to release all my code so you can profit.
+Use my code to pilot drones or stream sports or watch security cameras; I don't care.
+And contribute maybe?
+
+But **Application First** means that I'm also not going to focus on building a library.
+If your goal is to make a generic library, then you end up making a generic application.
+I've built too many demos expecting something else to turn them into an application.
+
+If a component is naturally generic, then it'll be open-sourced.
+If WebRTC supports it, then it'll be open-sourced.
+And if the application bombs, then I'll release everything, of course
+
+But I want to keep some of the cringe and flashy UI effects close to the chest.
+They're not that reusable and I want to have an exit strategy...
+
+<figure>
+	![Step 1](/blog/application-first/step.png)
+	<figcaption>Step 1: Read this blog post. Step 2: ???. Step 3: Profit **$$$**</figcaption>
+</figure>
+
+
+## Standards Last
+I love the IETF as an organization.
+It's a great place to meet people, collaborate, and engage in spicy drama/politics behind the scenes.
+And I'd like to show up to some of the meetings and keep the momentum going.
+
+But I can't spend more time arguing about [VarInt encoding](https://github.com/moq-wg/moq-transport/issues/549).
+Or if sequence numbers should be sequential or monotonically increasing.
+Or bikeshedding names.
+I'm just going to call it `PeePeePooPoo` and move on.
+
+The people who create standards and chair working groups are saints.
+I don't have that sort of patience.
+I think the most productive thing I can do is to build something and show it off.
+Build an application and use it to guide the standard, not the other way around.
+
+To that end, I'm only going to implement what my application will use.
+I'll eventually hit the publish button on something called `moq-lite` that is just the *bare minimum* to get the job done.
+Even the good ideas (some that I'm proud of) will be left out and added only when actually implemented.
+
+## It's Going to be Sick
+Look I would be lying if I didn't have some doubts.
+I can't predict where I'll be 1 year from now and that's pretty exciting.
+
+I've got a lot of ideas and a domain.
+If it doesn't work out, then hopefully **YOU** can use some of the code and upcoming blog posts.
+I promise they're a LOT funnier than this one.
+
+Join [the Discord](https://discord.gg/FCYF3p99mr) for updates.
+Reach out to `@kixelated` especially if you live in SF and want to jam.
+I'm down to scheme too if any companies have a partnership in mind.
+
+Hoping to have a public demo in 3-6 months.
