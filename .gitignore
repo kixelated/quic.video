@@ -18,7 +18,7 @@ pnpm-debug.log*
 
 # Just in case somebody runs the wrong command
 yarn.lock
-pnpm-lock.yaml
+package-lock.json
 tsconfig.tsbuildinfo
 bun.lockb
 
