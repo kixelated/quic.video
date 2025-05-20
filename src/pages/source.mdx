@@ -5,10 +5,10 @@ title: Source
 
 # Open Source
 
-This website is fully open source.
+Everything is open source and broken into two repositories:
 
-- [kixelated/quic.video](https://github.com/kixelated/quic.video): This website. Includes terraform to run on GCP.
 - [kixelated/moq](https://github.com/kixelated/moq-rs): The underlying MoQ library in both Rust and Typescript.
+- [kixelated/quic.video](https://github.com/kixelated/quic.video): This website. Includes terraform to run multiple relays on GCP.
 
 ## Rust
 Native code is written in [Rust](https://github.com/kixelated/moq/tree/main/rs) and is split into a few notable crates:
@@ -39,10 +39,10 @@ Web code is written in [Typescript](https://github.com/kixelated/moq/tree/main/j
 
 | package | description |
 | ------- | ----------- |
-| [@kixelated/moq](https://www.npmjs.com/package/@kixelated/moq) | A moq-lite client that mirrors the Rust API.  |
+| [@kixelated/moq](https://www.npmjs.com/package/@kixelated/moq) | A moq-lite client that mirrors the Rust API. You can publish and subscribe to generic tracks. Any media stuff is implemented at a higher layer. |
 | [@kixelated/hang](https://www.npmjs.com/package/@kixelated/hang) | A media library. This is where the bulk of the cool stuff happens, like capturing/encoding or decoding/rendering media. Includes Web Components to make setup super simple. [See the demos](https://github.com/kixelated/moq/tree/main/js/hang/demo). |
 
-**Note**: These utilize browser-specific APIs do not support for Node.
+**Note**: These utilize browser-specific APIs and there's no (explicit) support for Node and other server runtimes.
 [Deno](https://deno.com/) is doing some cool stuff with WebTransport so maybe it'll work there someday.
 
 And before you ask, yes, it is possible to use WASM for web support as evidenced by the [hang-wasm](https://github.com/kixelated/moq/tree/main/hang-wasm) crate.
@@ -60,3 +60,6 @@ Everything is licensed under MIT or Apache-2.0 so knock yourself out.
 
 If you do end up using MoQ for your project, let me know!
 I will never get tired of DMs.
+`@kixelated` on Discord.
+
+![@kixelated](/blog/avatar.png)

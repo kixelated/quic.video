@@ -11,24 +11,32 @@ a super-charged TCP/UDP replacement that powers [HTTP/3](https://en.wikipedia.or
 It's being developed by the [IETF](https://www.ietf.org/) and your _favorite_ big tech companies such as Google, Meta, Cisco, Akamai, etc.
 
 That's right, soon you will never have to deal with WebRTC again.
+You can delete SDP from your memory; it can't hurt you now.
 
-<p class="tagline">Try out the demo! [Watch](/watch) or [Publish](/publish) a broadcast</p>
+<p class="tagline">Try out the demo! [Watch](/watch/demo/bbb) or [Publish](/publish/demo) a broadcast</p>
 
 **NOTE**: This website uses a [fork](/blog/transfork) of the IETF drafts called [moq-lite](https://github.com/kixelated/moq/tree/main/rs/moq) and [hang](https://github.com/kixelated/moq/tree/main/rs/hang).
 The principles and rationale behind MoQ are great, but progress is painfully slow as it's an experimental protocol designed by committee.
-My goal is to build something *now* so you can use it.
+My goal is to build something now that you can use, even if it's not a *standard*.
 
 
-Some features include:
+### Features
 
--   Web support via [WebTransport](https://developer.mozilla.org/en-US/docs/Web/API/WebTransport), [WebCodecs](https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API), and [WebAudio](https://developer.mozilla.org/en-US/docs/Web/API/WebAudio_API).
--   CDN support via [moq-lite](https://github.com/kixelated/moq/tree/main/rs/moq) and [moq-relay](https://github.com/kixelated/moq/tree/main/rs/moq-relay).
--   Contribution, distribution, and conferencing via [hang](https://github.com/kixelated/moq/tree/main/rs/hang).
 -   [Open source](/source) Rust and Typescript libraries.
--   [ffmpeg](https://github.com/kixelated/moq/tree/main/rs/hang-cli) and [gstreamer](https://github.com/kixelated/moq/tree/main/rs/hang-gst) plugins.
+-   Web support via [WebTransport](https://developer.mozilla.org/en-US/docs/Web/API/WebTransport), [WebCodecs](https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API), and [WebAudio](https://developer.mozilla.org/en-US/docs/Web/API/WebAudio_API). No Safari support yet.
+-   Self-host your own relay or CDN cluster via [moq-relay](https://github.com/kixelated/moq/tree/main/rs/moq-relay).
+-   Publish live broadcasts using [ffmpeg](https://github.com/kixelated/moq/tree/main/rs/hang-cli), [gstreamer](https://github.com/kixelated/moq/tree/main/rs/hang-gst), or the web client.
+-   Watch live broadcasts using [gstreamer](https://github.com/kixelated/moq/tree/main/rs/hang-gst) or the web client.
+-   Discover live broadcasts, such as meeting participants, without a separate API.
 
-<p class="tagline">Visit [Github](https://github.com/kixelated/moq) or join [Discord](https://discord.gg/FCYF3p99mr)</p>
+### Learn More
+Check out the [blog](/blog) for more information.
+They give a good chuckle if I do say so myself.
 
-Oh and definitely check out the [blog posts](/blog).
-They give a good chuckle.
-And you might learn something.
+Once you're ready to dive in, check out the [Github](https://github.com/kixelated/moq) and/or join [Discord](https://discord.gg/FCYF3p99mr).
+Contributions are welcome of course, but feel free to just yoink the code make it your own.
+
+And if you're using some flavor of MoQ in the wild, I'd love to hear about it!
+My DMs are always open as `@kixelated` on Discord.
+
+![@kixelated](/blog/avatar.png)
