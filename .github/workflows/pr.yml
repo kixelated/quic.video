@@ -10,8 +10,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
       - uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          cache-dependency-path: js/pnpm-lock.yaml
+
       - uses: biomejs/setup-biome@v2
 
-      - run: npm ci
-      - run: npm run check
+      - run: pnpm ci
+      - run: pnpm run check
