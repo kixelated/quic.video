@@ -2,20 +2,18 @@ import { Support } from "@kixelated/hang";
 import { Watch, WatchControls } from "@kixelated/hang/watch";
 import { onCleanup } from "solid-js";
 
-export default function (props: { room: string; name: string }) {
-	const url = new URL(`${import.meta.env.PUBLIC_RELAY_SCHEME}://${import.meta.env.PUBLIC_RELAY_HOST}`);
+export default function (props: { name: string }) {
+	const url = new URL(
+		`${import.meta.env.PUBLIC_RELAY_SCHEME}://${import.meta.env.PUBLIC_RELAY_HOST}/demo/${props.name}.hang`,
+	);
 	const canvas = <canvas style={{ "max-width": "100%", height: "100%", margin: "0 auto", "border-radius": "1rem" }} />;
 
 	const watch = new Watch({
 		connection: {
 			url,
 		},
-		broadcast: {
-			room: props.room,
-			name: props.name,
-		},
 		audio: {
-			volume: 0,
+			muted: true,
 		},
 		video: {
 			canvas: canvas as HTMLCanvasElement,

@@ -1,9 +1,6 @@
 ---
 export const prerender = false;
 
-const { room } = Astro.params;
-if (!room) return Astro.redirect("/404");
-
 import Issues from "@/components/issues.astro";
 import Element from "@/components/publish.tsx";
 import Layout from "@/layouts/global.astro";
@@ -16,5 +13,5 @@ import Layout from "@/layouts/global.astro";
 		Publishing a <strong>PUBLIC</strong> broadcast. Pls don't do anything stupid.
 	</p>
 
-	<Element client:only="solid-js" room={room} />
+	<Element client:only="solid-js" />
 </Layout>
