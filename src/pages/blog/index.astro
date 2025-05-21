@@ -18,9 +18,10 @@ posts.sort((a, b) => {
 });
 ---
 
-<MainLayout title="Blog">
+<MainLayout title="Blog" description="Blog posts and fun stuff">
 	<section>
 		<h1>Blog Posts</h1>
+
 		{
 			posts.map((post) => (
 				<article class="mb-6 rounded-lg grid grid-cols-3 hover:bg-blue-950 hover:scale-110 hover:translate-x-2 transition-all ease-in-out">

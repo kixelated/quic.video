@@ -10,8 +10,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
       - uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+
       - uses: biomejs/setup-biome@v2
 
-      - run: npm ci
-      - run: npm run check
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check

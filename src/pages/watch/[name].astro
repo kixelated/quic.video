@@ -1,0 +1,20 @@
+---
+export const prerender = false;
+
+const { name } = Astro.params;
+if (!name) return Astro.redirect("/404");
+
+import Issues from "@/components/issues.astro";
+import Watch from "@/components/watch.tsx";
+import Layout from "@/layouts/global.astro";
+---
+
+<Layout title={`Watch - demo/${name}`} description="Watch a public broadcast.">
+	<Issues />
+
+	<p>
+		Watching a <strong>PUBLIC</strong> broadcast. Pls report any abuse on <a href="https://discord.gg/FCYF3p99mr" rel="noreferrer" target="_blank">Discord</a>.
+	</p>
+
+	<Watch client:only="solid-js" name={name} />
+</Layout>

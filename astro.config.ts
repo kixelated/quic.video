@@ -7,8 +7,6 @@ import tailwind from "@astrojs/tailwind";
 import { defineConfig } from "astro/config";
 
 import mkcert from "vite-plugin-mkcert";
-import { viteStaticCopy } from "vite-plugin-static-copy";
-import wasm from "vite-plugin-wasm";
 
 // https://astro.build/config
 export default defineConfig({
@@ -35,36 +33,16 @@ export default defineConfig({
 			fs: {
 				allow: [
 					".",
-					// Allow `npm link @kixelated/moq`
-					fs.realpathSync(path.resolve("node_modules/@kixelated/moq")),
+					// Allow `npm link @kixelated/hang`
+					fs.realpathSync(path.resolve("node_modules/@kixelated/hang")),
 				],
 			},
 		},
-		plugins: [
-			mkcert(),
-			wasm(),
-			viteStaticCopy({
-				hook: "buildStart",
-				targets: [
-					{
-						src: "node_modules/@shoelace-style/shoelace/dist/assets/**/*",
-						dest: "assets",
-					},
-				],
-			}),
-		],
-		worker: {
-			format: "es",
-			plugins: () => [wasm()],
-		},
+		plugins: [mkcert()],
 		resolve: {
 			alias: {
 				"@": "/src",
 			},
-		},
-		// Workaround for: https://github.com/vitejs/vite/issues/8427
-		optimizeDeps: {
-			exclude: ["@kixelated/moq"],
 		},
 	},
 });

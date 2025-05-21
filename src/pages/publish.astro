@@ -1,0 +1,17 @@
+---
+export const prerender = false;
+
+import Issues from "@/components/issues.astro";
+import Element from "@/components/publish.tsx";
+import Layout from "@/layouts/global.astro";
+---
+
+<Layout title="Publish" description="Publish a public broadcast.">
+	<Issues />
+
+	<p class="mb-16">
+		Publishing a <strong>PUBLIC</strong> broadcast. Pls don't do anything stupid.
+	</p>
+
+	<Element client:only="solid-js" />
+</Layout>

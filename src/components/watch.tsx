@@ -1,20 +1,38 @@
-import "@kixelated/moq/watch";
-import "@kixelated/moq/watch/ui";
+import { Support } from "@kixelated/hang";
+import { Watch, WatchControls } from "@kixelated/hang";
+import { onCleanup } from "solid-js";
 
-import { createSignal } from "solid-js";
+export default function (props: { name: string }) {
+	const url = new URL(
+		`${import.meta.env.PUBLIC_RELAY_SCHEME}://${import.meta.env.PUBLIC_RELAY_HOST}/demo/${props.name}.hang`,
+	);
+	const canvas = <canvas style={{ "max-width": "100%", height: "100%", margin: "0 auto", "border-radius": "1rem" }} />;
 
-import Region from "@/components/region";
+	const watch = new Watch({
+		connection: {
+			url,
+		},
+		audio: {
+			muted: true,
+		},
+		video: {
+			canvas: canvas as HTMLCanvasElement,
+		},
+	});
 
-export default function Watch(props: { path: string }) {
-	const [url, setUrl] = createSignal<string>("");
+	let root!: HTMLDivElement;
+
+	onCleanup(() => {
+		watch.close();
+	});
 
 	return (
-		<div>
-			<moq-watch-ui class="rounded-lg overflow-hidden">
-				<moq-watch prop:url={url()} prop:latency={100} />
-			</moq-watch-ui>
+		<div ref={root}>
+			{/* biome-ignore lint/a11y/useValidAriaRole: false-positive */}
+			<Support role="watch" show="partial" />
 
-			<Region setUrl={setUrl} path={props.path} />
+			{canvas}
+			<WatchControls lib={watch} root={root} />
 		</div>
 	);
 }

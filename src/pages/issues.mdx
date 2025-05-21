@@ -7,78 +7,55 @@ title: Issues
 
 Yeah so there's a lot of work to do.
 
-This is an early PoC and hobby project, so expect nothing to work. This page is a summary of the major issues, updated periodically. If you want to help, leave a comment on the cooresponding ticket!
+Because we've broken out of the WebRTC jail, we need to implement a lot of things that are taken for granted.
+If you want full control over the media stack so you can do cool shit, then welcome, you're in the right place.
+But if you just want a Google Meet clone and want to do minimal work, then check out [Pion](https://github.com/pion/webrtc).
 
-# Web
+This page is a summary of the major issues, updated periodically.
+If you want to help, jump in [Discord](https://discord.gg/FCYF3p99mr)!
 
-See the [moq-js](https://github.com/kixelated/moq-js/issues) issues for a full list. There's a lot of small things that won't make it here.
+## What works
+Before we give into despair, here's what does work:
 
-### General
+- **Browsers**: Chrome and soon Firefox. We're bleeding on the edge.
+- **Audio**: OPUS, AAC
+- **Video**: VP8, VP9, H.264, H.265, AV1
+- **Catalog**: A live-updating JSON blob that describes the available tracks.
+- **Clustering**: Multiple relays form a basic mesh network, providing CDN-like performance.
+- **Subscriptions**: Nothing flows over the network until needed. ex. no audio while muted
+- **Integrations**: Gstreamer and ffmpeg (publishing only).
 
-|                                                issue | name                      | description                                                                                                                                                                      |
-| ---------------------------------------------------: | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [#54](https://github.com/kixelated/moq-js/issues/54) | WebTransport - Safari     | No Safari support yet. Webkit has expressed [public support](https://github.com/WebKit/standards-positions/issues/18#issuecomment-1495890122) so it will likely show up one day. |
-| [#55](https://github.com/kixelated/moq-js/issues/55) | WebCodecs - Firefox       | No Firefox support yet. Firefox has an implementation on nightly [behind a flag](https://groups.google.com/a/mozilla.org/g/dev-platform/c/3g0fnn6682A/m/Nb1qVaA4AAAJ).           |
-| [#13](https://github.com/kixelated/moq-js/issues/13) | General - Codec Support   | WebCodecs supports a lot of codecs, but they need to be configured and correctly packaged into MP4.                                                                              |
-| [#65](https://github.com/kixelated/moq-js/issues/65) | General - Optional Tracks | You can't publish/subscribe to optional tracks, which is required for any form of ABR.                                                                                           |
-| [#56](https://github.com/kixelated/moq-js/issues/56) | General - Dynamic Tracks  | You can't add/remove tracks once a broadcast has started, such as to change input device or screen share.                                                                        |
-| [#57](https://github.com/kixelated/moq-js/issues/57) | UI - Make it Pretty       | Obviously, I'm not an artist.                                                                                                                                                    |
+Now on to the issues.
 
-### Playback
+## Networking
 
-|                                                issue | name                        | description                                                                                                                        |
-| ---------------------------------------------------: | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-|   [#6](https://github.com/kixelated/moq-js/issues/6) | WebCodecs - Controls        | There are no player controls. Even a volume slider would be great.                                                                 |
-|   [#9](https://github.com/kixelated/moq-js/issues/9) | WebCodecs - Jitter Buffer   | Received frames are rendered ASAP. The user experience could be improved with a playback buffer sized to the target latency.       |
-| [#58](https://github.com/kixelated/moq-js/issues/58) | WebCodecs - Synchronization | Audio and video are rendered out-of-sync. This is surprisingly difficult to implement, especially with a variable playback buffer. |
-| [#59](https://github.com/kixelated/moq-js/issues/59) | MSE - Player                | There's a backup MSE player for Firefox but it needs more love.                                                                    |
+| name                      | description                                                                                                                                                                      |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Safari Support     | No Safari support for WebTransport. Webkit has expressed [public support](https://github.com/WebKit/standards-positions/issues/18#issuecomment-1495890122) so it will likely show up one day. Until then, perhaps we should support WebSockets as a fallback. [caniuse](https://caniuse.com/webtransport) |
+| Prioritization | Media should be prioritized by the sender during congestion via [priority hints](https://www.w3.org/TR/webtransport/#dom-webtransportsendstreamoptions-sendorder) when implemented. ex. *new audio > old video*. This should be implemented in Chrome but has yet to be hooked up and tested. |
+| Congestion Control | The default congestion controller in QUIC (Reno/CUBIC) suffers from [bufferbloat](https://en.wikipedia.org/wiki/Bufferbloat). The WebTransport API exposes [congestion control hints](https://www.w3.org/TR/webtransport/#dom-webtransport-congestioncontrol) but I'm not sure if this has been implemented in browsers yet. It's also not clear if BBR is sufficient for real-time media and we might want to invest in porting GCC (Google Congestion Control) to QUIC. |
+| Authentication | There's no authentication in `moq-relay` (outside of TLS). Anybody can publish or subscribe to broadcasts with any name. We need to implement a token given to clients that scope what they can do. |
+| Clustering | The relays form a very simple mesh network, where each relay talks to every other relay. This won't scale past a few nodes; we need some sort of tree. |
 
-### Publishing
 
-|                                                issue | name                              | description                                                                                                                                                                                                                           |
-| ---------------------------------------------------: | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [#60](https://github.com/kixelated/moq-js/issues/60) | WebTransport - Prioritization     | Media should be prioritized by the sender during congestion via [priority hints](https://www.w3.org/TR/webtransport/#dom-webtransportsendstreamoptions-sendorder) when implemented.                                                   |
-| [#61](https://github.com/kixelated/moq-js/issues/61) | WebTransport - Congestion Control | Reno/CUBIC (default) suffers from [bufferbloat](https://en.wikipedia.org/wiki/Bufferbloat). At least use BBR via [congestion control hints](https://www.w3.org/TR/webtransport/#dom-webtransport-congestioncontrol) when implemented. |
-| [#62](https://github.com/kixelated/moq-js/issues/62) | WebCodecs - Echo Cancelation      | We need to support bidirectional broadcasts at some point, which requires echo cancellation.                                                                                                                                          |
-| [#49](https://github.com/kixelated/moq-js/issues/49) | UI - Public Broadcasts            | We should have a way to publish and list public broadcasts.                                                                                                                                                                           |
+## Media
 
-# Native
+| name                      | description                                                                                                                                                                      |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Adaptive Bitrate  	| Currently, the bitrate for a broadcast is fixed at creation time. We need to implement back-pressure so the broadcaster lowers its bitrate during congestion. In addition, we could use simulcast to create multiple tracks allowing the viewer to choose what to receive. |
+| Echo Cancelation      | People who use speakers are the worst. But for real we need some form of echo cancelation otherwise conferencing is difficult. It seems like you can specify it [when capturing media](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints/echoCancellation) but I've yet to test how well it works. |
+| OBS Plugin      | We should develop an [OBS](https://obsproject.com/) plugin to make it easier to publish broadcasts. The gstreamer plugin should also be improved but it mostly works. |
+| Viewer Feedback | Currently, viewers don't provide any feedback to the broadcaster(s). This would be very useful for small broadcasts for stuff like negotiating codecs, bitrates, etc. |
 
-See the [moq-rs](https://github.com/kixelated/moq-rs/issues) issues for a full list. There's a lot of small things that won't make it here.
 
-### General
+## Miscellaneous
 
-|                                                  issue | name                       | description                                                                                                                                                    |
-| -----------------------------------------------------: | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|   [#29](https://github.com/kixelated/moq-rs/issues/29) | Quinn - Congestion Control | Quinn experimentally supports BBR but it needs to be validated and possibly tweaked.                                                                           |
-| [#104](https://github.com/kixelated/moq-rs/issues/104) | Quinn - Tracing            | Quinn lacks the tracing required to validate the user experience. We should add [qlog](https://github.com/quinn-rs/quinn/issues/406) and other useful metrics. |
+| name                      | description                                                                                                                                                                      |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Logging | There's no logging, metrics, or even health checks. I don't even know if the site is up. |
+| Chat | I want to implement a chat protocol over MoQ! |
 
-### Publishing
+And of course, there's a million other things.
+Hit me up on [Discord](https://discord.gg/FCYF3p99mr) if want to volunteer your time or monies to help make these a reality.
 
-|                                                  issue | name                | description                                                                                                           |
-| -----------------------------------------------------: | ------------------- | --------------------------------------------------------------------------------------------------------------------- |
-|   [#112](https://github.com/kixelated/moq-rs/pull/112) | moq-pub - Audio     | The ffmpeg/moq-pub integration doesn't produce audio at the moment. It's probably a simple fix.                       |
-|   [#63](https://github.com/kixelated/moq-rs/issues/63) | libmoq - C Bindings | Make a C library to interface with moq-rs. Any networking/caching/async is hidden from the application.               |
-| [#105](https://github.com/kixelated/moq-rs/issues/105) | libmoq - OBS        | Develop an [OBS](https://obsproject.com/) plugin.                                                                     |
-| [#106](https://github.com/kixelated/moq-rs/issues/106) | libmoq - ffmpeg     | Develop an [ffmpeg](https://www.ffmpeg.org/) plugin. We currently pipe to stdin which works but it could be improved. |
-| [#107](https://github.com/kixelated/moq-rs/issues/107) | libmoq - GStreamer  | Develop a [GStreamer](https://gstreamer.freedesktop.org/) plugin.                                                     |
-
-### Relay
-
-|                                                  issue | name                  | description                                                                                                                                  |
-| -----------------------------------------------------: | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| [#108](https://github.com/kixelated/moq-rs/issues/108) | Relay - Cache Network | The relays form a mesh network. This won't scale past a few nodes; we need some sort of cache tree.                                          |
-| [#109](https://github.com/kixelated/moq-rs/issues/109) | Relay - Observability | There's no logging, metrics, or even health checks. I don't even know if the site is up.                                                     |
-| [#110](https://github.com/kixelated/moq-rs/issues/110) | Relay - Scaling       | Everything is in [terraform](https://github.com/kixelated/quic.video) but otherwise everything is manual, including the number of instances. |
-| [#111](https://github.com/kixelated/moq-rs/issues/111) | Relay - Pool Sessions | Clients establish a QUIC connection per broadcast. We should investigate reusing connections via ANNOUNCE like the specification intends.    |
-
-# Protocol
-
-See [moq-transport](https://github.com/moq-wg/moq-transport/issues) for a much bigger list. Gotta argue at the next [IETF](https://www.ietf.org/) and/or [W3C](https://www.w3.org/) meeting about these ones.
-
-|                                                    issue | name                         | description                                                                                                                                                                               |
-| -------------------------------------------------------: | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [#37](https://github.com/moq-wg/moq-transport/issues/37) | QUIC - Congestion Congestion | QUIC needs an extension in order to match WebRTC's [transport-wide-cc](https://webrtc.googlesource.com/src/+/refs/heads/main/docs/native-code/rtp-hdrext/transport-wide-cc-02/README.md). |
-|                                                      #XX | Transport - Catalog          | MoQ wll use a JSON catalog to describe the available tracks, but it needs some more work.                                                                                                 |
-|                                                      #XX | Transport - Containers       | MoQ supports fMP4 at the moment, but it introduces quite a bit of overhead and we need other options.                                                                                     |
-|                                                      #XX | Transport - Feedback         | There's no way to signal that a downstream is encountering congestion. This would be useful for 1:1 broadcasts.                                                                           |
+![@kixelated](/blog/avatar.png)

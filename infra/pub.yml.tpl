@@ -1,28 +1,28 @@
 #cloud-config
 
 write_files:
-  - path: /etc/systemd/system/moq-bbb.service
+  - path: /etc/systemd/system/hang-bbb.service
     permissions: 0644
     owner: root
     content: |
       [Unit]
-      Description=Run moq-bbb via docker
+      Description=Run hang-bbb via docker
       Requires=docker.service
       After=docker.service
 
       [Service]
       ExecStart=docker run --rm \
-        --name moq-bbb \
+        --name hang-bbb \
         --network="host" \
         --pull=always \
         --cap-add=SYS_PTRACE \
         -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
         -e REGION=${region} \
-        --entrypoint moq-bbb \
-        ${docker}/moq-karp \
-        publish "https://relay.quic.video/demo/bbb"
+        --entrypoint hang-bbb \
+        ${docker}/hang \
+        publish "https://relay.quic.video/demo/bbb.hang"
 
-      ExecStop=docker stop moq-bbb
+      ExecStop=docker stop hang-bbb
 
       # Take longer and longer to restart the process.
       Restart=always

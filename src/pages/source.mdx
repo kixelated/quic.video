@@ -3,34 +3,63 @@ layout: "@/layouts/global.astro"
 title: Source
 ---
 
-# Rust!
+# Open Source
 
-Native code is written in Rust and is available at [kixelated/moq-rs](https://github.com/kixelated/moq-rs).
-It's split into a few crates:
+Everything is open source and broken into two repositories:
+
+- [kixelated/moq](https://github.com/kixelated/moq-rs): The underlying MoQ library in both Rust and Typescript.
+- [kixelated/quic.video](https://github.com/kixelated/quic.video): This website. Includes terraform to run multiple relays on GCP.
+
+## Rust
+Native code is written in [Rust](https://github.com/kixelated/moq/tree/main/rs) and is split into a few notable crates:
 
 |                                                                               crate | description                                                                                                                                           |
 | ----------------------------------------------------------------------------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-|                [moq-transport](https://docs.rs/moq-transport/latest/moq-transport/) | A library that mostly implements the [MoqTransport](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/) draft... with a few strong opinions.  |
-|                [moq-relay](https://github.com/kixelated/moq-rs/tree/main/moq-relay) | A MoQ server that connects publishers to subscribers, caching any duplicate subscriptions.                                                            |
-|                    [moq-karp](https://github.com/kixelated/moq-rs/tree/main/moq-karp) | A MoQ client that integrates with ffmpeg to publish media in a new container.                                                                                             |
-|                    [moq-web](https://github.com/kixelated/moq-rs/tree/main/moq-web) | A MoQ client utilizing WebAssembly, WebCodecs, and WebTransport for web support. |
-|                    [moq-gst](https://github.com/kixelated/moq-rs/tree/main/moq-gst) | A MoQ gstreamer plugin that can publish media via moq-karp. |
-|                [moq-clock](https://github.com/kixelated/moq-rs/tree/main/moq-clock) | It's a clock! Just to demonstate that MoqTransport can do more than media.                                                                            |
-| [quic.video](https://github.com/kixelated/quic.video) | This website lul. |
+|                [moq-lite](https://docs.rs/moq-lite/latest/moq_lite/) | A generic pub/sub transport. This is a minimal reintepretation of the IETF [MoqTransport draft](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/).  |
+|                [moq-relay](https://github.com/kixelated/moq/tree/main/rs/moq-relay) | A Moq server that connects publishers to subscribers, caching and deduplicating any subscriptions. Note that MoQ does not support P2P; instead it utilizies relays to scale out to many subscribers.                                                            |
+|                [moq-clock](https://github.com/kixelated/moq/tree/main/rs/moq-clock) | It's a clock! Just to demonstate that MoQ can be used for more than media.                                                                            |
+|                    [hang](https://docs.rs/hang/latest/hang/) | A media specific library built on top of moq-lite. This provides a JSON "catalog" that describes the media tracks and "container" that literally consists of a timestamp. The actual media decoding/encoding is left to the platform. |
+|                    [hang-cli](https://github.com/kixelated/moq/tree/main/hang-cli) | A client that integrates with ffmpeg to publish media. This uses fMP4 via stdin so it's not the most efficient...                                                                                             |
+|                    [hang-gst](https://github.com/kixelated/moq/tree/main/hang-gst) | A gstreamer plugin for publishing and consuming media. It works but needs a lot of polish. |
+|                    [hang-wasm](https://github.com/kixelated/moq/tree/main/hang-wasm) | An MoQ client utilizing WebAssembly, WebCodecs, and WebTransport for web support. Deprecated in favor of the Typescript implementation; see below for justification. |
 
 
-Check out the [open issues](https://github.com/kixelated/moq-rs/issues) for a rough road map and potential contributions!
-
-There are some additional repositories that might be of interest:
+There are some additional crates in other repositories that might be of interest:
 | crate | description |
-| [web-transport-quinn](https://docs.rs/web-transport-quinn/latest/web_transport_quinn/) | A [WebTransport](https://datatracker.ietf.org/doc/draft-ietf-webtrans-http3/) client and server utilizing [Quinn](https://github.com/quinn-rs/quinn). |
+| ----: | ----------- |
+| [web-transport-quinn](https://docs.rs/web-transport-quinn/latest/web_transport_quinn/) | A [WebTransport](https://datatracker.ietf.org/doc/draft-ietf-webtrans-http3/) client and server utilizing [Quinn](https://github.com/quinn-rs/quinn). Copies the Quinn API and abstracts away the HTTP/3 handshake.  |
 | [web-transport-wasm](https://github.com/kixelated/web-transport-rs/tree/main/web-transport-wasm) | A WASM [WebTransport](https://datatracker.ietf.org/doc/draft-ietf-webtrans-http3/) wrapper around the `web-sys` bindings. |
-| [web-transport](https://github.com/kixelated/web-transport-rs) | A common interface, utilizing one of the above depending on the platform. |
-| [web-codecs](https://github.com/kixelated/web-codecs-rs) | A [WebCodecs](https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API) WASM wrapper providing a more ergonomic API. |
+| [web-transport](https://github.com/kixelated/web-transport-rs) | A common (opinionated) interface, utilizing one of the above depending on the platform. This is what the `moq-lite` crate uses. |
+| [web-codecs](https://docs.rs/web-codecs/latest/web_codecs/) | A wrapper around the [WebCodecs API](https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API) for WASM. |
+| [web-streams](https://docs.rs/web-streams/latest/web_streams/) | A wrapper around the [Streams API](https://developer.mozilla.org/en-US/docs/Web/API/Streams_API) for WASM. |
 
-# License
+
+## Typescript
+Web code is written in [Typescript](https://github.com/kixelated/moq/tree/main/js) and is split into a few packages:
+
+| package | description |
+| ------- | ----------- |
+| [@kixelated/moq](https://www.npmjs.com/package/@kixelated/moq) | A moq-lite client that mirrors the Rust API. You can publish and subscribe to generic tracks. Any media stuff is implemented at a higher layer. |
+| [@kixelated/hang](https://www.npmjs.com/package/@kixelated/hang) | A media library. This is where the bulk of the cool stuff happens, like capturing/encoding or decoding/rendering media. Includes Web Components to make setup super simple. [See the demos](https://github.com/kixelated/moq/tree/main/js/hang/demo). |
+
+**Note**: These utilize browser-specific APIs and there's no (explicit) support for Node and other server runtimes.
+[Deno](https://deno.com/) is doing some cool stuff with WebTransport so maybe it'll work there someday.
+
+And before you ask, yes, it is possible to use WASM for web support as evidenced by the [hang-wasm](https://github.com/kixelated/moq/tree/main/hang-wasm) crate.
+However, it involves a lot of boilerplate, wrappers, and casting.
+The performance is not great because the WASM sandbox doesn't have networking or device access, requiring copying and/or message passing to use Web APIs.
+
+So, we migrated all web code (back) to Typescript.
+It makes me a sad crab, but it results in faster iteration and the best user experience.
+
+
+
+## License
 
 Everything is licensed under MIT or Apache-2.0 so knock yourself out.
 
-If you do end up using MoQ for your project, let the world know! The more public traction we can
-get, the better we can make the standard.
+If you do end up using MoQ for your project, let me know!
+I will never get tired of DMs.
+`@kixelated` on Discord.
+
+![@kixelated](/blog/avatar.png)
