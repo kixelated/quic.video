@@ -1,5 +1,5 @@
 import { Support } from "@kixelated/hang";
-import { Watch, WatchControls } from "@kixelated/hang/watch";
+import { Watch, WatchControls } from "@kixelated/hang";
 import { onCleanup } from "solid-js";
 
 export default function (props: { name: string }) {
