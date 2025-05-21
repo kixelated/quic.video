@@ -20,5 +20,5 @@ jobs:
 
       - uses: biomejs/setup-biome@v2
 
-      - run: pnpm ci
+      - run: pnpm install --frozen-lockfile
       - run: pnpm run check
