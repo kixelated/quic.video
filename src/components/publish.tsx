@@ -1,7 +1,7 @@
-import { Support, Publish, PublishControls } from "@kixelated/hang";
-import { uniqueNamesGenerator, adjectives, animals } from "unique-names-generator";
+import { Publish, PublishControls, Support } from "@kixelated/hang";
+import { adjectives, animals, uniqueNamesGenerator } from "unique-names-generator";
 
-import { onCleanup, Show } from "solid-js";
+import { Show, onCleanup } from "solid-js";
 
 export default function () {
 	const name = uniqueNamesGenerator({ dictionaries: [adjectives, animals], separator: "-" });

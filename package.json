@@ -8,7 +8,7 @@
 		"build": "astro build --production",
 		"prod": "astro build --production && astro preview --production",
 		"check": "biome ci && tsc --noEmit",
-		"fix": "biome check --write && npm audit fix --force"
+		"fix": "biome check --write && pnpm audit fix"
 	},
 	"dependencies": {
 		"@astrojs/mdx": "3.1.9",
