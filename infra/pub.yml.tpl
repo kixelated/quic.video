@@ -97,5 +97,5 @@ write_files:
 runcmd:
   - systemctl daemon-reload
   - systemctl restart docker
-  - systemctl start moq-bbb moq-clock
+  - systemctl start hang-bbb moq-clock
   - systemctl start watchtower
