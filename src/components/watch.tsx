@@ -6,7 +6,7 @@ export default function (props: { name: string }) {
 	const url = new URL(
 		`${import.meta.env.PUBLIC_RELAY_SCHEME}://${import.meta.env.PUBLIC_RELAY_HOST}/demo/${props.name}.hang`,
 	);
-	const canvas = <canvas style={{ "max-width": "100%", height: "100%", margin: "0 auto", "border-radius": "1rem" }} />;
+	const canvas = <canvas style={{ "max-width": "100%", height: "auto", margin: "0 auto", "border-radius": "1rem" }} />;
 
 	const watch = new Watch({
 		connection: {
@@ -32,6 +32,7 @@ export default function (props: { name: string }) {
 			<Support role="watch" show="partial" />
 
 			{canvas}
+
 			<WatchControls lib={watch} root={root} />
 		</div>
 	);

@@ -5,10 +5,10 @@ title: Issues
 
 # Issues
 
-Yeah so there's a lot of work to do.
+Yeah, so there's a lot of work to do.
 
 Because we've broken out of the WebRTC jail, we need to implement a lot of things that are taken for granted.
-If you want full control over the media stack so you can do cool shit, then welcome, you're in the right place.
+If you want full control over the media stack so you can build cool shit, then welcome, you're in the right place.
 But if you just want a Google Meet clone and want to do minimal work, then check out [Pion](https://github.com/pion/webrtc).
 
 This page is a summary of the major issues, updated periodically.
@@ -43,7 +43,7 @@ Now on to the issues.
 | name                      | description                                                                                                                                                                      |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Adaptive Bitrate  	| Currently, the bitrate for a broadcast is fixed at creation time. We need to implement back-pressure so the broadcaster lowers its bitrate during congestion. In addition, we could use simulcast to create multiple tracks allowing the viewer to choose what to receive. |
-| Echo Cancelation      | People who use speakers are the worst. But for real we need some form of echo cancelation otherwise conferencing is difficult. It seems like you can specify it [when capturing media](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints/echoCancellation) but I've yet to test how well it works. |
+| Echo Cancellation | People who use speakers are the worst. But seriously, we need some form of echo cancelation otherwise conferencing is difficult. It seems like you can specify it [when capturing media](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints/echoCancellation) but I've yet to test how well it works. |
 | OBS Plugin      | We should develop an [OBS](https://obsproject.com/) plugin to make it easier to publish broadcasts. The gstreamer plugin should also be improved but it mostly works. |
 | Viewer Feedback | Currently, viewers don't provide any feedback to the broadcaster(s). This would be very useful for small broadcasts for stuff like negotiating codecs, bitrates, etc. |
 
@@ -56,6 +56,6 @@ Now on to the issues.
 | Chat | I want to implement a chat protocol over MoQ! |
 
 And of course, there's a million other things.
-Hit me up on [Discord](https://discord.gg/FCYF3p99mr) if want to volunteer your time or monies to help make these a reality.
+Hit me up on [Discord](https://discord.gg/FCYF3p99mr) if you want to volunteer your time or monies to help make these a reality.
 
 ![@kixelated](/blog/avatar.png)
