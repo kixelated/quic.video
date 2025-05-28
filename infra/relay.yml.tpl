@@ -37,6 +37,13 @@ write_files:
     permissions: "0644"
     owner: root
 
+  # Write the demo key to disk
+  - path: /etc/moq/demo.jwk
+    content: |
+      ${indent(6, demo_key)}
+    permissions: "0644"
+    owner: root
+
   - path: /etc/moq/relay.toml
     content: |
       [server]
@@ -60,6 +67,10 @@ write_files:
       [cluster]
       root = "${cluster_root}"
       node = "${cluster_node}"
+
+      [auth]
+      anon = ""
+      demo = "/etc/moq/demo.jwk"
 
     permissions: "0644"
     owner: root

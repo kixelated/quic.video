@@ -24,3 +24,6 @@ bun.lockb
 
 # Mac shit
 .DS_Store
+
+# Don't leak me secrets
+.env.production

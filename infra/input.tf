@@ -23,10 +23,16 @@ variable "docker" {
   default     = "docker.io/kixelated"
 }
 
+# A key generated using moq-token generate
+variable "demo_key" {
+  description = "demo key"
+  sensitive   = true
+}
+
 # A token used to publish demo/bbb.hang
 # This is very manual/crude, but I don't want someone to hijack the broadcast.
-variable "token" {
-  description = "token"
+variable "demo_token" {
+  description = "demo token"
   sensitive   = true
 }
 

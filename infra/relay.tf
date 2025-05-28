@@ -46,6 +46,9 @@ resource "google_compute_instance" "relay" {
       # See: https://cloud.google.com/compute/docs/internal-dns
       cluster_node = "relay-${each.key}.${each.value.zone}.c.${var.project}.internal"
       cluster_root = "${local.root}.c.${var.project}.internal"
+
+      # The demo key, used to authenticate the demo broadcast
+      demo_key = var.demo_key
     })
   }
 
