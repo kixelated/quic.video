@@ -30,6 +30,7 @@ resource "google_compute_instance" "pub" {
       addr   = "relay.${var.domain}"
       docker = var.docker
       region = local.pub.region
+      token  = var.token
     })
   }
 

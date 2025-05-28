@@ -6,7 +6,7 @@ import { Show, onCleanup } from "solid-js";
 export default function () {
 	const name = uniqueNamesGenerator({ dictionaries: [adjectives, animals], separator: "-" });
 	const url = new URL(
-		`${import.meta.env.PUBLIC_RELAY_SCHEME}://${import.meta.env.PUBLIC_RELAY_HOST}/demo/${name}.hang`,
+		`${import.meta.env.PUBLIC_RELAY_SCHEME}://${import.meta.env.PUBLIC_RELAY_HOST}/anon/${name}.hang`,
 	);
 
 	const video = (

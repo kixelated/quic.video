@@ -37,6 +37,33 @@ write_files:
     permissions: "0644"
     owner: root
 
+  - path: /etc/moq/relay.toml
+    content: |
+      [server]
+      bind = "0.0.0.0:443"
+
+      [[server.tls_cert]]
+      chain = "/etc/cert/${cluster_node}.crt"
+      key = "/etc/cert/${cluster_node}.key"
+
+      [[server.tls_cert]]
+      chain = "/etc/cert/${public_host}.crt"
+      key = "/etc/cert/${public_host}.key"
+
+      [client]
+      tls_root = "/etc/cert/internal.ca"
+
+      [[client.tls_cert]]
+      chain = "/etc/cert/${cluster_node}.crt"
+      key = "/etc/cert/${cluster_node}.key"
+
+      [cluster]
+      root = "${cluster_root}"
+      node = "${cluster_node}"
+
+    permissions: "0644"
+    owner: root
+
   # Create a systemd service to run the docker image
   - path: /etc/systemd/system/moq-relay.service
     permissions: "0644"
@@ -56,13 +83,9 @@ write_files:
         --pull=always \
         --cap-add=SYS_PTRACE \
         -v "/etc/cert:/etc/cert:ro" \
+        -v "/etc/moq:/etc/moq:ro" \
         -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
-        ${docker}/moq-relay --bind 0.0.0.0:443 \
-        --tls-cert "/etc/cert/${cluster_node}.crt" --tls-key "/etc/cert/${cluster_node}.key" \
-        --tls-cert "/etc/cert/${public_host}.crt" --tls-key "/etc/cert/${public_host}.key" \
-        --tls-root "/etc/cert/internal.ca" \
-        --cluster-root "${cluster_root}" \
-        --cluster-node "${cluster_node}"
+        ${docker}/moq-relay /etc/moq/relay.toml \
       ExecStop=docker stop moq-relay
 
   # GCP configures a firewall by default that blocks all UDP traffic

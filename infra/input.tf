@@ -23,6 +23,13 @@ variable "docker" {
   default     = "docker.io/kixelated"
 }
 
+# A token used to publish demo/bbb.hang
+# This is very manual/crude, but I don't want someone to hijack the broadcast.
+variable "token" {
+  description = "token"
+  sensitive   = true
+}
+
 # Too complicated to specify via flags, so do it here.
 locals {
   relays = {
