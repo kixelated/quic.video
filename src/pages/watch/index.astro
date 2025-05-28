@@ -1,0 +1,13 @@
+---
+export const prerender = false;
+
+import Issues from "@/components/issues.astro";
+import Watch from "@/components/watch.tsx";
+import Layout from "@/layouts/global.astro";
+---
+
+<Layout title={`Watch - Demo`} description="Watch a (fake) live broadcast.">
+	<Issues />
+
+	<Watch client:only="solid-js" name="demo/bbb" token={import.meta.env.PUBLIC_DEMO_TOKEN} />
+</Layout>
