@@ -27,9 +27,9 @@ resource "google_compute_instance" "pub" {
   metadata = {
     # cloud-init template
     user-data = templatefile("${path.module}/pub.yml.tpl", {
-      addr   = "relay.${var.domain}"
-      docker = var.docker
-      region = local.pub.region
+      addr         = "relay.${var.domain}"
+      docker_image = var.docker_hang
+      region       = local.pub.region
 
       # A token used to publish demo/bbb.hang
       demo_token = var.demo_token

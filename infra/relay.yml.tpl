@@ -61,7 +61,7 @@ write_files:
   - path: /etc/moq/relay.toml
     content: |
       [server]
-      bind = "0.0.0.0:443"
+      listen = "0.0.0.0:443"
 
       [[server.tls.cert]]
       chain = "/etc/cert/${cluster_node}.crt"
@@ -72,11 +72,7 @@ write_files:
       key = "/etc/cert/${public_host}.key"
 
       [client]
-      tls.root = "/etc/cert/internal.ca"
-
-      [[client.tls.cert]]
-      chain = "/etc/cert/${cluster_node}.crt"
-      key = "/etc/cert/${cluster_node}.key"
+      tls.root = [ "/etc/cert/internal.ca" ]
 
       [cluster]
       connect = "${cluster_root}"
@@ -114,7 +110,7 @@ write_files:
         -v "/etc/cert:/etc/cert:ro" \
         -v "/etc/moq:/etc/moq:ro" \
         -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
-        ${docker}/moq-relay /etc/moq/relay.toml \
+        ${docker_image} /etc/moq/relay.toml
       ExecStop=docker stop moq-relay
 
   # GCP configures a firewall by default that blocks all UDP traffic
@@ -152,29 +148,7 @@ write_files:
       #!/bin/sh
       docker system prune -af
 
-  # Add Watchtower systemd service to restart the container on update
-  - path: /etc/systemd/system/watchtower.service
-    permissions: "0644"
-    owner: root
-    content: |
-      [Unit]
-      Description=Watchtower to auto-update containers
-      After=docker.service
-      Wants=docker.service
-
-      [Service]
-      Restart=on-failure
-      RestartSec=10s
-      ExecStart=docker run --rm \
-        --name watchtower \
-        --volume /var/run/docker.sock:/var/run/docker.sock \
-        containrrr/watchtower \
-        --cleanup \
-        --interval 300
-      ExecStop=docker stop watchtower
-
 runcmd:
   - systemctl daemon-reload
   - systemctl restart docker
   - systemctl start moq-relay
-  - systemctl start watchtower

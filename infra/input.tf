@@ -18,9 +18,14 @@ variable "domain" {
   description = "domain name"
 }
 
-variable "docker" {
-  description = "Docker repository prefix"
-  default     = "docker.io/kixelated"
+variable "docker_relay" {
+  description = "Docker image for moq-relay"
+  default     = "docker.io/kixelated/moq-relay:0.7.1"
+}
+
+variable "docker_hang" {
+  description = "Docker image for hang"
+  default     = "docker.io/kixelated/hang:0.3.0"
 }
 
 # A key generated using moq-token generate
