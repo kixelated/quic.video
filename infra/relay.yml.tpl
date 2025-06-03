@@ -44,33 +44,51 @@ write_files:
     permissions: "0644"
     owner: root
 
+  # Write the root key to disk
+  - path: /etc/moq/root.jwk
+    content: |
+      ${indent(6, root_key)}
+    permissions: "0644"
+    owner: root
+
+  # Write the root token to disk
+  - path: /etc/moq/root.jwt
+    content: |
+      ${indent(6, root_token)}
+    permissions: "0644"
+    owner: root
+
   - path: /etc/moq/relay.toml
     content: |
       [server]
       bind = "0.0.0.0:443"
 
-      [[server.tls_cert]]
+      [[server.tls.cert]]
       chain = "/etc/cert/${cluster_node}.crt"
       key = "/etc/cert/${cluster_node}.key"
 
-      [[server.tls_cert]]
+      [[server.tls.cert]]
       chain = "/etc/cert/${public_host}.crt"
       key = "/etc/cert/${public_host}.key"
 
       [client]
-      tls_root = "/etc/cert/internal.ca"
+      tls.root = "/etc/cert/internal.ca"
 
-      [[client.tls_cert]]
+      [[client.tls.cert]]
       chain = "/etc/cert/${cluster_node}.crt"
       key = "/etc/cert/${cluster_node}.key"
 
       [cluster]
-      root = "${cluster_root}"
-      node = "${cluster_node}"
+      connect = "${cluster_root}"
+      advertise = "${cluster_node}"
+      token = "/etc/moq/root.jwk"
 
       [auth]
-      anon = ""
+      root = "/etc/moq/root.jwk"
+
+      [auth.paths]
       demo = "/etc/moq/demo.jwk"
+      anon = ""
 
     permissions: "0644"
     owner: root

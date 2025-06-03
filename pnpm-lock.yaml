@@ -21,8 +21,8 @@ importers:
         specifier: 5.1.2
         version: 5.1.2(astro@4.16.18(@types/node@22.15.18)(rollup@4.40.2)(typescript@5.8.3))(tailwindcss@3.4.17)
       '@kixelated/hang':
-        specifier: ^0.1.1
-        version: 0.1.1
+        specifier: ^0.2.0
+        version: 0.2.0
       '@tailwindcss/forms':
         specifier: ^0.5.9
         version: 0.5.10(tailwindcss@3.4.17)
@@ -464,11 +464,14 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
-  '@kixelated/hang@0.1.1':
-    resolution: {integrity: sha512-wU/T7nM8KKL/IoopNcmgvw1u9/COWmIiDV8QCNTQhJ88uRc5fctAQxjNwKZNyyX23EGY8WwItzsKO59OWCsEOg==}
+  '@kixelated/hang@0.2.0':
+    resolution: {integrity: sha512-0U+bdSw/Sih5xYSYSjeHYUgohei7/UdnSQPnVVZADhmpgeOFbdNcHa6CFqimdBF4AxPS9nThEni7LBkjnGBmaQ==}
 
-  '@kixelated/moq@0.5.0':
-    resolution: {integrity: sha512-LUun0t7n3K2l+7F24bB2TgUeoW73X21f9Bf6N9l82BLKmKMU1QbuZTP9LBGPxHDnaUyz3a/Cc8kLrJzsZIqzRA==}
+  '@kixelated/moq@0.6.0':
+    resolution: {integrity: sha512-etaHsvQX/LH8p34xCF865B3ad3i1hvhBxQloXYI/wjyUYawz1CgTyoqOEwIVp2XgiuJrimZR/500I5xFaFQO6w==}
+
+  '@kixelated/signals@0.2.0':
+    resolution: {integrity: sha512-9mEmWGuvfcv8L2GhrW3t3zg2GDWv3QbYd0gX5IK7DW3BK5xGy8f+ftyGHLGyTl8pRHPyaZh9eOQi64kDGBawKw==}
 
   '@mdx-js/mdx@3.1.0':
     resolution: {integrity: sha512-/QxEhPAvGwbQmy1Px8F899L5Uc2KZ6JtXwlCgJmjSTBedwOZkByYcBG4GceIGPXRDsmfxhHazuS+hlOShRLeDw==}
@@ -631,9 +634,6 @@ packages:
     resolution: {integrity: sha512-0wDLwCVF5V3x3b1SGXPCDcdsbDHMBe+lkFzBRaHeLvNi+nrrnZ1lA18u+OTWO8iSWU2GxUOCvlXtDuqftc1oiA==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders || >=4.0.0-alpha.20 || >=4.0.0-beta.1'
-
-  '@types/audioworklet@0.0.75':
-    resolution: {integrity: sha512-Xb35K9bXy+fUl/moqCgoTuvuLWxd2Tro1ua+2j3JzOBzYb5n5bvBry7OKNrw1imObjKufxV5+ZfZ02xFkqJiXw==}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -2352,8 +2352,8 @@ packages:
   zod@3.24.4:
     resolution: {integrity: sha512-OdqJE9UDRPwWsrHjLN2F8bPxvwJBK22EHLWtanu0LSYr5YqzsaaW3RMgmjwr8Rypg5k+meEJdSPXJZXE/yqOMg==}
 
-  zod@3.25.17:
-    resolution: {integrity: sha512-8hQzQ/kMOIFbwOgPrm9Sf9rtFHpFUMy4HvN0yEB0spw14aYi0uT5xG5CE2DB9cd51GWNsz+DNO7se1kztHMKnw==}
+  zod@3.25.50:
+    resolution: {integrity: sha512-VstOnRxf4tlSq0raIwbn0n+LA34SxVoZ8r3pkwSUM0jqNiA/HCMQEVjTuS5FZmHsge+9MDGTiAuHyml5T0um6A==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -2764,18 +2764,22 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@kixelated/hang@0.1.1':
+  '@kixelated/hang@0.2.0':
     dependencies:
-      '@kixelated/moq': 0.5.0
-      '@types/audioworklet': 0.0.75
+      '@kixelated/moq': 0.6.0
+      '@kixelated/signals': 0.2.0
       buffer: 6.0.3
       lodash: 4.17.21
       solid-js: 1.9.7
-      zod: 3.25.17
+      zod: 3.25.50
 
-  '@kixelated/moq@0.5.0':
+  '@kixelated/moq@0.6.0':
     dependencies:
       buffer: 6.0.3
+
+  '@kixelated/signals@0.2.0':
+    dependencies:
+      solid-js: 1.9.7
 
   '@mdx-js/mdx@3.1.0(acorn@8.14.1)':
     dependencies:
@@ -2939,8 +2943,6 @@ snapshots:
       lodash.merge: 4.6.2
       postcss-selector-parser: 6.0.10
       tailwindcss: 3.4.17
-
-  '@types/audioworklet@0.0.75': {}
 
   '@types/babel__core@7.20.5':
     dependencies:
@@ -5163,6 +5165,6 @@ snapshots:
 
   zod@3.24.4: {}
 
-  zod@3.25.17: {}
+  zod@3.25.50: {}
 
   zwitch@2.0.4: {}

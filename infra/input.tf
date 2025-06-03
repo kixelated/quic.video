@@ -36,6 +36,16 @@ variable "demo_token" {
   sensitive   = true
 }
 
+variable "root_key" {
+  description = "root key"
+  sensitive   = true
+}
+
+variable "root_token" {
+  description = "root token"
+  sensitive   = true
+}
+
 # Too complicated to specify via flags, so do it here.
 locals {
   relays = {
