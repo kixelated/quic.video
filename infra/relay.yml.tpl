@@ -37,6 +37,58 @@ write_files:
     permissions: "0644"
     owner: root
 
+  # Write the demo key to disk
+  - path: /etc/moq/demo.jwk
+    content: |
+      ${indent(6, demo_key)}
+    permissions: "0644"
+    owner: root
+
+  # Write the root key to disk
+  - path: /etc/moq/root.jwk
+    content: |
+      ${indent(6, root_key)}
+    permissions: "0644"
+    owner: root
+
+  # Write the root token to disk
+  - path: /etc/moq/root.jwt
+    content: |
+      ${indent(6, root_token)}
+    permissions: "0644"
+    owner: root
+
+  - path: /etc/moq/relay.toml
+    content: |
+      [server]
+      listen = "0.0.0.0:443"
+
+      [[server.tls.cert]]
+      chain = "/etc/cert/${cluster_node}.crt"
+      key = "/etc/cert/${cluster_node}.key"
+
+      [[server.tls.cert]]
+      chain = "/etc/cert/${public_host}.crt"
+      key = "/etc/cert/${public_host}.key"
+
+      [client]
+      tls.root = [ "/etc/cert/internal.ca" ]
+
+      [cluster]
+      connect = "${cluster_root}"
+      advertise = "${cluster_node}"
+      token = "/etc/moq/root.jwk"
+
+      [auth]
+      root = "/etc/moq/root.jwk"
+
+      [auth.paths]
+      demo = "/etc/moq/demo.jwk"
+      anon = ""
+
+    permissions: "0644"
+    owner: root
+
   # Create a systemd service to run the docker image
   - path: /etc/systemd/system/moq-relay.service
     permissions: "0644"
@@ -56,13 +108,9 @@ write_files:
         --pull=always \
         --cap-add=SYS_PTRACE \
         -v "/etc/cert:/etc/cert:ro" \
+        -v "/etc/moq:/etc/moq:ro" \
         -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
-        ${docker}/moq-relay --bind 0.0.0.0:443 \
-        --tls-cert "/etc/cert/${cluster_node}.crt" --tls-key "/etc/cert/${cluster_node}.key" \
-        --tls-cert "/etc/cert/${public_host}.crt" --tls-key "/etc/cert/${public_host}.key" \
-        --tls-root "/etc/cert/internal.ca" \
-        --cluster-root "${cluster_root}" \
-        --cluster-node "${cluster_node}"
+        ${docker_image} /etc/moq/relay.toml
       ExecStop=docker stop moq-relay
 
   # GCP configures a firewall by default that blocks all UDP traffic
@@ -100,29 +148,7 @@ write_files:
       #!/bin/sh
       docker system prune -af
 
-  # Add Watchtower systemd service to restart the container on update
-  - path: /etc/systemd/system/watchtower.service
-    permissions: "0644"
-    owner: root
-    content: |
-      [Unit]
-      Description=Watchtower to auto-update containers
-      After=docker.service
-      Wants=docker.service
-
-      [Service]
-      Restart=on-failure
-      RestartSec=10s
-      ExecStart=docker run --rm \
-        --name watchtower \
-        --volume /var/run/docker.sock:/var/run/docker.sock \
-        containrrr/watchtower \
-        --cleanup \
-        --interval 300
-      ExecStop=docker stop watchtower
-
 runcmd:
   - systemctl daemon-reload
   - systemctl restart docker
   - systemctl start moq-relay
-  - systemctl start watchtower

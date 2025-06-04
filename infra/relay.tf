@@ -29,7 +29,7 @@ resource "google_compute_instance" "relay" {
   metadata = {
     # cloud-init template
     user-data = templatefile("${path.module}/relay.yml.tpl", {
-      docker = var.docker
+      docker_image = var.docker_relay
 
       # The external address and certs
       public_host = var.domain
@@ -46,6 +46,13 @@ resource "google_compute_instance" "relay" {
       # See: https://cloud.google.com/compute/docs/internal-dns
       cluster_node = "relay-${each.key}.${each.value.zone}.c.${var.project}.internal"
       cluster_root = "${local.root}.c.${var.project}.internal"
+
+      # The demo key, used to authenticate the demo broadcast
+      demo_key = var.demo_key
+
+      # The root key and token, used to authenticate nodes
+      root_key   = var.root_key
+      root_token = var.root_token
     })
   }
 
@@ -58,7 +65,7 @@ resource "google_compute_instance" "relay" {
 
   lifecycle {
     # There seems to be a terraform bug causing this to be recreated on every apply
-    # ignore_changes = [boot_disk]
+    ignore_changes = [boot_disk]
   }
 
   allow_stopping_for_update = true

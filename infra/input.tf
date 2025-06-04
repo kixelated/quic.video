@@ -18,9 +18,37 @@ variable "domain" {
   description = "domain name"
 }
 
-variable "docker" {
-  description = "Docker repository prefix"
-  default     = "docker.io/kixelated"
+variable "docker_relay" {
+  description = "Docker image for moq-relay"
+  default     = "docker.io/kixelated/moq-relay:0.7.1"
+}
+
+variable "docker_hang" {
+  description = "Docker image for hang"
+  default     = "docker.io/kixelated/hang:0.3.0"
+}
+
+# A key generated using moq-token generate
+variable "demo_key" {
+  description = "demo key"
+  sensitive   = true
+}
+
+# A token used to publish demo/bbb.hang
+# This is very manual/crude, but I don't want someone to hijack the broadcast.
+variable "demo_token" {
+  description = "demo token"
+  sensitive   = true
+}
+
+variable "root_key" {
+  description = "root key"
+  sensitive   = true
+}
+
+variable "root_token" {
+  description = "root token"
+  sensitive   = true
 }
 
 # Too complicated to specify via flags, so do it here.
