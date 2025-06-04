@@ -1,5 +1,5 @@
-import { Support } from "@kixelated/hang";
-import { Watch, WatchControls } from "@kixelated/hang";
+import { Connection, Support } from "@kixelated/hang";
+import { Watch } from "@kixelated/hang";
 import { onCleanup } from "solid-js";
 
 export default function (props: { name: string; token?: string }) {
@@ -8,34 +8,32 @@ export default function (props: { name: string; token?: string }) {
 	const url = new URL(
 		`${import.meta.env.PUBLIC_RELAY_SCHEME}://${import.meta.env.PUBLIC_RELAY_HOST}/${props.token ? `demo/${props.token}` : `${props.name}.hang`}`,
 	);
-	const canvas = <canvas style={{ "max-width": "100%", height: "auto", margin: "0 auto", "border-radius": "1rem" }} />;
+	const canvas = (
+		<canvas style={{ "max-width": "100%", height: "auto", margin: "0 auto", "border-radius": "1rem" }} />
+	) as HTMLCanvasElement;
 
-	const watch = new Watch({
-		connection: {
-			url,
-		},
-		audio: {
-			muted: true,
-		},
-		video: {
-			canvas: canvas as HTMLCanvasElement,
-		},
-	});
+	const connection = new Connection({ url });
+	const broadcast = new Watch.Broadcast(connection, { path: "", enabled: true });
+	const video = new Watch.VideoRenderer(broadcast.video, { canvas });
+	const audio = new Watch.AudioEmitter(broadcast.audio, { muted: true });
 
 	let root!: HTMLDivElement;
 
 	onCleanup(() => {
-		watch.close();
+		connection.close();
+		broadcast.close();
+		video.close();
+		audio.close();
 	});
 
 	return (
 		<div ref={root}>
 			{/* biome-ignore lint/a11y/useValidAriaRole: false-positive */}
-			<Support role="watch" show="partial" />
+			<Support.Modal role="watch" show="partial" />
 
 			{canvas}
 
-			<WatchControls lib={watch} root={root} />
+			<Watch.Controls broadcast={broadcast} video={video} audio={audio} root={root} />
 		</div>
 	);
 }

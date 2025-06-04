@@ -15,19 +15,19 @@
 		"@astrojs/node": "8.3.4",
 		"@astrojs/solid-js": "4.4.4",
 		"@astrojs/tailwind": "5.1.2",
-		"@kixelated/hang": "^0.2.0",
-		"@tailwindcss/forms": "^0.5.9",
-		"@tailwindcss/typography": "^0.5.15",
+		"@kixelated/hang": "^0.2.1",
+		"@tailwindcss/forms": "^0.5.10",
+		"@tailwindcss/typography": "^0.5.16",
 		"astro": "^4.16.18",
-		"solid-js": "^1.9.3",
-		"tailwindcss": "^3.4.15",
+		"solid-js": "^1.9.7",
+		"tailwindcss": "^3.4.17",
 		"unique-names-generator": "^4.7.1",
-		"vite-plugin-mkcert": "^1.17.6",
-		"vite-plugin-static-copy": "^2.2.0",
-		"vite-plugin-wasm": "^3.3.0"
+		"vite-plugin-mkcert": "^1.17.8",
+		"vite-plugin-static-copy": "^2.3.1",
+		"vite-plugin-wasm": "^3.4.1"
 	},
 	"devDependencies": {
-		"@types/node": "^22.10.1"
+		"@types/node": "^22.15.29"
 	},
 	"packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977"
 }
