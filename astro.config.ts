@@ -22,8 +22,6 @@ export default defineConfig({
 	adapter: nodejs({
 		mode: "standalone",
 	}),
-	// Default to static rendering, but allow server rendering per-page
-	output: "hybrid",
 	vite: {
 		build: {
 			target: "esnext",
