@@ -80,10 +80,10 @@ write_files:
       token = "/etc/moq/root.jwk"
 
       [auth]
-      root = "/etc/moq/root.jwk"
+      key = "/etc/moq/root.jwk"
 
-      [auth.paths]
-      demo = "/etc/moq/demo.jwk"
+      [auth.path]
+      demo = ""
       anon = ""
 
     permissions: "0644"
