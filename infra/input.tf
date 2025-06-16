@@ -20,12 +20,12 @@ variable "domain" {
 
 variable "docker_relay" {
   description = "Docker image for moq-relay"
-  default     = "docker.io/kixelated/moq-relay:0.7.1"
+  default     = "docker.io/kixelated/moq-relay:latest"
 }
 
 variable "docker_hang" {
   description = "Docker image for hang"
-  default     = "docker.io/kixelated/hang:0.3.0"
+  default     = "docker.io/kixelated/hang:latest"
 }
 
 # A key generated using moq-token generate
