@@ -85,6 +85,7 @@ write_files:
       [auth.path]
       demo = ""
       anon = ""
+      hang = ""
 
     permissions: "0644"
     owner: root
