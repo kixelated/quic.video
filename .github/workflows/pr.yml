@@ -18,7 +18,5 @@ jobs:
         with:
           cache: 'pnpm'
 
-      - uses: biomejs/setup-biome@v2
-
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check
