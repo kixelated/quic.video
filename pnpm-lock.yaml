@@ -21,8 +21,8 @@ importers:
         specifier: 6.0.2
         version: 6.0.2(astro@5.8.2(@types/node@22.15.29)(jiti@1.21.7)(rollup@4.41.1)(typescript@5.8.3)(yaml@2.8.0))(tailwindcss@3.4.17)
       '@kixelated/hang':
-        specifier: ^0.2.1
-        version: 0.2.1
+        specifier: ^0.2.5
+        version: 0.2.5(@types/react@19.1.8)(solid-js@1.9.7)
       '@tailwindcss/forms':
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@3.4.17)
@@ -469,14 +469,25 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
-  '@kixelated/hang@0.2.1':
-    resolution: {integrity: sha512-jTTuuHh/J1bWeYkefLekwrWexkmH3yi0xR6leamPUxbzsy+bNBFsubpOkjndnIzuW/nS4/Vq6HrbczZlBStr7w==}
+  '@kixelated/hang@0.2.5':
+    resolution: {integrity: sha512-Uw7qFrJ34zvX/cVh97TtHFhY1nxdDEqBp+ckG6t+V+BmSg0AgwUOWPFISl1uDjkCsR84IkFw+zN3HSt4bYvXgw==}
+    peerDependencies:
+      solid-js: ^1.9.7
 
-  '@kixelated/moq@0.6.0':
-    resolution: {integrity: sha512-etaHsvQX/LH8p34xCF865B3ad3i1hvhBxQloXYI/wjyUYawz1CgTyoqOEwIVp2XgiuJrimZR/500I5xFaFQO6w==}
+  '@kixelated/moq@0.6.1':
+    resolution: {integrity: sha512-fdEbFghz0NwrDYmjntDVvYYAvIFpgtxrY5MzM7uexFimyEtMCfIt9Th4bcL54vpZm6l5R6gsL1IEBUHo4AdOfg==}
 
-  '@kixelated/signals@0.2.0':
-    resolution: {integrity: sha512-9mEmWGuvfcv8L2GhrW3t3zg2GDWv3QbYd0gX5IK7DW3BK5xGy8f+ftyGHLGyTl8pRHPyaZh9eOQi64kDGBawKw==}
+  '@kixelated/signals@0.3.0':
+    resolution: {integrity: sha512-oLBrY27OKyyB5d4++HE2GGyR5siIlWWc8ZHNcGyKKk+kMY2AEAwpJnA8IvyUaJkfQvc6VMTYXRSDS7YON14QRQ==}
+    peerDependencies:
+      '@types/react': ^19.1.8
+      react: ^19.0.0
+      solid-js: ^1.9.7
+    peerDependenciesMeta:
+      react:
+        optional: true
+      solid-js:
+        optional: true
 
   '@mdx-js/mdx@3.1.0':
     resolution: {integrity: sha512-/QxEhPAvGwbQmy1Px8F899L5Uc2KZ6JtXwlCgJmjSTBedwOZkByYcBG4GceIGPXRDsmfxhHazuS+hlOShRLeDw==}
@@ -684,6 +695,9 @@ packages:
 
   '@types/node@22.15.29':
     resolution: {integrity: sha512-LNdjOkUDlU1RZb8e1kOIUpN1qQUlzGkEtbVNo53vbrwDg5om6oduhm4SiUaPW5ASTXhAiP0jInWG8Qx9fVlOeQ==}
+
+  '@types/react@19.1.8':
+    resolution: {integrity: sha512-AwAfQ2Wa5bCx9WP8nZL2uMZWod7J7/JSplxbTmBQ5ms6QpqNYm672H0Vu9ZVKVngQ+ii4R/byguVEUZQyeg44g==}
 
   '@types/unist@2.0.11':
     resolution: {integrity: sha512-CmBKiL6NNo/OqgmMn95Fk9Whlp2mtvIv+KNpQKN2F4SjvrEesubTRWGYSg+BnWZOnlCaSTU1sMpsBOzgbYhnsA==}
@@ -1413,9 +1427,6 @@ packages:
 
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
-
-  lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
 
   longest-streak@3.1.0:
     resolution: {integrity: sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g==}
@@ -2423,6 +2434,9 @@ packages:
   zod@3.25.51:
     resolution: {integrity: sha512-TQSnBldh+XSGL+opiSIq0575wvDPqu09AqWe1F7JhUMKY+M91/aGlK4MhpVNO7MgYfHcVCB1ffwAUTJzllKJqg==}
 
+  zod@3.25.67:
+    resolution: {integrity: sha512-idA2YXwpCdqUSKRCACDE6ItZD9TZzy3OZMtpfLoh6oPR47lipysRrJfjzMqFxQ3uJuUPyUeWe1r9vLH33xO/Qw==}
+
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
@@ -2837,21 +2851,26 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@kixelated/hang@0.2.1':
+  '@kixelated/hang@0.2.5(@types/react@19.1.8)(solid-js@1.9.7)':
     dependencies:
-      '@kixelated/moq': 0.6.0
-      '@kixelated/signals': 0.2.0
+      '@kixelated/moq': 0.6.1
+      '@kixelated/signals': 0.3.0(@types/react@19.1.8)(solid-js@1.9.7)
       buffer: 6.0.3
-      lodash: 4.17.21
       solid-js: 1.9.7
-      zod: 3.25.51
+      zod: 3.25.67
+    transitivePeerDependencies:
+      - '@types/react'
+      - react
 
-  '@kixelated/moq@0.6.0':
+  '@kixelated/moq@0.6.1':
     dependencies:
       buffer: 6.0.3
 
-  '@kixelated/signals@0.2.0':
+  '@kixelated/signals@0.3.0(@types/react@19.1.8)(solid-js@1.9.7)':
     dependencies:
+      '@types/react': 19.1.8
+      dequal: 2.0.3
+    optionalDependencies:
       solid-js: 1.9.7
 
   '@mdx-js/mdx@3.1.0(acorn@8.14.1)':
@@ -3073,6 +3092,10 @@ snapshots:
   '@types/node@22.15.29':
     dependencies:
       undici-types: 6.21.0
+
+  '@types/react@19.1.8':
+    dependencies:
+      csstype: 3.1.3
 
   '@types/unist@2.0.11': {}
 
@@ -3958,8 +3981,6 @@ snapshots:
   lodash.isplainobject@4.0.6: {}
 
   lodash.merge@4.6.2: {}
-
-  lodash@4.17.21: {}
 
   longest-streak@3.1.0: {}
 
@@ -5287,5 +5308,7 @@ snapshots:
       zod: 3.25.51
 
   zod@3.25.51: {}
+
+  zod@3.25.67: {}
 
   zwitch@2.0.4: {}

@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "astro dev --open",
 		"build": "astro build --production",
-		"prod": "astro build --production && astro preview --production",
+		"prod": "astro build --production && astro preview --production --open",
 		"check": "biome ci && tsc --noEmit",
 		"fix": "biome check --write && pnpm audit fix"
 	},
@@ -15,7 +15,7 @@
 		"@astrojs/node": "9.2.2",
 		"@astrojs/solid-js": "5.1.0",
 		"@astrojs/tailwind": "6.0.2",
-		"@kixelated/hang": "^0.2.2",
+		"@kixelated/hang": "^0.2.5",
 		"@tailwindcss/forms": "^0.5.10",
 		"@tailwindcss/typography": "^0.5.16",
 		"astro": "^5.8.2",
