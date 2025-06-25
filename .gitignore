@@ -27,3 +27,5 @@ bun.lockb
 
 # Don't leak me secrets
 .env.production
+*.jwt
+*.jwk

@@ -47,12 +47,9 @@ resource "google_compute_instance" "relay" {
       cluster_node = "relay-${each.key}.${each.value.zone}.c.${var.project}.internal"
       cluster_root = "${local.root}.c.${var.project}.internal"
 
-      # The demo key, used to authenticate the demo broadcast
-      demo_key = var.demo_key
-
       # The root key and token, used to authenticate nodes
-      root_key   = var.root_key
-      root_token = var.root_token
+      root_key      = var.root_key
+      cluster_token = var.cluster_token
     })
   }
 
