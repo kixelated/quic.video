@@ -37,13 +37,6 @@ write_files:
     permissions: "0644"
     owner: root
 
-  # Write the demo key to disk
-  - path: /etc/moq/demo.jwk
-    content: |
-      ${indent(6, demo_key)}
-    permissions: "0644"
-    owner: root
-
   # Write the root key to disk
   - path: /etc/moq/root.jwk
     content: |
@@ -52,9 +45,9 @@ write_files:
     owner: root
 
   # Write the root token to disk
-  - path: /etc/moq/root.jwt
+  - path: /etc/moq/cluster.jwt
     content: |
-      ${indent(6, root_token)}
+      ${indent(6, cluster_token)}
     permissions: "0644"
     owner: root
 
@@ -77,14 +70,14 @@ write_files:
       [cluster]
       connect = "${cluster_root}"
       advertise = "${cluster_node}"
-      token = "/etc/moq/root.jwk"
+      token = "/etc/moq/cluster.jwt"
 
       [auth]
       key = "/etc/moq/root.jwk"
 
       [auth.path]
-      demo = ""
       anon = ""
+      hang = ""
 
     permissions: "0644"
     owner: root

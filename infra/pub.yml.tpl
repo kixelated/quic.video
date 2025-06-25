@@ -20,7 +20,7 @@ write_files:
         -e REGION=${region} \
         --entrypoint hang-bbb \
         ${docker_image} \
-        publish "https://relay.quic.video/demo/bbb.hang"
+        publish "https://relay.quic.video/${demo_token}.jwt"
 
       ExecStop=docker stop hang-bbb
 
@@ -51,4 +51,4 @@ write_files:
 runcmd:
   - systemctl daemon-reload
   - systemctl restart docker
-  - systemctl start hang-bbb moq-clock
+  - systemctl start hang-bbb
