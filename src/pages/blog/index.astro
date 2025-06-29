@@ -20,7 +20,22 @@ posts.sort((a, b) => {
 
 <MainLayout title="Blog" description="Blog posts and fun stuff">
 	<section>
-		<h1>Blog Posts</h1>
+		<div class="flex items-center justify-between mb-6">
+			<h1>Blog Posts</h1>
+			<a href="/rss.xml" class="flex items-center gap-2 text-white hover:opacity-80 transition-opacity" title="RSS Feed">
+				<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+					<!-- RSS dot -->
+					<circle cx="6" cy="26" r="2" fill="#F7F8F8"/>
+
+					<!-- First arc (inner) -->
+					<path d="M6 16 A10 10 0 0 1 16 26" fill="none" stroke="#F7F8F8" stroke-width="2" stroke-linecap="round"/>
+
+					<!-- Second arc (outer) -->
+					<path d="M6 8 A18 18 0 0 1 24 26" fill="none" stroke="#00C02D" stroke-width="2" stroke-linecap="round"/>
+				</svg>
+				<span class="text-sm font-medium">RSS</span>
+			</a>
+		</div>
 
 		{
 			posts.map((post) => (
