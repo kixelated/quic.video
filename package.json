@@ -13,6 +13,7 @@
 	"dependencies": {
 		"@astrojs/mdx": "4.3.0",
 		"@astrojs/node": "9.2.2",
+		"@astrojs/rss": "^4.0.12",
 		"@astrojs/solid-js": "5.1.0",
 		"@astrojs/tailwind": "6.0.2",
 		"@kixelated/hang": "^0.2.5",

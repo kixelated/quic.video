@@ -10,6 +10,7 @@ import mkcert from "vite-plugin-mkcert";
 
 // https://astro.build/config
 export default defineConfig({
+	site: "https://quic.video",
 	integrations: [
 		mdx(),
 		solidJs(),
