@@ -36,7 +36,7 @@ variable "root_key" {
 
 # A token used to publish demo/bbb.hang
 # This is very manual/crude, but I don't want someone to hijack the broadcast.
-# cargo run --bin moq-token -- --key root.jwk sign --path "demo" --publish "" > demo.jwt
+# cargo run --bin moq-token -- --key root.jwk sign --path "demo/bbb.hang" --publish "" > demo.jwt
 variable "demo_token" {
   description = "demo token"
   sensitive   = true
