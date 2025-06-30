@@ -6,7 +6,7 @@ export default function (props: { name: string; token?: string }) {
 	// The signed token is only needed for the demo/ prefix just to prevent abuse.
 	// All other broadcasts go to anon/ which is super easy to spoof.
 	const url = new URL(
-		`${import.meta.env.PUBLIC_RELAY_SCHEME}://${import.meta.env.PUBLIC_RELAY_HOST}/${props.token ? `${props.token}.jwt` : `${props.name}.hang`}`,
+		`${import.meta.env.PUBLIC_RELAY_SCHEME}://${import.meta.env.PUBLIC_RELAY_HOST}/${props.name}${props.token ? `?jwt=${props.token}` : ""}`,
 	);
 
 	return (
