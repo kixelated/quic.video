@@ -20,7 +20,7 @@ write_files:
         -e REGION=${region} \
         --entrypoint hang-bbb \
         ${docker_image} \
-        publish "https://relay.quic.video/${demo_token}.jwt"
+        publish "https://relay.quic.video/demo/bbb.hang?jwt=${demo_token}"
 
       ExecStop=docker stop hang-bbb
 

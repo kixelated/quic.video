@@ -20,12 +20,12 @@ variable "domain" {
 
 variable "docker_relay" {
   description = "Docker image for moq-relay"
-  default     = "docker.io/kixelated/moq-relay:0.7.5"
+  default     = "docker.io/kixelated/moq-relay:0.7.6"
 }
 
 variable "docker_hang" {
   description = "Docker image for hang"
-  default     = "docker.io/kixelated/hang:0.1.7"
+  default     = "docker.io/kixelated/hang:0.1.8"
 }
 
 # cargo run --bin moq-token -- --key root.jwk generate
