@@ -74,15 +74,7 @@ write_files:
 
       [auth]
       key = "/etc/moq/root.jwk"
-
-      [auth.path.demo]
-      public = { read = true }
-
-      [auth.path.anon]
-      key = ""
-
-      [auth.path.hang]
-      key = ""
+      public = "anon"
 
     permissions: "0644"
     owner: root
