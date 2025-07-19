@@ -33,7 +33,7 @@ resource "google_compute_instance" "pub" {
 
       # A token used to publish demo/bbb.hang
       # cargo run --bin moq-token -- --key root.jwk sign --root "demo" --publish "" > demo.jwt
-      demo_token = file("demo.jwt")
+      demo_token = trimspace(file("demo.jwt"))
     })
   }
 

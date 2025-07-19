@@ -49,10 +49,10 @@ resource "google_compute_instance" "relay" {
 
       # The root key and token, used to authenticate nodes
       # cargo run --bin moq-token -- --key root.jwk generate > root.jwk
-      root_key      = file("root.jwk")
+      root_key      = trimspace(file("root.jwk"))
 
       # cargo run --bin moq-token -- --key root.jwk sign --publish "" --subscribe "" --cluster > cluster.jwt
-      cluster_token = file("cluster.jwt")
+      cluster_token = trimspace(file("cluster.jwt"))
     })
   }
 
