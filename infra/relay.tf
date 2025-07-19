@@ -48,8 +48,11 @@ resource "google_compute_instance" "relay" {
       cluster_root = "${local.root}.c.${var.project}.internal"
 
       # The root key and token, used to authenticate nodes
-      root_key      = var.root_key
-      cluster_token = var.cluster_token
+      # cargo run --bin moq-token -- --key root.jwk generate > root.jwk
+      root_key      = file("root.jwk")
+
+      # cargo run --bin moq-token -- --key root.jwk sign --publish "" --subscribe "" --cluster > cluster.jwt
+      cluster_token = file("cluster.jwt")
     })
   }
 

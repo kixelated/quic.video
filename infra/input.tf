@@ -1,51 +1,36 @@
 variable "project" {
   description = "project id"
+  default     = "quic-video"
 }
 
 variable "region" {
   description = "region"
+  default     = "us-central1"
 }
 
 variable "zone" {
   description = "zone"
+  default     = "us-central1-a"
 }
 
 variable "email" {
   description = "Your email address, used for LetsEncrypt"
+  default     = "kixelated@gmail.com"
 }
 
 variable "domain" {
   description = "domain name"
+  default     = "quic.video"
 }
 
 variable "docker_relay" {
   description = "Docker image for moq-relay"
-  default     = "docker.io/kixelated/moq-relay:0.7.6"
+  default     = "docker.io/kixelated/moq-relay:0.8.0"
 }
 
 variable "docker_hang" {
   description = "Docker image for hang"
-  default     = "docker.io/kixelated/hang:0.1.8"
-}
-
-# cargo run --bin moq-token -- --key root.jwk generate
-variable "root_key" {
-  description = "root key"
-  sensitive   = true
-}
-
-# A token used to publish demo/bbb.hang
-# This is very manual/crude, but I don't want someone to hijack the broadcast.
-# cargo run --bin moq-token -- --key root.jwk sign --path "demo/bbb.hang" --publish "" > demo.jwt
-variable "demo_token" {
-  description = "demo token"
-  sensitive   = true
-}
-
-# cargo run --bin moq-token -- --key root.jwk sign --publish "" --publish-secondary --subscribe "" --subscribe-primary > cluster.jwt
-variable "cluster_token" {
-  description = "cluster token"
-  sensitive   = true
+  default     = "docker.io/kixelated/hang:0.2.0"
 }
 
 # Too complicated to specify via flags, so do it here.
