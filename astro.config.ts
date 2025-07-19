@@ -6,8 +6,6 @@ import solidJs from "@astrojs/solid-js";
 import tailwind from "@astrojs/tailwind";
 import { defineConfig } from "astro/config";
 
-import mkcert from "vite-plugin-mkcert";
-
 // https://astro.build/config
 export default defineConfig({
 	site: "https://quic.video",
@@ -37,7 +35,6 @@ export default defineConfig({
 				],
 			},
 		},
-		plugins: [mkcert()],
 		resolve: {
 			alias: {
 				"@": "/src",
