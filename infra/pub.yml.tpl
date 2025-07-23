@@ -45,11 +45,7 @@ write_files:
           -v quiet \
           -re \
           -i /tmp/fragmented.mp4 \
-          -vf "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf:text='${region}: %%{gmtime: %%H\\:%%M\\:%%S.%%3N}':x=(W-tw)-24:y=24:fontsize=48:fontcolor=white:box=1:boxcolor=black@0.5" \
-          -an \
-          -b:v 3M \
-          -preset ultrafast \
-          -tune zerolatency \
+          -c copy \
           -f mp4 \
           -movflags cmaf+separate_moof+delay_moov+skip_trailer+frag_every_frame \
           - | \
@@ -60,7 +56,7 @@ write_files:
           --cap-add=SYS_PTRACE \
           -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
           ${docker_image} \
-          hang publish --url "https://relay.quic.video/anon" --name "bbb"'
+          publish --url https://relay.quic.video/demo?jwt=${demo_token} --name bbb'
 
       ExecStop=docker stop hang-bbb
 
