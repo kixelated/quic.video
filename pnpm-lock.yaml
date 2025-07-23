@@ -24,8 +24,8 @@ importers:
         specifier: 6.0.2
         version: 6.0.2(astro@5.8.2(@types/node@22.15.29)(jiti@1.21.7)(rollup@4.41.1)(typescript@5.8.3)(yaml@2.8.0))(tailwindcss@3.4.17)
       '@kixelated/hang':
-        specifier: ^0.3.0
-        version: 0.3.0(@types/react@19.1.8)(solid-js@1.9.7)
+        specifier: ^0.3.2
+        version: 0.3.2(@types/react@19.1.8)(solid-js@1.9.7)
       '@tailwindcss/forms':
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@3.4.17)
@@ -525,13 +525,13 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
-  '@kixelated/hang@0.3.0':
-    resolution: {integrity: sha512-FFdiiKYgV4Og4IE5n6PgKGBTpHgzNAd41UQ2u4Ega9RS/pyoO7dLmW2MS5bFPvoGuaRWduK35to3G4VYHNbSDQ==}
+  '@kixelated/hang@0.3.2':
+    resolution: {integrity: sha512-pWtxsKXBMqSDqj3ZGCvKg5XlLQikk3nGvEEafqKVRUD/ZDmLNzqlZ9DC7Y0aV/VISa5GDCwP1cfLR3vjBACAyA==}
     peerDependencies:
       solid-js: ^1.9.7
 
-  '@kixelated/moq@0.7.0':
-    resolution: {integrity: sha512-y0S/M4lKjz5UwcNlX1bRlAoNgGDL+AMq2YJPQ2uHAPlLHqODYx8ihqBWf76/JHbJSdyaP/UwE+xAnT5ujIOrTQ==}
+  '@kixelated/moq@0.7.1':
+    resolution: {integrity: sha512-y1WT8Uq7/jX1lQd12BPh3D9LmN5bPDGJS2PrM3PTx+yhDTNC7gUTUFnVE/KSZx5dHE45fBtNqUi8vtaoWyIPPg==}
 
   '@kixelated/signals@0.3.1':
     resolution: {integrity: sha512-ZtCps9UwqVi94nVGydzxP4FAwGKvDV3YSZvDaXCXyuCvthy04LOpxmLo1nT3TS1IcSTOqv5v6ZbiPSdYtkv9Ew==}
@@ -2400,8 +2400,8 @@ packages:
   zod@3.25.51:
     resolution: {integrity: sha512-TQSnBldh+XSGL+opiSIq0575wvDPqu09AqWe1F7JhUMKY+M91/aGlK4MhpVNO7MgYfHcVCB1ffwAUTJzllKJqg==}
 
-  zod@3.25.76:
-    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+  zod@4.0.5:
+    resolution: {integrity: sha512-/5UuuRPStvHXu7RS+gmvRf4NXrNxpSllGwDnCBcJZtQsKrviYXm54yDGV2KYNLT5kq0lHGcl7lqWJLgSaG+tgA==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -2857,18 +2857,18 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@kixelated/hang@0.3.0(@types/react@19.1.8)(solid-js@1.9.7)':
+  '@kixelated/hang@0.3.2(@types/react@19.1.8)(solid-js@1.9.7)':
     dependencies:
-      '@kixelated/moq': 0.7.0
+      '@kixelated/moq': 0.7.1
       '@kixelated/signals': 0.3.1(@types/react@19.1.8)(solid-js@1.9.7)
       buffer: 6.0.3
       solid-js: 1.9.7
-      zod: 3.25.76
+      zod: 4.0.5
     transitivePeerDependencies:
       - '@types/react'
       - react
 
-  '@kixelated/moq@0.7.0': {}
+  '@kixelated/moq@0.7.1': {}
 
   '@kixelated/signals@0.3.1(@types/react@19.1.8)(solid-js@1.9.7)':
     dependencies:
@@ -5217,6 +5217,6 @@ snapshots:
 
   zod@3.25.51: {}
 
-  zod@3.25.76: {}
+  zod@4.0.5: {}
 
   zwitch@2.0.4: {}

@@ -32,8 +32,8 @@ resource "google_compute_instance" "pub" {
       region       = local.pub.region
 
       # A token used to publish demo/bbb.hang
-      # cargo run --bin moq-token -- --key root.jwk sign --root "demo" --publish "" > demo.jwt
-      demo_token = trimspace(file("demo.jwt"))
+      # cargo run --bin moq-token -- --key root.jwk sign --root "demo" --publish "" > demo-pub.jwt
+      demo_token = trimspace(file("demo-pub.jwt"))
     })
   }
 
