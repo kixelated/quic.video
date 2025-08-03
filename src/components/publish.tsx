@@ -17,7 +17,14 @@ export default function () {
 			</a>
 
 			<h3>Preview:</h3>
-			<hang-publish prop:url={url} prop:name={name} prop:controls={true} prop:video={true} prop:audio={true}>
+			<hang-publish
+				prop:url={url}
+				prop:name={name}
+				prop:controls={true}
+				prop:video={true}
+				prop:audio={true}
+				prop:captions={true}
+			>
 				<video
 					style={{ "max-width": "100%", height: "100%", margin: "0 auto", "border-radius": "1rem" }}
 					autoplay
