@@ -19,7 +19,7 @@ export default function (props: { name: string; token?: string }) {
 		<>
 			<hang-support prop:mode="watch" prop:show="partial" />
 
-			<hang-watch prop:url={url} prop:name={props.name} prop:muted={true} prop:controls={true}>
+			<hang-watch prop:url={url} prop:name={props.name} prop:muted={true} prop:controls={true} prop:captions={true}>
 				<canvas style={{ "max-width": "100%", height: "auto", margin: "0 auto", "border-radius": "1rem" }} />
 			</hang-watch>
 		</>
