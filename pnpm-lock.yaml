@@ -24,8 +24,8 @@ importers:
         specifier: 6.0.2
         version: 6.0.2(astro@5.8.2(@types/node@22.15.29)(jiti@1.21.7)(rollup@4.41.1)(typescript@5.8.3)(yaml@2.8.0))(tailwindcss@3.4.17)
       '@kixelated/hang':
-        specifier: ^0.3.5
-        version: 0.3.5(@types/react@19.1.9)(solid-js@1.9.7)
+        specifier: ^0.3.8
+        version: 0.3.8(@types/react@19.1.9)(solid-js@1.9.7)
       '@tailwindcss/forms':
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@3.4.17)
@@ -661,16 +661,14 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
-  '@kixelated/hang@0.3.5':
-    resolution: {integrity: sha512-xe317L/QoEA5sWwaCaEc8cgyXlWLClhEQv/IhZlj3byilquoTPCjs4pKuSqGBoRPnyo7cmGLeX730d7avbvcrw==}
-    peerDependencies:
-      solid-js: ^1.9.7
+  '@kixelated/hang@0.3.8':
+    resolution: {integrity: sha512-4dT2RwHOBqREhlIWkd4u6sYnh086zYXDLcrU+Xdzs1QZR/ij2d0AIiTp7X1t797Xk7MNMGOMxip35zSqdVBWDg==}
 
   '@kixelated/moq@0.7.3':
     resolution: {integrity: sha512-tbiY7SaIA0jdwWI2hih+aH1Kn/vK4hZHVfamT+J9SARRdEONOFJ/Y3vK3OIZB52LLNjB6+iGE35xrhd/dFFYpQ==}
 
-  '@kixelated/signals@0.5.2':
-    resolution: {integrity: sha512-kGOlJP9lmvDutoHyoUXMI20dVSzXEa7CJP7ocV+eJqljdSl7XOK5DXbeTehvge96M/lHYt9KpHYarBjKOsVnBw==}
+  '@kixelated/signals@0.5.3':
+    resolution: {integrity: sha512-wfy6asUobO0e3eJ0M//drB8yG+cTg9U22TBFljmNgH7Ci5kbOdhyNOaLycG8+IKVMszf7EtyhfbD6OrirEy8kA==}
     peerDependencies:
       '@types/react': ^19.1.8
       react: ^19.0.0
@@ -3255,21 +3253,21 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@kixelated/hang@0.3.5(@types/react@19.1.9)(solid-js@1.9.7)':
+  '@kixelated/hang@0.3.8(@types/react@19.1.9)(solid-js@1.9.7)':
     dependencies:
       '@huggingface/transformers': 3.7.1
       '@kixelated/moq': 0.7.3
-      '@kixelated/signals': 0.5.2(@types/react@19.1.9)(solid-js@1.9.7)
+      '@kixelated/signals': 0.5.3(@types/react@19.1.9)(solid-js@1.9.7)
       buffer: 6.0.3
-      solid-js: 1.9.7
       zod: 4.0.14
     transitivePeerDependencies:
       - '@types/react'
       - react
+      - solid-js
 
   '@kixelated/moq@0.7.3': {}
 
-  '@kixelated/signals@0.5.2(@types/react@19.1.9)(solid-js@1.9.7)':
+  '@kixelated/signals@0.5.3(@types/react@19.1.9)(solid-js@1.9.7)':
     dependencies:
       '@types/react': 19.1.9
       dequal: 2.0.3
