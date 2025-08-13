@@ -1,21 +1,7 @@
 // Set up a DNS zone for our domain.
-resource "google_dns_managed_zone" "public" {
-  name     = "public"
-  dns_name = "${var.domain}."
-}
-
-// Create a managed certificate for the domain.
-resource "google_compute_managed_ssl_certificate" "root" {
-  name        = "root"
-  description = "Cert for ${var.domain}."
-
-  managed {
-    domains = ["${var.domain}."]
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
+resource "google_dns_managed_zone" "relay" {
+  name     = "relay"
+  dns_name = "relay.${var.domain}."
 }
 
 // We also need an unmanaged certificate for the relay, since there's no QUIC LBs available yet.
@@ -39,13 +25,13 @@ resource "acme_certificate" "relay" {
   subject_alternative_names = ["*.relay.${var.domain}"]
   key_type                  = tls_private_key.relay.ecdsa_curve
 
-  recursive_nameservers = ["8.8.8.8:53"]
+  revoke_certificate_on_destroy = false
 
   dns_challenge {
     provider = "gcloud"
-
     config = {
       GCE_PROJECT = var.project
+      GCE_ZONE_ID = google_dns_managed_zone.relay.name
     }
   }
 }

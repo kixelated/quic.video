@@ -1,14 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import mdx from "@astrojs/mdx";
-import nodejs from "@astrojs/node";
 import solidJs from "@astrojs/solid-js";
 import tailwind from "@astrojs/tailwind";
 import { defineConfig } from "astro/config";
 
 // https://astro.build/config
 export default defineConfig({
-	site: "https://quic.video",
+	site: "https://moq.dev",
+	output: "static",
 	integrations: [
 		mdx(),
 		solidJs(),
@@ -17,10 +17,6 @@ export default defineConfig({
 			applyBaseStyles: false,
 		}),
 	],
-	// Renders any non-static pages using node
-	adapter: nodejs({
-		mode: "standalone",
-	}),
 	vite: {
 		build: {
 			target: "esnext",

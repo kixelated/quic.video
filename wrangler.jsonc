@@ -1,0 +1,23 @@
+{
+	// Check the configuration file schema, the main reason why we're not using TOML.
+	"$schema": "./node_modules/wrangler/config-schema.json",
+
+	"name": "moq-dev",
+	"compatibility_date": "2025-08-13",
+	"account_id": "dd618f5dbd5da77b8296f1613c301f5c",
+
+	"assets": {
+		"directory": "./dist",
+		"not_found_handling": "404-page",
+	},
+
+	"vars": {
+		"PUBLIC_RELAY_URL": "https://relay.moq.dev",
+		"PUBLIC_RELAY_TOKEN": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb290IjoiZGVtbyIsInB1YiI6bnVsbCwic3ViIjoiIiwiZXhwIjpudWxsLCJpYXQiOm51bGx9.w6NCqef736qNYCC1KAovUbTaJb8bvHnY-QwXZ_p3vTw"
+	},
+
+			"route": {
+				"pattern": "moq.dev",
+				"custom_domain": true,
+			},
+}

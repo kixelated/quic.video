@@ -1,0 +1,11 @@
+---
+import Issues from "@/components/issues.astro";
+import Watch from "@/components/watch.tsx";
+import Layout from "@/layouts/global.astro";
+---
+
+<Layout title={`Watch`} description="Watch a live broadcast.">
+	<Issues />
+
+	<Watch client:only="solid-js" />
+</Layout>

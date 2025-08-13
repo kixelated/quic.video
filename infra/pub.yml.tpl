@@ -56,7 +56,7 @@ write_files:
           --cap-add=SYS_PTRACE \
           -e RUST_LOG=debug -e RUST_BACKTRACE=1 \
           ${docker_image} \
-          publish --url https://relay.quic.video/demo?jwt=${demo_token} --name bbb'
+          publish --url https://relay.moq.dev/demo?jwt=${demo_token} --name bbb'
 
       ExecStop=docker stop hang-bbb
 

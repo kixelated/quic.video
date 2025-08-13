@@ -33,12 +33,7 @@ variable "gcp_service_list" {
     "storage.googleapis.com",
     "compute.googleapis.com",
     "dns.googleapis.com",
-    "appengine.googleapis.com",
     "iamcredentials.googleapis.com",
-    "sourcerepo.googleapis.com",
-    "run.googleapis.com",
-    "vpcaccess.googleapis.com",
-    "redis.googleapis.com",
   ]
 }
 

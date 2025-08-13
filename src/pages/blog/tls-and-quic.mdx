@@ -60,7 +60,7 @@ It's good stuff, much better than TLS 1.2 in my opinion.
 There is no way to disable encryption but depending on the client, you can modify certificate validation.
 The IETF grey-beards decreed that the protocol can never be insecure, lest a lowly application developer shoot themselves in the foot.
 
-- HTTP/3, WebTransport, and of course, [Media over QUIC](https://quic.video) all use QUIC under the hood.
+- HTTP/3, WebTransport, and of course, [Media over QUIC](https://moq.dev) all use QUIC under the hood.
 - HTTP/2 *technically* does not require TLS but browsers require it as a forcing function.
 - HTTP/1 is the lone exception, allowing you to choose if you want to connect to `http://example.com` (insecure) or `https://example.com` (TLS).
 
@@ -141,7 +141,7 @@ That means adding a way to reload certificates, or periodically hitting the good
 It would be remiss of me to not mention that LetsEncrypt uses [ACME v2](https://en.wikipedia.org/wiki/Automatic_Certificate_Management_Environment).
 You don't need to use `certbot` and in fact you could integrate ACME directly into your workflow.
 
-In fact, I'm using a [terraform module](https://github.com/vancluever/terraform-provider-acme) to generate certificates for `relay.quic.video`.
+In fact, I'm using a [terraform module](https://github.com/vancluever/terraform-provider-acme) to generate certificates for `relay.moq.dev`.
 It's **not recommended** because if I forget to run terraform every so often, then oops, my certificate will expire and users can no longer connect to my server.
 But it's easy and it works for now so I'm embracing my folly.
 

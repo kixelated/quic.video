@@ -1,11 +1,11 @@
 <p align="center">
-	<img height="128px" src="https://github.com/kixelated/quic.video/blob/main/public/home/logo.svg" alt="Media over QUIC">
+	<img height="128px" src="https://github.com/kixelated/moq.dev/blob/main/public/home/logo.svg" alt="Media over QUIC">
 </p>
 
-This repository contains the code for [quic.video](https://quic.video).
+This repository contains the code for [moq.dev](https://moq.dev).
 
 This is a client only.
-You'll either need to run a local server using [moq-rs](https://github.com/kixelated/moq-rs) or use a public server such as [relay.quic.video](https://quic.video/relay).
+You'll either need to run a local server using [moq-rs](https://github.com/kixelated/moq-rs) or use a public server such as [relay.moq.dev](https://moq.dev/relay).
 
 Join the [Discord](https://discord.gg/FCYF3p99mr) for updates and discussion.
 

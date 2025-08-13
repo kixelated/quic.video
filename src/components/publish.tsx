@@ -12,7 +12,7 @@ export default function () {
 			<hang-support prop:mode="publish" prop:show="partial" />
 
 			<h3>Watch URL:</h3>
-			<a href={`/watch/${name}`} rel="noreferrer" target="_blank" class="ml-2">
+			<a href={`/watch?name=${name}`} rel="noreferrer" target="_blank" class="ml-2">
 				{name}
 			</a>
 

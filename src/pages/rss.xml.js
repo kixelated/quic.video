@@ -21,7 +21,7 @@ export async function GET(context) {
 		}));
 
 	return rss({
-		title: "quic.video | Blog",
+		title: "moq.dev | Blog",
 		description: "Latest posts about Media over QUIC and real-time media streaming",
 		site: context.site,
 		items: sortedPosts,

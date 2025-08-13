@@ -25,7 +25,7 @@ if (frontmatter?.description) description = frontmatter.description;
 		<meta name="description" content={description ? `Media over QUIC: ${description}` : "Media over QUIC is a new live media protocol in development by the IETF." } />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/layout/favicon.svg" />
-		<link rel="alternate" type="application/rss+xml" title="quic.video RSS Feed" href={new URL("rss.xml", Astro.site)} />
+		<link rel="alternate" type="application/rss+xml" title="moq.dev RSS Feed" href={new URL("rss.xml", Astro.site)} />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title ? `${title} - Media over QUIC` : "Media over QUIC"}</title>
 	</head>
