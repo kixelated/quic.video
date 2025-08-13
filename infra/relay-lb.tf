@@ -1,9 +1,9 @@
 # Global Geo DNS, routing to the closest region.
 resource "google_dns_record_set" "relay_global" {
-  name         = "relay.${var.domain}."
+  name         = google_dns_managed_zone.relay.dns_name
+  managed_zone = google_dns_managed_zone.relay.name
   type         = "A"
   ttl          = 60
-  managed_zone = google_dns_managed_zone.public.name
 
   routing_policy {
     dynamic "geo" {
@@ -26,10 +26,10 @@ resource "google_dns_record_set" "relay_global" {
 /*
 # Get a domain name for the anycast address.
 resource "google_dns_record_set" "relay_lb" {
-  name         = "relay.quic.video."
+  name         = "relay.moq.dev."
   type         = "A"
   ttl          = 300
-  managed_zone = google_dns_managed_zone.public.name
+  managed_zone = google_dns_managed_zone.relay.name
   rrdatas      = [google_compute_global_forwarding_rule.relay_lb.ip_address]
 }
 

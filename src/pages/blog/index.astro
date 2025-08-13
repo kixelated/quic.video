@@ -10,7 +10,9 @@ interface Frontmatter {
 	date: string;
 }
 
-const posts = await Astro.glob<Frontmatter>("./*.mdx");
+const posts = Object.values(
+	await import.meta.glob<{ frontmatter: Frontmatter; url: string }>("./*.mdx", { eager: true }),
+);
 posts.sort((a, b) => {
 	const dateA = Date.parse(a.frontmatter.date);
 	const dateB = Date.parse(b.frontmatter.date);

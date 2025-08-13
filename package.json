@@ -1,33 +1,35 @@
 {
-	"name": "quic.video",
+	"name": "moq.dev",
 	"type": "module",
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
 		"dev": "astro dev --open",
 		"build": "astro build --production",
-		"prod": "astro build --production && astro preview --production --open",
+		"preview": "wrangler pages dev ./dist",
+		"deploy": "wrangler deploy",
+		"prod": "astro build --production && wrangler pages dev ./dist --open",
 		"check": "biome ci && tsc --noEmit",
 		"fix": "biome check --write && pnpm audit fix"
 	},
 	"dependencies": {
-		"@astrojs/mdx": "4.3.0",
-		"@astrojs/node": "9.2.2",
-		"@astrojs/rss": "^4.0.12",
-		"@astrojs/solid-js": "5.1.0",
-		"@astrojs/tailwind": "6.0.2",
-		"@kixelated/hang": "^0.3.8",
-		"@tailwindcss/forms": "^0.5.10",
-		"@tailwindcss/typography": "^0.5.16",
+		"@kixelated/hang": "^0.3.9",
 		"astro": "^5.8.2",
 		"solid-js": "^1.9.7",
-		"tailwindcss": "^3.4.17",
-		"unique-names-generator": "^4.7.1",
-		"vite-plugin-static-copy": "^2.3.1"
+		"unique-names-generator": "^4.7.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.0.5",
-		"@types/node": "^22.15.29"
+		"vite-plugin-static-copy": "^2.3.1",
+		"@astrojs/mdx": "4.3.0",
+		"@astrojs/rss": "^4.0.12",
+		"@astrojs/solid-js": "5.1.0",
+		"@astrojs/tailwind": "6.0.2",
+		"@tailwindcss/forms": "^0.5.10",
+		"@tailwindcss/typography": "^0.5.16",
+		"tailwindcss": "^3.4.17",
+		"@types/node": "^22.15.29",
+		"wrangler": "^4.29.1"
 	},
 	"packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977"
 }

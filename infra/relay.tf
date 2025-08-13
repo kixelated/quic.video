@@ -82,10 +82,10 @@ resource "google_compute_address" "relay" {
 resource "google_dns_record_set" "relay" {
   for_each = local.relays
 
-  name         = "${each.key}.relay.${var.domain}."
+  name         = "${each.key}.${google_dns_managed_zone.relay.dns_name}"
+  managed_zone = google_dns_managed_zone.relay.name
   type         = "A"
   ttl          = 300
-  managed_zone = google_dns_managed_zone.public.name
   rrdatas      = [google_compute_address.relay[each.key].address]
 }
 

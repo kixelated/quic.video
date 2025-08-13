@@ -29,3 +29,7 @@ bun.lockb
 .env.production
 *.jwt
 *.jwk
+
+# Cloudflare
+.wrangler/
+.dev.vars

@@ -15,22 +15,32 @@ variable "zone" {
 
 variable "email" {
   description = "Your email address, used for LetsEncrypt"
-  default     = "kixelated@gmail.com"
+  default     = "admin@moq.dev"
 }
 
 variable "domain" {
   description = "domain name"
-  default     = "quic.video"
+  default     = "moq.dev"
 }
 
 variable "docker_relay" {
   description = "Docker image for moq-relay"
-  default     = "docker.io/kixelated/moq-relay:0.8.7"
+  default     = "docker.io/kixelated/moq-relay:0.8.8"
 }
 
 variable "docker_hang" {
   description = "Docker image for hang"
-  default     = "docker.io/kixelated/hang:0.2.4"
+  default     = "docker.io/kixelated/hang:0.2.5"
+}
+
+variable "cloudflare_dns_token" {
+  description = "Cloudflare DNS API token - edit permissions for moq.dev"
+  sensitive   = true
+}
+
+variable "cloudflare_zone_token" {
+  description = "Cloudflare Zone API token - read permissions for all zones"
+  sensitive   = true
 }
 
 # Too complicated to specify via flags, so do it here.
