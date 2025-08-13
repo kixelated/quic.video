@@ -11,11 +11,6 @@
 		"not_found_handling": "404-page"
 	},
 
-	"vars": {
-		"PUBLIC_RELAY_URL": "https://relay.moq.dev",
-		"PUBLIC_RELAY_TOKEN": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb290IjoiZGVtbyIsInB1YiI6bnVsbCwic3ViIjoiIiwiZXhwIjpudWxsLCJpYXQiOm51bGx9.w6NCqef736qNYCC1KAovUbTaJb8bvHnY-QwXZ_p3vTw"
-	},
-
 	"route": {
 		"pattern": "moq.dev",
 		"custom_domain": true
