@@ -1,0 +1,107 @@
+---
+layout: "@/layouts/global.astro"
+title: "hang.live: The First MoQ App"
+author: kixelated
+description: The coolest app for cool people. hang.live is a MoQ conferencing app built without even a trace of WebRTC. Try it, invite a friend, and yoink the open source code that powers it.
+cover: "/blog/first-app/demo.png"
+date: 2025-08-16
+---
+
+# hang.live: The First MoQ App
+🚨 It's finally happening! 🚨
+
+[4 months ago](./application-first) I quit my job and went all-in on MoQ.
+4 months of vibe coding later (Claude Code is goated) and I've finally got something worth sharing, but by no means complete.
+
+<figure>
+	![Omni-chan](/blog/first-app/demo.png)
+	<figcaption>[Watch the demo](https://hang.live). I know I spoiled the joke but I wanted to show Omni-cheeks.</figcaption>
+</figure>
+
+
+[hang.live](https://hang.live) is place to hang out with friends after a long day.
+It's meant to be fun and stupid.
+Everything is **live** and revolves around human interfaction.
+People will *eventually* need a break from AI slop, even if that means disqualifying myself from VC funding.
+
+<figure>
+	![Preview window](/blog/first-app/preview.png)
+	<figcaption>Even the room previews are live. Watch as others have fun without you.</figcaption>
+</figure>
+
+And of course, all of the functionality (except for user accounts) uses Media over QUIC.
+I wanted to demonstate what's now possible within the browser, utilizing WebTransport, WebCodecs, WebAudio, WebGPU, WebAssembly, WebWorkers, WebEtc.
+Basically every web feature under the sun *except for WebRTC*.
+
+If any of that sounds cool, check out my [Replacing WebRTC](./replacing-webrtc) post.
+
+## Open Source
+Even if you don't want to use a site designed for cringe teenagers, there's much to be excited about.
+
+The core networking and media stuff is [open source](https://github.com/kixelated/moq), written in **Rust** and **Typescript**.
+I've been polishing the core libraries for a few years now, so they're actually pretty good.
+Even the [crude CDN](https://github.com/kixelated/moq.dev/tree/main/infra) is open source if you feel like paying GCP a bucket of money every month.
+
+There's already a few companies using my awful code, like [Cloudflare](./first-cdn) and terrifying enough, a few defense contractors.
+I am eager to help if you want to grow that list.
+[Join the MoQ Discord](https://discord.gg/FCYF3p99mr) and ping `@kixelated`.
+
+The vibe coded UI is closed source for now.
+I still have ambitions of [hang.live](https://hang.live) taking off and want to make it a *tiiiny* bit more difficult to clone.
+And you should probably make something more professional anyway.
+
+<figure>
+	![hang.live logo](/blog/first-app/icon.png)
+	<figcaption>design is not my passion</figcaption>
+</figure>
+
+## Features
+Too busy and/or awkward to invite a friend and try it out?
+Me too.
+
+- 🎥 **The usual stuff**: microphone, webcam, screen sharing.
+- ⚡ **Synchronized drag/drop/zoom**: No more boring, static grids.
+- 🤖 **Automatic captions**: Generated using AI, [running in the browser](https://huggingface.co/docs/transformers.js/en/index).
+- 👀 **Previews**: See who is talking before awkwardly joining.
+- 💬 **TTS Announcements**: No need to alt-tab, just listen to who has joined. Also AI.
+- 📝 **Live chat**: Super simple text tracks, using markdown.
+- ⭐ **Favorites**: Favorite a hang so you can preview a bunch at the same time.
+- 😂 **Memes**: An assortment of meme videos and sounds; try `/brb`.
+
+## Huge Disclaimer
+This shit is hard.
+Nothing has been optimized and the user experience still leave much to be desired.
+Just like the [Cloudflare CDN](./first-cdn), consider this as a demo of what is possible and NOT the end state.
+
+WebRTC has had the luxury of being integrated into the browser and being bankrolled by Google for over a decade.
+It's really good at powering Google Meet, but it gets exponentially more difficult as you stray from the happy path.
+It's why all conferencing apps feel the same, and I want to change that.
+
+The current focus is to demonstrate what's possible and polish it later.
+Don't be that WebRTC fanboy who quips about how unoptimized it is.
+
+<figure>
+	![Snarky comment](/blog/first-app/snarky.png)
+	<figcaption>wtf is vivaldi anyway</figcaption>
+</figure>
+
+
+## The Future
+I've given myself at least 1 year to work on this before I'll consider getting a real job™.
+You can help me delay the inevitable by sharing [hang.live](https://hang.live).
+Who knows, it might turn into a real job.
+
+Until then, here's my current plan:
+- **Safari Support**: Working on a WebSocket fallback for the Apple fanboys.
+- **File sharing**: Stream an image or video to the hang.
+- **Notifications**: Get notified when someone joins a favorite.
+- **Desktop and Mobile App**: Probably using [Tauri](https://v2.tauri.app/).
+- **Chat History**: The app currently has the memory of a goldfish.
+- **Discord Bot**: Gotta steal the users somehow.
+- **More AI Stuff**: Gotta get funding somehow.
+
+I'm totally open to suggestions and contributions.
+[Hit me up](https://discord.gg/SRG9gu6BdE).
+
+Written by [@kixelated](https://github.com/kixelated).
+![@kixelated](/blog/avatar.png)
