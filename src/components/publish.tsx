@@ -5,16 +5,11 @@ import "@kixelated/hang/publish/element";
 
 export default function () {
 	const name = uniqueNamesGenerator({ dictionaries: [adjectives, animals], separator: "-" });
-	const url = new URL(`${import.meta.env.PUBLIC_RELAY_URL}/anon`);
+	const url = new URL(import.meta.env.PUBLIC_CLOUDFLARE_URL);
 
 	return (
 		<div>
 			<hang-support prop:mode="publish" prop:show="partial" />
-
-			<h3>Watch URL:</h3>
-			<a href={`/watch?name=${name}`} rel="noreferrer" target="_blank" class="ml-2">
-				{name}
-			</a>
 
 			<h3>Preview:</h3>
 			<hang-publish
@@ -31,6 +26,13 @@ export default function () {
 					muted
 				/>
 			</hang-publish>
+
+			<div class="mt-16">
+				<h3 class="inline">Share URL:</h3>{" "}
+				<a href={`/watch?name=${name}`} rel="noreferrer" target="_blank" class="ml-2">
+					{name}
+				</a>
+			</div>
 		</div>
 	);
 }

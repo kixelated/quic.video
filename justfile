@@ -62,3 +62,6 @@ dev:
 
 	# Run the web development server
 	pnpm astro dev --open
+
+preview: build
+	pnpm astro preview --open

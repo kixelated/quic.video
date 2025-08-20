@@ -10,7 +10,7 @@ export default function () {
 	if (name === "bbb") {
 		url = new URL(`${import.meta.env.PUBLIC_RELAY_URL}/demo?jwt=${import.meta.env.PUBLIC_RELAY_TOKEN}`);
 	} else {
-		url = new URL(`${import.meta.env.PUBLIC_RELAY_URL}/anon`);
+		url = new URL(import.meta.env.PUBLIC_CLOUDFLARE_URL);
 	}
 
 	return (
@@ -20,6 +20,13 @@ export default function () {
 			<hang-watch prop:url={url} prop:name={name} prop:muted={true} prop:controls={true} prop:captions={true}>
 				<canvas style={{ "max-width": "100%", height: "auto", margin: "0 auto", "border-radius": "1rem" }} />
 			</hang-watch>
+
+			<div class="mt-16">
+				<h3 class="inline">Share URL:</h3>{" "}
+				<a href={`/watch?name=${name}`} class="ml-2">
+					{name}
+				</a>
+			</div>
 		</>
 	);
 }

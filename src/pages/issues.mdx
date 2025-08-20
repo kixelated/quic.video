@@ -17,7 +17,7 @@ If you want to help, jump in [Discord](https://discord.gg/FCYF3p99mr)!
 ## What works
 Before we give into despair, here's what does work:
 
-- **Browsers**: Chrome and soon Firefox. We're bleeding on the edge.
+- **Browsers**: Chrome and Firefox\*. We're bleeding on the edge.
 - **Audio**: OPUS, AAC
 - **Video**: VP8, VP9, H.264, H.265, AV1
 - **Catalog**: A live-updating JSON blob that describes the available tracks.
@@ -34,7 +34,6 @@ Now on to the issues.
 | Safari Support     | No Safari support for WebTransport. Webkit has expressed [public support](https://github.com/WebKit/standards-positions/issues/18#issuecomment-1495890122) so it will likely show up one day. Until then, perhaps we should support WebSockets as a fallback. [caniuse](https://caniuse.com/webtransport) |
 | Prioritization | Media should be prioritized by the sender during congestion via [priority hints](https://www.w3.org/TR/webtransport/#dom-webtransportsendstreamoptions-sendorder) when implemented. ex. *new audio > old video*. This should be implemented in Chrome but has yet to be hooked up and tested. |
 | Congestion Control | The default congestion controller in QUIC (Reno/CUBIC) suffers from [bufferbloat](https://en.wikipedia.org/wiki/Bufferbloat). The WebTransport API exposes [congestion control hints](https://www.w3.org/TR/webtransport/#dom-webtransport-congestioncontrol) but I'm not sure if this has been implemented in browsers yet. It's also not clear if BBR is sufficient for real-time media and we might want to invest in porting GCC (Google Congestion Control) to QUIC. |
-| Authentication | There's no authentication in `moq-relay` (outside of TLS). Anybody can publish or subscribe to broadcasts with any name. We need to implement a token given to clients that scope what they can do. |
 | Clustering | The relays form a very simple mesh network, where each relay talks to every other relay. This won't scale past a few nodes; we need some sort of tree. |
 
 
@@ -43,7 +42,6 @@ Now on to the issues.
 | name                      | description                                                                                                                                                                      |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Adaptive Bitrate  	| Currently, the bitrate for a broadcast is fixed at creation time. We need to implement back-pressure so the broadcaster lowers its bitrate during congestion. In addition, we could use simulcast to create multiple tracks allowing the viewer to choose what to receive. |
-| Echo Cancellation | People who use speakers are the worst. But seriously, we need some form of echo cancelation otherwise conferencing is difficult. It seems like you can specify it [when capturing media](https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints/echoCancellation) but I've yet to test how well it works. |
 | OBS Plugin      | We should develop an [OBS](https://obsproject.com/) plugin to make it easier to publish broadcasts. The gstreamer plugin should also be improved but it mostly works. |
 | Viewer Feedback | Currently, viewers don't provide any feedback to the broadcaster(s). This would be very useful for small broadcasts for stuff like negotiating codecs, bitrates, etc. |
 
@@ -53,7 +51,6 @@ Now on to the issues.
 | name                      | description                                                                                                                                                                      |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Logging | There's no logging, metrics, or even health checks. I don't even know if the site is up. |
-| Chat | I want to implement a chat protocol over MoQ! |
 
 And of course, there's a million other things.
 Hit me up on [Discord](https://discord.gg/FCYF3p99mr) if you want to volunteer your time or monies to help make these a reality.

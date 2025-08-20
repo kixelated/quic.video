@@ -36,5 +36,8 @@ export default defineConfig({
 				"@": "/src",
 			},
 		},
+		optimizeDeps: {
+			exclude: ["@kixelated/hang"],
+		},
 	},
 });

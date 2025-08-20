@@ -11,46 +11,23 @@ date: 2025-08-16
 🚨 It's finally happening! 🚨
 
 Cloudflare has just announced the first Media over QUIC CDN!
-It's not an official product *yet*, but now you can test MoQ on their *massive*, anycast CDN.
+It's an **official product**, and you can test MoQ on their *massive*, anycast CDN.
 Try it out, and convince your boss' boss that the writing is on the wall.
 
-## Why is this important?
-I've been an [outspoken critic](./transfork) of the MoQ standardization process.
-It's just really difficult to design a protocol, via a cross-company committee, before there's been any real world usage.
-It's been over 3 years since I fought Amazon lawyers and published my [first MoQ draft](https://www.ietf.org/archive/id/draft-lcurley-warp-00.html).
-It's going to be at least another 3 years before even the base `moq-transport` becomes an RFC.
+Also, *while you're here*, some shameless self-promotion: I just published [hang.live](./first-app).
+Check it out if you want to see the ~cringe~ cool stuff you can do with MoQ, soon on Cloudflare's CDN.
 
-**And that's by design!**
-The best standards take a while.
-Look no further than QUIC, deployed at Google in 2012, started standardization in 2015, with the RFC released in 2021.
-And they had a boatload of production data to shape the specification, not just a [Big Buck Bunny demo](/watch).
+## What's new?
+Cloudflare is officially supporting MoQ via their [Cloudflare Realtime](https://developers.cloudflare.com/realtime/) architecture.
+It's real, to the point where they've even announced pricing: a shiny nickel per GB.
 
-Cloudflare has done something fantastic and said:
-> fuck waiting for a RFC, let's deploy something now
+There's a public `relay.cloudflare.mediaoverquic.com` endpoint that you can abuse.
+Connect using [my library](https://github.com/kixelated/moq), [Mike's fork](https://github.com/englishm/moq-rs), [Lorenzo's imquic](https://www.meetecho.com/blog/imquic/), [Meta's moxygen](https://github.com/facebookexperimental/moxygen), or any client that supports this limited subset of draft-07.
 
-This is **exactly** what MoQ needs right now.
-**Just build something**.
-Arguing in the [650+ issues](https://github.com/moq-wg/moq-transport/issues) and [500+ PRs](https://github.com/moq-wg/moq-transport/pulls) is a distraction.
-**Just release something**, learn from it, and iterate.
+I'm biased so naturally I'm going to use [@kixelated/moq](https://github.com/kixelated/moq).
+Smash that star button, like, and subscribe.
+You can publish a live broadcast in the browser using the [web demo](/publish) or the [library](https://github.com/kixelated/moq/blob/main/js/hang-demo/src/publish.html#L25):
 
-<figure>
-	<iframe width="560" height="315" src="https://www.youtube.com/embed/ZXsQAXx_ao0?si=xsAscm04CnwAer4b" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="margin: 0 auto;"></iframe>
-	<figcaption>I am Shia LaBeouf.</figcaption>
-</figure>
-
-This is nowhere near a production release.
-Cloudflare is only supporting a *tiny* subset of a [draft from a year ago](https://www.ietf.org/archive/id/draft-ietf-moq-transport-07.html).
-They're using an old fork of my terrible code, so there are bugs and missing features.
-Nothing has been optimized and the user experience will improve over time.
-
-But **fucking finally** we might start to see MoQ in production.
-
-
-## How to use it?
-There's a public `relay.cloudflare.mediaoverquic.com` endpoint that you can ~use~ abuse.
-You can connect using [my library](https://github.com/kixelated/moq), [Mike's fork](https://github.com/englishm/moq-rs), [Lorenzo's imquic](https://www.meetecho.com/blog/imquic/), [Meta's moxygen](https://github.com/facebookexperimental/moxygen), or another client that supports this limited subset of draft-07.
-
-For example, [publish a broadcast](https://github.com/kixelated/moq/blob/main/js/hang-demo/src/publish.html#L25):
 ```html
 <script type="module">
 	import "@kixelated/hang/publish/element";
@@ -63,7 +40,7 @@ For example, [publish a broadcast](https://github.com/kixelated/moq/blob/main/js
 </hang-publish>
 ```
 
-And then you can [watch a broadcast](https://github.com/kixelated/moq/blob/9f5f6153458c03f255877a036e36f68f742d5c85/js/hang-demo/src/index.html#L30):
+There's a link to watch you live broadcast using the [web demo](/watch), or again you can use the [library](https://github.com/kixelated/moq/blob/9f5f6153458c03f255877a036e36f68f742d5c85/js/hang-demo/src/index.html#L30):
 ```html
 <script type="module">
 	import "@kixelated/hang/watch/element";
@@ -76,55 +53,155 @@ And then you can [watch a broadcast](https://github.com/kixelated/moq/blob/9f5f6
 </hang-watch>
 ```
 
-You'll even get automatic closed `captions` because I've been experimenting with AI features.
-Poggers indeed.
+You'll even get automatic closed captions because I've been experimenting with AI features (gotta get funding eventually 💰).
+They're generated *in the browser* using [silero-vad](https://github.com/snakers4/silero-vad) + [whisper](https://github.com/openai/whisper) + [transformers.js](https://huggingface.co/docs/transformers.js/en/index) + [onnxruntime-web](https://github.com/microsoft/onnxruntime) + [WebGPU](https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API) and transmitted using MoQ of course.
+But that's a whole separate blog post; it's pretty cool.
 
-**NOTE:** You don't have to use the Web Component API.
-[hang.live](./first-app) uses the Javascript API to do more complicated stuff, like get access to individual video frames.
-Everything uses reactive signals which is actually a joy to work with, but it's under-documented and still evolving.
+**NOTE:** You don't have to use this Web Component API.
+[hang.live](./first-app) uses the Javascript API to do more complicated stuff like get access to individual video frames.
+It's under-documented and still evolving, but knock yourself out.
 
-And if you think Javascript is an abomination (true), then you can also use my Rust client.
-*Assuming that I've added draft-07 compatibility by the time you read this.*
-There's a [library to import CMAF](https://github.com/kixelated/moq/tree/main/rs/hang), [which can be piped from ffmpeg](https://github.com/kixelated/moq/blob/9f5f6153458c03f255877a036e36f68f742d5c85/rs/justfile#L103), and [crude gstreamer plugins](https://github.com/kixelated/moq/blob/9f5f6153458c03f255877a036e36f68f742d5c85/rs/justfile#L119).
+There's also a 🦀 Rust 🦀 library [to import MP4](https://github.com/kixelated/moq/tree/main/rs/hang), [pipe media from ffmpeg](https://github.com/kixelated/moq/blob/9f5f6153458c03f255877a036e36f68f742d5c85/rs/justfile#L103), and [publish/watch using gstreamer](https://github.com/kixelated/moq/blob/9f5f6153458c03f255877a036e36f68f742d5c85/rs/justfile#L119).
 So you can do more complicated media stuff without 🤮 Javascript 🤮.
 
-Despite being a Rust fanboye, I'm currently focusing on the Typescript library.
-**WebSupport is a big deal**.
-We are no longer stuck with WebRTC for browser support.
 
+## Disclaimer
+This is a **preview** release.
+Cloudflare is only supporting a *tiny* subset of an [old draft](https://www.ietf.org/archive/id/draft-ietf-moq-transport-07.html), which is even smaller than [my tiny subset](https://www.ietf.org/archive/id/draft-lcurley-moq-lite-01.html).
+They're using a fork of [my terrible code](https://github.com/kixelated/moq) (Rust btw) so bugs are guaranteed.
 
-## What's missing?
-A lot of stuff.
-
-Cloudflare is supporting an even smaller subset than [my already tiny subset](https://www.ietf.org/archive/id/draft-lcurley-moq-lite-01.html) of the [bloated moq-transport draft](https://www.ietf.org/archive/id/draft-ietf-moq-transport-13.html).
-
-- **There's no authentication**. Anybody can watch a broadcast, or impersonate another broadcaster, if they know the broadcast name.
-- **There's a bug with reusing broadcast names**. Another reason to give your broadcast a unique name, otherwise the origin may get confused.
-- **There's no [ANNOUNCE support](https://www.ietf.org/archive/id/draft-lcurley-moq-lite-01.html#name-announce)**. The [conferencing example](https://github.com/kixelated/moq/blob/main/js/hang-demo/src/meet.html) won't work without an out-of-band discovery mechanism.
-- **There's no automatic reloads**. My library uses **ANNOUNCE** to detect when a broadcast starts/stops, so you can't use `reload`.
+- **There's no authentication yet**: choose an unguessable name for each broadcast.
+- **There's no ANNOUNCE support**: my [conferencing example](https://github.com/kixelated/moq/blob/main/js/hang-demo/src/meet.html) uses **ANNOUNCE** to discover when broadcasts start/stop, so that won't work .
+- **Nothing has been optimized**: the user experience will improve over time.
 
 If any of those are deal breakers for you, then you can always run your own [moq-relay](https://github.com/kixelated/moq/tree/main/rs/moq-relay) until Cloudflare fixes these issues.
 There's even a [terraform module](https://github.com/kixelated/moq.dev/blob/main/infra/relay.tf) used for `relay.moq.dev`.
 You too can run your own "global" CDN and pay GCP a boatload of money.
+Or host it inside your own network!
 
-It should only take a few months to fix these issues.
+It's going to take a few months to fix these issues.
 Then I'll be one of the first to switch [hang.live](./first-app) over to Cloudflare.
 
+
+## A Huge Deal
+But why should you care? As a great philosopher once said:
+> Apathy is a tragedy and boredom is a crime.
+> \- [Bo Burnham](https://www.youtube.com/watch?v=k1BneeJTDcU)
+
+This is a huge deal.
+The biggest of deals.
+
+I've been an [outspoken critic](./transfork) of the MoQ standardization process.
+It's just really difficult to design a protocol, via a cross-company committee, before there's been any real world usage.
+It's been over 3 years since I fought Amazon lawyers and published my [first MoQ draft](https://www.ietf.org/archive/id/draft-lcurley-warp-00.html).
+It's going to be at least another 3 years before even the [base networking layer](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/) becomes an RFC.
+
+**And that's by design!**
+The best standards take a while.
+Look no further than QUIC, deployed by Google in 2012, started standardization in 2015, with the RFC released in 2021.
+And they had a boatload of production data to shape the specification... a little bit more than a [Big Buck Bunny demo](/watch).
+
+Cloudflare has done something fantastic and said:
+> fuck waiting for a RFC, let's deploy something now
+
+This is **exactly** what MoQ needs right now.
+**Just build something**.
+**Just release something**.
+**Just do it**.
+
+<figure>
+	<iframe width="560" height="315" src="https://www.youtube.com/embed/ZXsQAXx_ao0?si=xsAscm04CnwAer4b" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="margin: 0 auto;"></iframe>
+	<figcaption>Holy shit I'm Shia LaBeouf.</figcaption>
+</figure>
+
+Arguing in the [650+ issues](https://github.com/moq-wg/moq-transport/issues) and [500+ PRs](https://github.com/moq-wg/moq-transport/pulls) can wait for another day.
+We're still going to make sure that MoQ gets standardized *eventually*, but it's more important to get *something* out there.
+[Yoink some code](https://github.com/kixelated/moq), run it on some spare servers, and start to learn what customers need.
+
+I'm looking at you: Google, Akamai, Fastly, etc.
 
 ## What's next?
 A lot of stuff.
 
-This is a demo and show of intent, not a production rollout.
-The same goes for the [hang.live](./first-app) demo.
-Don't judge MoQ based on these initial offerings; we've got a **ton** of work still to do.
+We're effectively trying to reimplement most WebRTC/HLS/RTMP features using new Web APIs.
+Don't judge MoQ based on these initial offerings, like [hang.live](./first-app).
+We've got a **ton** of work to do.
+**Let's do it**.
 
-Other companies will start releasing their own CDN offerings too.
-I know that folks from Google (GCP), Akamai, Fastly, etc are authoring [moq-transport](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/) with the intent of offering a CDN service in the future.
-We're all pretty fed up with WebRTC and just want something simpler that scales.
-
-If you want use MoQ or contribute, then absolutely [join the Discord](https://discord.gg/FCYF3p99mr).
-I will do whatever I can to help.
+Absolutely [join the Discord](https://discord.gg/FCYF3p99mr), somehow there's 900+ people there.
+Ping me and I will do whatever I can to help.
 *Especially* if it means putting one more nail in the WebRTC coffin.
 
 Written by [@kixelated](https://github.com/kixelated).
 ![@kixelated](/blog/avatar.png)
+
+## Javascript is an Abomination
+Still reading?
+
+You win some bonus documentation.
+Congrats!
+I knew you would win.
+
+Despite being a Rust fanboye, I'm currently focusing on the Typescript library.
+**WebSupport is a big deal**.
+We are no longer stuck with WebRTC, but that means we need to build our own WebRTC in 🤮 Javascript 🤮.
+
+Here's an example of the reactive library in action.
+No promises that the API hasn't changed since I wrote this.
+
+```typescript
+import { Watch } from "@kixelated/hang"
+
+// Start downloading a broadcast.
+const watch = new Watch.Broadcast({
+	enabled: true,
+	url: "https://relay.cloudflare.mediaoverquic.com",
+	name: "unique-name-abc123",
+	video: { enabled: true },
+	reload: false, // required for Cloudflare's CDN
+});
+
+// You can toggle reactive properties.
+watch.audio.enabled.set(true);
+
+// There are helpers to convert my custom signals, like for React:
+import react from "@kixelated/signals/react"
+const audioInfo = react(watch.audio.info); // a JSON blob of track information
+
+// You could use the built-in renderers.
+const canvas = document.getElementById("canvas");
+const audio = new Watch.AudioEmitter(watch.audio, { volume: 0.5 });
+const video = new Watch.VideoRenderer(watch.video, { canvas });
+
+// Or you can do it yourself, like this crude Vanilla JS example:
+const dispose = watch.video.frame.subscribe((frame?: VideoFrame) => {
+	if (!frame) return;
+
+	// Render the frame to a canvas, or pass it to a ML model, or whatever.
+	canvas.getContext("2d")?.drawImage(frame, 0, 0);
+
+	// NOTE: You should use requestAnimationFrame instead, but I'm lazy.
+});
+```
+
+There's even some top-secret 🤫 features behind undocumented APIs.
+Like running an object detection model in browser and publishing the results as a MoQ track.
+
+```typescript
+// Publish a broadcast.
+const publish = new Watch.Publish({
+	enabled: true,
+	url: "https://relay.cloudflare.mediaoverquic.com",
+	name: "unique-name-abc123",
+	device: "camera",
+	video: {
+		enabled: true,
+		detection: {
+			enabled: true,
+		}
+	},
+})
+```
+
+Also I joke.
+Typescript is really nice.
