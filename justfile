@@ -54,8 +54,8 @@ build:
 	pnpm astro build
 
 # Deploy the site to Cloudflare Pages
-deploy: build
-	pnpm wrangler deploy
+deploy env="staging": build
+	pnpm wrangler deploy --env {{env}}
 
 dev:
 	pnpm i
