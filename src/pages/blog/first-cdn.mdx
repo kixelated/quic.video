@@ -14,7 +14,7 @@ Cloudflare has [just announced](https://blog.cloudflare.com/moq/) their Media ov
 It's an **official product**, and you can test MoQ on their *massive*, anycast network.
 Try it out, and convince your boss' boss that the writing is on the wall.
 
-If you've been living under a rock, MoQ is an [up-and-coming standard](https://datatracker.ietf.org/group/moq/about/) for live media, aiming to supplant [WebRTC](./replacing-webrtc), [HLS/DASH](./replacing-hls-dash), and even **RTMP/SRT** as the one to rule them all.
+If you've been living under a rock, MoQ is an [up-and-coming standard](https://datatracker.ietf.org/group/moq/about/) for live media, aiming to supplant [WebRTC](/blog/replacing-webrtc), [HLS/DASH](/blog/replacing-hls-dash), and even **RTMP/SRT** as the one to rule them all.
 And now Cloudflare wins the award for the first CDN offering!
 
 <figure>
@@ -22,7 +22,7 @@ And now Cloudflare wins the award for the first CDN offering!
 	<figcaption>Your prize is a blog post. You're welcome mega-corp.</figcaption>
 </figure>
 
-Also, *while you're here*, some shameless self-promotion: I just soft-launched [hang.live](./first-app).
+Also, *while you're here*, some shameless self-promotion: I just soft-launched [hang.live](/blog/first-app).
 Check it out if you want to see the ~cringe~ cool stuff you can do with MoQ.
 
 ## What's available now?
@@ -66,7 +66,7 @@ They're generated *in the browser* using [silero-vad](https://github.com/snakers
 But that's a whole separate blog post; it's pretty cool.
 
 **NOTE:** You don't have to use this [Web Component](https://developer.mozilla.org/en-US/docs/Web/API/Web_components) API.
-[hang.live](./first-app) uses the far more powerful Javascript API to do more complicated stuff like get access to individual video frames.
+[hang.live](/blog/first-app) uses the far more powerful Javascript API to do more complicated stuff like get access to individual video frames.
 There's a *super secret* section at the end of this blog if you LOVE sample code, but I'm not going to bore the rest of you.
 
 There's also a 🦀 Rust 🦀 library [to import MP4](https://github.com/kixelated/moq/tree/main/rs/hang), [pipe media from ffmpeg](https://github.com/kixelated/moq/blob/9f5f6153458c03f255877a036e36f68f742d5c85/rs/justfile#L103), and [publish/watch using gstreamer](https://github.com/kixelated/moq/blob/9f5f6153458c03f255877a036e36f68f742d5c85/rs/justfile#L119) so you can do more complicated media stuff without 🤮 Javascript 🤮.
@@ -74,7 +74,7 @@ I wish I could spend more time on the Rust side but **WebSupport** is a big deal
 We are no longer forced to use WebRTC, but that also means we need to build our own WebRTC in 🤮 Javascript 🤮.
 I can suffer and you can reap the rewards.
 
-(and yes, [I'm aware that WASM exists](./to-wasm), but I ended up abandoning it)
+(and yes, [I'm aware that WASM exists](/blog/to-wasm), but I ended up abandoning it)
 
 ## What's not available yet?
 This is a **preview** release.
@@ -100,7 +100,7 @@ It's not *quite* as good as Cloudflare's network, currently available for free..
 </figure>
 
 Or host **moq-relay** yourself!
-It should even work on private networks provided you [wrestle with TLS certificates](./tls-and-quic).
+It should even work on private networks provided you [wrestle with TLS certificates](/blog/tls-and-quic).
 I'd also love to get MoQ running over [Iroh](https://www.iroh.computer/) for peer-to-peer action if anybody wants to help.
 
 ## Why should you care?
@@ -112,7 +112,7 @@ This is a big deal.
 The biggest of deals.
 The HUGEST of deals.
 
-I've been an [outspoken critic](./transfork) of the MoQ standardization process.
+I've been an [outspoken critic](/blog/transfork) of the MoQ standardization process.
 It's just really difficult to design a protocol, via a cross-company committee, before there's been any real world usage.
 It's been over 3 years since I fought Amazon lawyers and published my [first MoQ draft](https://www.ietf.org/archive/id/draft-lcurley-warp-00.html).
 It's going to be at least another 3 years before even the [base networking layer](https://datatracker.ietf.org/doc/draft-ietf-moq-transport/) becomes an RFC.
@@ -167,7 +167,7 @@ Congrats!
 I knew you would win.
 
 Here's an example of my reactive library in action.
-It powers [hang.live](./first-app) so the API is subject to change and is probably already out of date.
+It powers [hang.live](/blog/first-app) so the API is subject to change and is probably already out of date.
 When in doubt, [consult the source code](https://github.com/kixelated/moq/tree/main/js/hang) like the hacker you are.
 
 ```typescript

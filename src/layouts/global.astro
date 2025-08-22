@@ -23,50 +23,48 @@ if (frontmatter?.description) description = frontmatter.description;
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="description" content={description ? `Media over QUIC: ${description}` : "Media over QUIC is a new live media protocol designed for simplicity and scale. It uses new browser technologies like WebTransport and WebCodecs to deliver media (and arbitrary data) with latency that rivals WebRTC. It is being standardized by the IETF." } />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="icon" type="image/svg+xml" href="/layout/favicon.svg" />
 		<link rel="alternate" type="application/rss+xml" title="moq.dev RSS Feed" href={new URL("rss.xml", Astro.site)} />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title ? `${title} - Media over QUIC` : "Media over QUIC"}</title>
 	</head>
-	<body class="min-h-screen bg-slate-900">
-		<div class="flex justify-center">
-			<div class="flex flex-col md:flex-row gap-0 bg-slate-900 shadow-2xl max-w-6xl w-full p-4">
-				<nav class="flex flex-row items-center md:flex-col md:gap-12 gap-4 md:w-64 w-full p-4">
-					<div class="w-1/2 md:w-full flex justify-center">
-						<a href="/">
-							<img src="/layout/logo.svg" class="w-52" alt="Media over QUIC" />
-						</a>
-					</div>
-					<div class="flex md:flex-col flex-row flex-wrap items-center justify-center gap-4 md:w-32 w-1/2">
-						<a href="/watch">
-							<img src="/layout/watch.svg" class="w-32" alt="Watch" />
-						</a>
-						<a href="/publish">
-							<img src="/layout/publish.svg" class="w-32" alt="Publish" />
-						</a>
-						<a href="/blog">
-							<img src="/layout/explain.svg" class="w-32" alt="Blog" />
-						</a>
-						<a href="/source">
-							<img src="/layout/source.svg" class="w-32" alt="Source" />
-						</a>
-						<a href="https://discord.gg/FCYF3p99mr">
-							<img src="/layout/discord.svg" class="w-32" alt="Discord" />
-						</a>
-					</div>
-				</nav>
-				<article class="markdown p-4 flex-1">
-					{
-						frontmatter?.date && (
-							<p class="text-sm text-gray-400 text-right">
-								published {new Date(frontmatter.date).toLocaleDateString()}
-							</p>
-						)
-					}
-					<slot />
-				</article>
-			</div>
+	<body class="min-h-screen bg-slate-900 flex justify-center">
+		<div class="flex flex-col md:flex-row gap-0 bg-slate-900 shadow-2xl max-w-6xl w-full p-4">
+			<nav class="flex flex-row items-center md:flex-col md:gap-12 gap-4 md:w-64 w-full p-4">
+				<div class="w-1/2 md:w-full flex justify-center">
+					<a href="/">
+						<img src="/layout/logo.svg" class="w-52" alt="Media over QUIC" />
+					</a>
+				</div>
+				<div class="flex md:flex-col flex-row flex-wrap items-center justify-center gap-4 md:w-32 w-1/2">
+					<a href="/watch">
+						<img src="/layout/watch.svg" class="w-32" alt="Watch" />
+					</a>
+					<a href="/publish">
+						<img src="/layout/publish.svg" class="w-32" alt="Publish" />
+					</a>
+					<a href="/blog">
+						<img src="/layout/explain.svg" class="w-32" alt="Blog" />
+					</a>
+					<a href="/source">
+						<img src="/layout/source.svg" class="w-32" alt="Source" />
+					</a>
+					<a href="https://discord.gg/FCYF3p99mr">
+						<img src="/layout/discord.svg" class="w-32" alt="Discord" />
+					</a>
+				</div>
+			</nav>
+			<article class="markdown p-4 flex-1">
+				{
+					frontmatter?.date && (
+						<p class="text-sm text-gray-400 text-right">
+							published {new Date(frontmatter.date).toLocaleDateString()}
+						</p>
+					)
+				}
+				<slot />
+			</article>
 		</div>
 	</body>
 </html>
