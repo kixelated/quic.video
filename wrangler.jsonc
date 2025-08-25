@@ -2,7 +2,8 @@
 	// Check the configuration file schema, the main reason why we're not using TOML.
 	"$schema": "./node_modules/wrangler/config-schema.json",
 
-	"name": "moq-dev",
+	// Default configuration for local development
+	"name": "moq-dev-local",
 	"compatibility_date": "2025-08-13",
 	"account_id": "dd618f5dbd5da77b8296f1613c301f5c",
 
@@ -11,8 +12,21 @@
 		"not_found_handling": "404-page"
 	},
 
-	"route": {
-		"pattern": "moq.dev",
-		"custom_domain": true
+	// Environment-specific configurations
+	"env": {
+		"staging": {
+			"name": "moq-dev-staging",
+			"route": {
+				"pattern": "new.moq.dev",
+				"custom_domain": true
+			}
+		},
+		"live": {
+			"name": "moq-dev",
+			"route": {
+				"pattern": "moq.dev",
+				"custom_domain": true
+			}
+		}
 	}
 }

@@ -20,7 +20,7 @@ Native code is written in [Rust](https://github.com/kixelated/moq/tree/main/rs) 
 |                [moq-clock](https://github.com/kixelated/moq/tree/main/rs/moq-clock) | It's a clock! Just to demonstrate that MoQ can be used for more than media.                                                                            |
 |                    [hang](https://docs.rs/hang/latest/hang/) | A media specific library built on top of moq-lite. This provides a JSON "catalog" that describes the media tracks and "container" that literally consists of a timestamp. The actual media decoding/encoding is left to the platform. |
 |                    [hang-cli](https://github.com/kixelated/moq/tree/main/hang-cli) | A client that integrates with ffmpeg to publish media. This pipes fMP4 over stdin, so it's not the most efficient...                                                                                             |
-|                    [hang-gst](https://github.com/kixelated/moq/tree/main/hang-gst) | A gstreamer plugin for publishing and consuming media. It works, but needs a lot of polish. |
+|                    [hang-gst](https://github.com/kixelated/hang-gst) | A GStreamer plugin for publishing and consuming media. Separate repository to avoid GStreamer build dependency. |
 |                    [hang-wasm](https://github.com/kixelated/moq/tree/main/hang-wasm) | An MoQ web client utilizing WebAssembly, WebCodecs, and WebTransport. Deprecated in favor of the Typescript implementation; see below for justification. |
 
 
