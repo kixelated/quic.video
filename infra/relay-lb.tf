@@ -70,4 +70,13 @@ resource "google_compute_backend_service" "relay_lb" {
     google_compute_http_health_check.relay.self_link
   ]
 }
+
+
+# We must use a legacy health check for the UDP load balancer
+resource "google_compute_http_health_check" "relay" {
+  name               = "relay"
+  request_path       = "/health"
+  check_interval_sec = 5
+  timeout_sec        = 5
+}
 */

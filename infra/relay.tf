@@ -89,7 +89,7 @@ resource "google_dns_record_set" "relay" {
   rrdatas      = [google_compute_address.relay[each.key].address]
 }
 
-# Allow UDP 443
+# Allow port 443
 resource "google_compute_firewall" "relay" {
   name    = "relay"
   network = "default"
@@ -99,16 +99,13 @@ resource "google_compute_firewall" "relay" {
     ports    = ["443"]
   }
 
+  allow {
+    protocol = "tcp"
+    ports    = ["443"]
+  }
+
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["relay"]
-}
-
-# We must use a legacy health check for the UDP load balancer
-resource "google_compute_http_health_check" "relay" {
-  name               = "relay"
-  request_path       = "/health"
-  check_interval_sec = 5
-  timeout_sec        = 5
 }
 
 # Create an internal TLS certificate for the relay

@@ -25,12 +25,12 @@ variable "domain" {
 
 variable "docker_relay" {
   description = "Docker image for moq-relay"
-  default     = "docker.io/kixelated/moq-relay:0.8.9"
+  default     = "docker.io/kixelated/moq-relay:0.9.2"
 }
 
 variable "docker_hang" {
   description = "Docker image for hang"
-  default     = "docker.io/kixelated/hang:0.2.6"
+  default     = "docker.io/kixelated/hang:0.2.9"
 }
 
 # Too complicated to specify via flags, so do it here.
