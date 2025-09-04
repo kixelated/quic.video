@@ -114,7 +114,8 @@ write_files:
       [Service]
       Type=oneshot
       RemainAfterExit=true
-      ExecStart=iptables -A INPUT -p tcp,udp --dport 443 -j ACCEPT
+      ExecStart=iptables -A INPUT -p udp --dport 443 -j ACCEPT
+      ExecStart=iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 
   # There's a mismatch between the GCP network MTU and the docker MTU
   - path: /etc/docker/daemon.json
