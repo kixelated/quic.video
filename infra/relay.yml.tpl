@@ -56,16 +56,16 @@ write_files:
       [server]
       listen = "0.0.0.0:443"
 
-      [[server.tls.cert]]
-      chain = "/etc/cert/${cluster_node}.crt"
-      key = "/etc/cert/${cluster_node}.key"
-
-      [[server.tls.cert]]
-      chain = "/etc/cert/${public_host}.crt"
-      key = "/etc/cert/${public_host}.key"
+      tls.cert = [ "/etc/cert/${cluster_node}.crt", "/etc/cert/${public_host}.crt" ]
+      tls.key = [ "/etc/cert/${cluster_node}.key", "/etc/cert/${public_host}.key" ]
 
       [client]
       tls.root = [ "/etc/cert/internal.ca" ]
+
+      [web.https]
+      listen = "0.0.0.0:443"
+      cert = "/etc/cert/${public_host}.crt"
+      key = "/etc/cert/${public_host}.key"
 
       [cluster]
       connect = "${cluster_root}"
@@ -115,6 +115,7 @@ write_files:
       Type=oneshot
       RemainAfterExit=true
       ExecStart=iptables -A INPUT -p udp --dport 443 -j ACCEPT
+      ExecStart=iptables -A INPUT -p tcp --dport 443 -j ACCEPT
 
   # There's a mismatch between the GCP network MTU and the docker MTU
   - path: /etc/docker/daemon.json

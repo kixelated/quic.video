@@ -5,18 +5,19 @@ import "@kixelated/hang/publish/element";
 
 export default function () {
 	const name = uniqueNamesGenerator({ dictionaries: [adjectives, animals], separator: "-" });
-	const url = new URL(`${import.meta.env.PUBLIC_RELAY_URL}/anon`);
+	const url = new URL(import.meta.env.PUBLIC_CLOUDFLARE_URL);
 
 	return (
 		<div>
 			<hang-support prop:mode="publish" prop:show="partial" />
 
-			<h3>Watch URL:</h3>
-			<a href={`/watch?name=${name}`} rel="noreferrer" target="_blank" class="ml-2">
-				{name}
-			</a>
+			<div class="mb-8">
+				<h3 class="inline">Broadcast:</h3>{" "}
+				<a href={`/watch?name=${name}`} rel="noreferrer" target="_blank" class="ml-2 text-2xl">
+					{name}
+				</a>
+			</div>
 
-			<h3>Preview:</h3>
 			<hang-publish
 				prop:url={url}
 				prop:name={name}
@@ -31,6 +32,39 @@ export default function () {
 					muted
 				/>
 			</hang-publish>
+
+			<h3>Features:</h3>
+			<ul>
+				<li>
+					🔓 <strong>Open Source</strong>: <a href="/source">Typescript and Rust libraries</a>; this demo is{" "}
+					<a href="https://github.com/kixelated/moq/blob/main/js/hang-demo/src/publish.html">here</a>.
+				</li>
+				<li>
+					🌐 <strong>100% Web</strong>: WebTransport, WebCodecs, WebAudio, WebWorkers, WebEtc.
+				</li>
+				<li>
+					🎬 <strong>Modern Codecs</strong>: Supports AV1, H.265, H.264, VP9, Opus, AAC, etc.
+				</li>
+				<li>
+					💬 <strong>Automatic Captions</strong>: Generated{" "}
+					<a href="https://huggingface.co/docs/transformers.js/en/index">in-browser</a> using WebGPU and{" "}
+					<a href="https://github.com/openai/whisper">Whisper</a>.
+				</li>
+				<li>
+					⚡ <strong>Real-time Latency</strong>: Zero delays, and old media is skipped during congestion.
+				</li>
+				<li>
+					🚀 <strong>Massive Scale</strong>: Everything is deduplicated and distributed across a global CDN.
+				</li>
+				<li>
+					💪 <strong>Efficient</strong>: No bandwidth is used until a viewer needs it.
+				</li>
+			</ul>
+
+			<h3>Hosted on:</h3>
+			<a href="/blog/first-cdn" rel="noreferrer" target="_blank">
+				<img src="/blog/first-cdn/cloudflare.png" alt="Cloudflare" class="w-64" />
+			</a>
 		</div>
 	);
 }

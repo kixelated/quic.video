@@ -1,0 +1,120 @@
+---
+layout: "@/layouts/global.astro"
+title: "The First MoQ App: hang.live"
+author: kixelated
+description: The coolest app for cool people. hang.live is a MoQ conferencing app built without even a trace of WebRTC. Try it, invite a friend, and perhaps yoink the code that powers it.
+cover: "/blog/first-app/demo.png"
+date: 2025-08-22
+---
+
+# The First MoQ App: hang.live
+🚨 It's finally happening! 🚨
+
+[4 months ago](/blog/application-first) I quit my job and went all-in on MoQ.
+4 months of vibe coding later (Claude Code is goated) and I've finally got something worth sharing, but by no means complete.
+
+<figure>
+	![Omni-chan](/blog/first-app/demo.png)
+	<figcaption>[Watch the demo](https://hang.live). I know I spoiled the joke but I wanted to show Omni-cheeks.</figcaption>
+</figure>
+
+
+[hang.live](https://hang.live) is place to hang out with friends after a long day.
+It's meant to be fun and stupid.
+Everything is **live** and focused on human interaction.
+People will *eventually* need a break from AI slop... even if that means disqualifying myself from VC funding.
+
+<figure>
+	![Preview window](/blog/first-app/preview.png)
+	<figcaption>Even the room previews are live. Watch as others have fun without you.</figcaption>
+</figure>
+
+And of course, all of the functionality (except for user accounts) uses Media over QUIC.
+I wanted to demonstrate what's now possible within the browser, utilizing WebTransport, WebCodecs, WebAudio, WebGPU, WebAssembly, WebWorkers, WebEtc.
+Basically every web feature under the sun *except for WebRTC*.
+
+If any of those names sound cool, check out my [Replacing WebRTC](/blog/replacing-webrtc) post.
+And maybe you can catch me in [hang.live/@moq](https://hang.live/@moq) when the kids aren't hovering around my office.
+
+## Open Source
+Even if you don't want to use a site designed for cringe teenagers, there's much to be excited about.
+
+The core networking and media stuff is [open source](https://github.com/kixelated/moq), written in **Rust** and **Typescript**.
+I've been polishing the core libraries for a few years now, so they're actually pretty good.
+There's some less-than-generic features, like [hang.live](https://hang.live) is using a track that contains the `x,y,z` coordinates of a broadcast.
+However, *every* component is opt-in via `enabled: true` so you can pick your poison.
+
+There's already a few companies using my awful code, including [Cloudflare now](/blog/first-cdn) and, terrifyingly enough, a few defense contractors *that shall not be named*.
+I want to help *you* grow that list, [join the Discord](https://discord.gg/FCYF3p99mr).
+Seriously, this has become a personal vendetta against WebRTC.
+
+The vibe coded UI is closed source for now.
+I still have ambitions of [hang.live](https://hang.live) taking off and want to make it a *tiiiny* bit more difficult to clone.
+And you should probably make something more professional anyway.
+
+<figure>
+	![hang.live logo](/blog/first-app/icon.png)
+	<figcaption>Design is not my passion. I'm literally using code to generate an SVG.</figcaption>
+</figure>
+
+## Features
+Too busy to invite a friend and try it out?
+Me too.
+If I had friends.
+
+- 🎥 **The usual stuff**: microphone, webcam, screen sharing.
+- ⚡ **Synchronized drag/drop/zoom**: No more boring, static grids.
+- 🤖 **Automatic captions**: Generated using AI, [running in the browser](https://huggingface.co/docs/transformers.js/en/index).
+- 👀 **Previews**: See who is talking before awkwardly joining.
+- 💬 **Text-to-speech**: No need to alt-tab, just listen to who has joined. Also AI.
+- 📝 **Live chat**: Super simple text tracks, using markdown.
+- ⭐ **Favorites**: Favorite a hang so you can preview a bunch at the same time.
+- 😂 **Memes**: An assortment of meme videos and sounds; try `/brb`.
+
+Seriously just [try it out](https://hang.live).
+It's pretty slick and words don't do it justice.
+
+## Huge Disclaimer
+This shit is hard.
+Nothing has been optimized and the user experience still leaves much to be desired.
+Just like the [Cloudflare CDN](/blog/first-cdn), consider this as a starting point and NOT the end state.
+
+WebRTC has had the luxury of being integrated into the browser and being bankrolled by Google for over a decade.
+It's really good at powering Google Meet, but it gets exponentially more difficult as you stray from the happy path.
+It's why all conferencing apps feel the same, and I want to change that.
+
+The current focus is to demonstrate what's possible and polish it later.
+And I've tested Firefox about as many times as I've worn a suit.
+Don't be that WebRTC fanboy who quips about how it doesn't work or how unoptimized it is.
+I'm just one person right now, maybe I'll metamorphose into a person with friends and money later.
+
+<figure>
+	![Snarky comment](/blog/first-app/snarky.png)
+	<figcaption>wtf is vivaldi anyway</figcaption>
+</figure>
+
+On a positive note, that's proof that everything is hardware accelerated and just needs to be toned down.
+Maybe we don't need hundreds of wiggling lines in the background.
+
+## The Future
+I had given myself at least 1 year to work on this before I'll consider getting a real job™.
+I'm having fun so let's bump that up to 2 years.
+
+You can help me delay the inevitable by sharing [hang.live](https://hang.live).
+Who knows, it might just turn into a real startup.
+
+Here's my current **TODO** list:
+- **Safari Support**: A WebSocket fallback for the Apple fanboys. (*nearly complete*)
+- **File sharing**: Stream an image or video to the hang.
+- **Notifications**: Get notified when someone joins a favorite hang.
+- **Desktop and Mobile App**: Likely just a webview using [Tauri](https://v2.tauri.app/).
+- **Chat History**: The app currently has the memory of a goldfish.
+- **Discord Bot**: Gotta steal the users somehow.
+- **More AI Stuff**: Gotta get funding somehow.
+
+I'm totally open to suggestions and contributions.
+*Especially* if you're in the San Francisco area and want to vibe.
+[Hit me up](https://discord.gg/SRG9gu6BdE).
+
+Written by [@kixelated](https://github.com/kixelated).
+![@kixelated](/blog/avatar.png)
