@@ -8,35 +8,36 @@ layout: "@/layouts/global.astro"
 
 **Media over QUIC** is a live media protocol powered by [QUIC](https://quicwg.org/):
 a super-charged TCP/UDP replacement that powers [HTTP/3](https://en.wikipedia.org/wiki/HTTP/3).
-It's being developed by the [IETF](https://www.ietf.org/) and your _favorite_ big tech companies such as Cloudflare, Google, Meta, Cisco, Akamai, etc.
+It's being developed by the [IETF](https://www.ietf.org/)\* and your _favorite_ big tech companies such as Google, Meta, Cisco, Akamai, Cloudflare, etc.
 
-That's right, soon you will never have to deal with WebRTC again.
+That's right, *soon* you will never have to deal with WebRTC again.
+Unless masochism is your thing.
 
-<p class="tagline">Try out the demo! [Watch](/watch) or [Publish](/publish) a broadcast</p>
+<p class="tagline">Try out the web demo! [Watch](/watch) or [Publish](/publish) a broadcast</p>
 
-**NOTE**: This website uses a [fork](/blog/transfork) of the IETF drafts called [moq-lite](https://github.com/kixelated/moq/tree/main/rs/moq) and [hang](https://github.com/kixelated/moq/tree/main/rs/hang).
-The principles behind MoQ are fantastic, but progress has been slow; it's an experimental protocol being developed by committee.
-My goal is to build something now that you can use, even if it's not a *standard* yet.
+\***NOTE**: This website uses a [fork](/blog/transfork) of the IETF draft called [moq-lite](https://kixelated.github.io/moq-drafts/draft-lcurley-moq-lite.html) and a media layer called [hang](https://kixelated.github.io/moq-drafts/draft-lcurley-moq-hang.html).
+The principles behind MoQ are fantastic, but standards are **SLOW**.
+My goal is to build something simple that you can use *now*, even if it's not a standard *yet*.
 
 
-### Features
+### ✨ Features
 
--   [Open source](/source) Rust and Typescript libraries.
--   Web support via [WebTransport](https://developer.mozilla.org/en-US/docs/Web/API/WebTransport), [WebCodecs](https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API), and [WebAudio](https://developer.mozilla.org/en-US/docs/Web/API/WebAudio_API). No Safari support yet.
--   Self-host your own relay or CDN cluster via [moq-relay](https://github.com/kixelated/moq/tree/main/rs/moq-relay).
--   Publish live broadcasts using [ffmpeg](https://github.com/kixelated/moq/tree/main/rs/hang-cli), [gstreamer](https://github.com/kixelated/hang-gst), or the web client.
--   Watch live broadcasts using [gstreamer](https://github.com/kixelated/hang-gst) or the web client.
--   Discover live broadcasts, such as meeting participants, without a separate API.
+- 🔓 **Open Source**: Production-ready [Rust and TypeScript libraries](/source).
+- 🌐 **100% Web**: Utilizes [WebTransport](https://developer.mozilla.org/en-US/docs/Web/API/WebTransport), [WebCodecs](https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API), [WebAudio](https://developer.mozilla.org/en-US/docs/Web/API/WebAudio_API), WebEtc.
+- ⚡ **Real-time**: Minimal latency, prioritizing important media during congestion.
+- 🚀 **Massive Scale**: Host your own CDN with [moq-relay](https://github.com/kixelated/moq/tree/main/rs/moq-relay) or use [Cloudflare](/blog/first-cdn).
+- 🎬 **Multi-Platform**: [Web](https://github.com/kixelated/moq/tree/main/js/hang), [FFmpeg](https://github.com/kixelated/moq/tree/main/rs/hang-cli), and [GStreamer](https://github.com/kixelated/hang-gst) clients available.
+- 🔍 **Live Discovery**: Natively supports conferencing and online/offline detection.
+- 🔧 **Compatible**: TCP fallback via [WebSocket](https://github.com/kixelated/web-transport/tree/main/web-transport-ws), Safari fallback via [libav.js](https://github.com/Yahweasel/libav.js/).
 
 ### Learn More
-Check out the [blog](/blog) for more information.
-They give a good chuckle if I do say so myself.
+Check out the [blog](/blog) for more information and a smattering of jokes.
+Once you're ready for more, check out the [Github](https://github.com/kixelated/moq) and/or join [Discord](https://discord.gg/FCYF3p99mr).
 
-Once you're ready to dive in, check out the [Github](https://github.com/kixelated/moq) and/or join [Discord](https://discord.gg/FCYF3p99mr).
 
 Contributions are welcome, of course.
 But also feel free to just yoink the code, fork it, and make it your own.
 If you're using some flavor of MoQ in the wild, I'd love to hear about it!
-My DMs are always open as `@kixelated` on Discord.
+My DMs are always open; `@kixelated` on Discord.
 
 ![@kixelated](/blog/avatar.png)
