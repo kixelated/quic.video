@@ -45,7 +45,7 @@ export default function () {
 					<a href="https://github.com/openai/whisper">Whisper</a>.
 				</li>
 				<li>
-					⚡ <strong>Real-time Latency</strong>: 100ms buffer, and old media is skipped during congestion.
+					⚡ <strong>Real-time Latency</strong>: Minimal buffer, old media is skipped during congestion.
 				</li>
 				<li>
 					🚀 <strong>Massive Scale</strong>: Downloaded from the nearest CDN edge.
@@ -53,6 +53,13 @@ export default function () {
 				<li>
 					💪 <strong>Efficient</strong>: No video is downloaded when minimized, or audio when muted.
 				</li>
+				<Show when={name !== "bbb"}>
+					<li>
+						🔧 <strong>Compatible</strong>: TCP fallback via{" "}
+						<a href="https://github.com/kixelated/web-transport/tree/main/web-transport-ws">WebSocket</a>, Safari
+						fallback via <a href="https://github.com/Yahweasel/libav.js/">libav.js.</a>
+					</li>
+				</Show>
 			</ul>
 
 			<Show when={name !== "bbb"}>

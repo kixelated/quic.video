@@ -51,13 +51,18 @@ export default function () {
 					<a href="https://github.com/openai/whisper">Whisper</a>.
 				</li>
 				<li>
-					⚡ <strong>Real-time Latency</strong>: Zero delays, and old media is skipped during congestion.
+					⚡ <strong>Real-time Latency</strong>: Minimal buffer, old media is skipped during congestion.
 				</li>
 				<li>
 					🚀 <strong>Massive Scale</strong>: Everything is deduplicated and distributed across a global CDN.
 				</li>
 				<li>
 					💪 <strong>Efficient</strong>: No bandwidth is used until a viewer needs it.
+				</li>
+				<li>
+					🔧 <strong>Compatible</strong>: TCP fallback via{" "}
+					<a href="https://github.com/kixelated/web-transport/tree/main/web-transport-ws">WebSocket</a>, Safari fallback
+					via <a href="https://github.com/Yahweasel/libav.js/">libav.js.</a>
 				</li>
 			</ul>
 
