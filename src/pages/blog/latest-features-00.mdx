@@ -1,0 +1,189 @@
+---
+layout: "@/layouts/global.astro"
+title: "New Features - 00"
+author: kixelated
+description: "The stuff I added in the last two weeks: Safari support, WebSocket fallback, improved audio, device selection, and more."
+cover: "/blog/new-features/bbb.png"
+date: 2025-09-05
+---
+
+# New Features - 00
+I'm trying something new here.
+
+Instead of writing boring bullet points on Discord, I'm going to write a boring blog post instead.
+Here's a recap of the latest features merged in the last *two weeks*.
+
+## Safari Support
+All Two Safari Users Rejoice!
+With both of these polyfills, **Safari should just work™**.
+
+<figure>
+	![BBB demo](/blog/new-features/bbb.png)
+	<figcaption>It now says "partial browser support".</figcaption>
+</figure>
+
+The ™ is because it obviously won't, this is Safari after all.
+Please ~report~ fix any issues you find.
+
+### WebSocket Fallback
+The powers-that-be at Apple have been dragging their feet on [WebTransport support](https://caniuse.com/webtransport).
+Additionally, there are just environments where QUIC/WebTransport isn't available.
+It might be blocked by overzealous corporate firewalls, your VPN software, or just not supported (ex. Cloudflare Workers).
+
+So I added a [WebSocket fallback](https://github.com/kixelated/web-transport/tree/main/web-transport-ws).
+`moq-relay` now listens on both UDP and TCP `:443`, **serving both WebSocket and WebTransport**.
+The Javascript client will race both protocols and use the first one to connect, similar to [Happy Eyeballs](https://en.wikipedia.org/wiki/Happy_Eyeballs).
+Check the JS console and you'll see a warning if it falls back to WebSocket.
+
+It's not as great as QUIC/WebTransport, but it beats having a broken site.
+There's very crude backpressure and no prioritization support.
+Knock yourself out if you want to improve it!
+
+For the nerds out there, it uses a very simple encoding that is similar to [QMux](https://datatracker.ietf.org/doc/draft-opik-quic-qmux/).
+I think this is a far more practical TCP fallback than the official [WebTransport over HTTP/2](https://datatracker.ietf.org/doc/draft-ietf-webtrans-http2/).
+
+Oh, and I've hard-coded `guest271314` to always receive WebSocket because I'm a petty individual.
+
+### Audio Polyfill
+Safari has supported [Video WebCodecs](https://caniuse.com/mdn-api_audioencoder) for a while now.
+[Audio WebCodecs](https://caniuse.com/mdn-api_audioencoder) is currently in preview.
+
+However, adoption might take a while.
+See for some reason, Apple ties the Safari version to the iOS/macOS version.
+I was planning on using Tauri for the [hang.live](/blog/first-app) desktop/mobile apps but that would rely on a Safari WebView.
+My app would require the latest iOS/macOS version just to work which is obviously no bueno.
+
+So fuck waiting, there's now a **WebCodecs polyfill for Safari**.
+Under the hood it uses [libav.js](https://github.com/Yahweasel/libav.js/) and [libavjs-webcodecs-polyfill](https://github.com/ennuicastr/libavjs-webcodecs-polyfill),
+which is just ffmpeg compiled to WASM (amazing and terrifying).
+The performance won't be perfect, but that's already expected if you're using Safari.
+
+It currently only supports Opus out-of-the-box because [I quote](https://github.com/Yahweasel/libav.js/?tab=readme-ov-file#variants-and-building-libavjs):
+> ² Includes technologies patented by the Misanthropic Patent Extortion Gang (MPEG). You should not build these, you should not use these builds, and you should not support this organization which works actively against the common good.
+
+So I started doing exactly the oposite and adding AAC support.
+However, I paused after realizing that it would be literally just to support Safari for the [BBB demo](/watch).
+I'm using Opus for everything else.
+
+**CONTRIBUTIONS WELCOME.**
+I can guide you.
+
+
+## Fixing Audio
+It's no secret that video is much easier than audio.
+It's also no secret that I spend most of my day in a coffee shop, surrounded by judgemental old people, so I never test with my microphone.
+
+### Jitter Buffer
+Networks deliver packets at a variable rate and cadence.
+Every internet media player, including WebRTC, keeps a jitter buffer of samples/frames to smooth this out.
+Input to the jitter buffer is variable but output is at a constant rate.
+
+The larger the jitter buffer, the more network variance that can be tolerated without rebuffering or causing artifact.
+However, the cost is higher latency as we can queue samples/frames for a longer period of time.
+
+At least that's how it's *supposed* to work.
+It turns out that I am just bad at programming.
+
+1. I was appending to the jitter buffer, instead of inserting based on timestamp.
+2. I was cancelling frames, instead of letting them arrive late.
+
+Both of these combined meant that virtually any packet loss would cause audio artifacts, regardless of the jitter buffer size.
+Oops.
+
+So yeah that's fixed.
+**Audio playback is significantly better now.**
+I wish I could tell you that I tested it extensively, but I didn't.
+Claude wrote some unit tests though so that's something...
+
+### Device Selection
+Browsers are terrible at automatically doing the right thing.
+
+I was using [hang.live](/blog/first-app) on my Windows desktop and for some reason, Chrome chose [Virtual Audio Cable](https://vb-audio.com/Cable/) for my microphone.
+Of course, there was nothing wrong with the  `(Default)` device; Chrome just wanted to be a dick.
+Even changing the default device *within Chrome settings* did nothing so I grabbed my laptop instead.
+
+So yeah, there's **microphone/webcam device selection** now.
+I tried to make it fairly minimal/unopinionated, but I'm sure there are bugs and edge cases.
+The web APIs are terrible, inconsistent across browsers, and of course require user permission to even list the available devices.
+
+## moq-relay Improvements
+By coincidence, there were a few `moq-relay` changes that are worth mentioning.
+
+### Raw QUIC Support
+For the protocol nerds out there (you know who you are), we again **support raw QUIC connections** via the `moql://` schema.
+You no longer need a WebTransport client; QUIC is good enough.
+
+However, the authentication (via JWT tokens) does not support raw QUIC at the moment.
+If somebody cares, implementing something simple like the original [WebTransport](https://datatracker.ietf.org/doc/html/draft-vvv-webtransport-quic-02) before it switched to HTTP/3 would be cool.
+
+Big thanks to `@Frando` for making this happen and thanks to me for removing it in the first place.
+
+### HTTPS Support
+Once upon a time, `moq-relay` supported HTTPS over TCP.
+At the time I was only using it for local development so I figured, why not use HTTP instead?
+It made things simpler because [mkcert](https://github.com/FiloSottile/mkcert) was no longer required.
+
+Well, it turns out that I do need HTTPS... for WebSocket support.
+At the same time, `@pangaea` pinged me on Discord wondering why his old code could no longer connect via HTTPs.
+
+So now, moq-relay now **supports HTTP and/or HTTPS**.
+This is a breaking change to the config/CLI and I'm not sorry.
+But for real, if you guys are annoyed by all of these arbitrary breaking changes, let me know and I'll actually start to care about backwards compatibility.
+
+Big thanks to me *again* for removing this feature and then adding it back.
+
+### HTTP Endpoints
+This is old news, but more relevant now.
+Did you know that `moq-relay` **supports serving content over boring old HTTP**?
+This uses the same (JWT) authentication scheme as the WebTransport endpoint.
+
+- `GET /announced` - Returns all active broadcasts.
+- `GET /announced/<prefix>` - Returns all active broadcasts with a given prefix.
+- `GET /fetch/<broadcast>/<track>` - Returns the latest group for a given broadcast/track.
+
+For example, [fetch the latest catalog](https://relay.moq.dev/fetch/demo/bbb/catalog.json?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb290IjoiZGVtbyIsImdldCI6WyIiXSwiZXhwIjpudWxsLCJpYXQiOm51bGx9.6EoN-Y1Ouj35_qV5FokcdcdderrE2navNbYQjJyR2Ac) or [list all active public broadcasts](https://relay.moq.dev/announced/anon).
+All somebody needs to do is add a `?group=` parameter and bam, you can implement HLS/DASH over MoQ.
+
+### aws-lc-rs vs ring
+This is more of a "who cares" thing, but now you can choose between **aws-lc-rs and ring for TLS** via cargo features.
+
+What's the difference?
+If you care then you'll know.
+
+
+## hang.live stuff
+A bunch of these changes intended for [hang.live](/blog/first-app), but because the core library is open source, you can use it too.
+
+### Custom Media Sources
+The JavaScript API now supports custom [media sources](https://github.com/kixelated/moq/tree/main/js/hang/src/publish/source).
+Want to stream something weird?
+Go for it, it doesn't have to be a microphone/webcam/screen any longer
+
+Currently, the interface is [MediaStreamTrack](https://developer.mozilla.org/en-US/docs/Web/API/MediaStreamTrack), but that will change when I add support for file/image uploads.
+
+### Status Updates
+There's now "typing" and "speaking" status indicators.
+This is published live as part of [preview.json](https://github.com/kixelated/moq/blob/7c7e61b751aff5ca1dd9721b36d764bd03bba881/js/hang/src/preview/info.ts#L3), used so you can see if people are AFK before joining.
+
+<figure>
+	![Preview window](/blog/first-app/preview.png)
+	<figcaption>Yes, it is just a live updating JSON blob.</figcaption>
+</figure>
+
+
+### Flip Support
+You can now flip video horizontally.
+
+Yay.
+
+
+## What's Next?
+Yes, all of this was merged in the last two weeks.
+I'm churning out code but it doesn't mean it's *good* code.
+As they always say, **quantity over quality**.
+
+Try it out and let me know what breaks.
+[Join the Discord](https://discord.gg/FCYF3p99mr) if you want to complain or contribute.
+
+Written by [@kixelated](https://github.com/kixelated).
+![@kixelated](/blog/avatar.png)
